@@ -1,5 +1,7 @@
-/backend/node_modules
+/node_modules
 /pdf
 /database
 /screenshots
+/backend/credentials.env
+/backend/node_modules
 
