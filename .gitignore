@@ -1,7 +1,7 @@
 /node_modules
 /pdf
-/database
+/database_img
 /screenshots
-/backend/credentials.env
+/backend/.env
 /backend/node_modules
 
