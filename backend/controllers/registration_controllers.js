@@ -2,7 +2,7 @@ const db = require('../database/db');
 
 const test_comms = async (req,res) => {
     try {
-        console.log('test_comms');
+        // console.log('test_comms');
         const result = await db.test_connection();
         res.status(200).send(result);
     } catch (error) {
@@ -10,7 +10,7 @@ const test_comms = async (req,res) => {
     }
 }
 
-const test_insert = async (req,res) => {
+const user_insert = async (req,res) => {
     const {university_id, first_name, last_name, username,  password, email, phone, role} = req.body;    //destructure the name from the body
     const john = {university_id, first_name, last_name, username,  password, email, phone, role};
     // if(username && password){
@@ -26,7 +26,8 @@ const test_insert = async (req,res) => {
     }
 }
 
+
 module.exports = {
     test_comms,
-    test_insert,
+    user_insert,
 }
