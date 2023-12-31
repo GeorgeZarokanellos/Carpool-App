@@ -1,33 +1,39 @@
-const db = require('../database/db');
+const sequelize = require('../database/connect_to_db');
+const User = require('../models/user');
+
 
 const test_comms = async (req,res) => {
     try {
         // console.log('test_comms');
-        const result = await db.test_connection();
-        res.status(200).send(result);
+        await sequelize.authenticate();
+        // res.status(200)
     } catch (error) {
         res.status(500).send('Server error');
     }
 }
 
-const user_insert = async (req,res) => {
-    const {university_id, first_name, last_name, username,  password, email, phone, role} = req.body;    //destructure the name from the body
-    const john = {university_id, first_name, last_name, username,  password, email, phone, role};
-    // if(username && password){
-    //     return res.status(200).send(`Welcome ${username}`);
-    // }
-    // res.status(401).send('Please provide credentials');
+const add_user = async (req,res) => {
     try {
-        const result = await db.add_user(john);
-        console.log(result);
-        res.status(200).send('User added');
+        console.log('im in');
+        const {university_id, first_name, last_name, username, password, email, role, phone} = req.body;
+        const newUser = await User.create({
+            university_id,
+            first_name, 
+            last_name, 
+            username, 
+            password, 
+            email, 
+            role, 
+            phone});
+        res.status(200).send(newUser);
     } catch (error) {
-        res.status(500).send('Server error');
+        console.error('Error: ' + error);
+        res.status(500).send(error);
     }
 }
 
 
 module.exports = {
     test_comms,
-    user_insert,
+    add_user,
 }

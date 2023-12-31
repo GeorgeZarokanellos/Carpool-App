@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const {test_comms, user_insert} = require('../controllers/registration_controllers');
+const {test_comms, add_user} = require('../controllers/registration_controllers');
 
 router.get('/registration', test_comms);    
 
-router.post('/registration', user_insert);
+router.post('/registration', add_user);
 
 module.exports = router;
