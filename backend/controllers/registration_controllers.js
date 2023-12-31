@@ -4,16 +4,6 @@ const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const saltRounds = 10; //determines the complexity of the generated hash
 
-const testComms = async (req,res) => {
-    try {
-        // console.log('testComms');
-        await sequelize.authenticate();
-        // res.status(200)
-    } catch (error) {
-        res.status(500).send('Server error');
-    }
-}
-
 const addUser = async (req,res) => {
     try {
         const {universityId, firstName, lastName, username, password, email, role, phone} = req.body;
@@ -68,6 +58,5 @@ const addUser = async (req,res) => {
 
 
 module.exports = {
-    testComms,
     addUser,
 }
