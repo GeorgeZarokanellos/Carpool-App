@@ -21,6 +21,7 @@ const credentials = {
 //routers
 const registration_router = require('./routes/registration_routes');
 const trip_router = require('./routes/trip_routes');
+const login_router = require('./routes/login_router');
 
 app.use(express.static('./methods-public'));
 app.use(express.json());
@@ -28,8 +29,8 @@ app.use(express.urlencoded({extended: false}));
 
 //#region middleware
 app.use('/api/v1', registration_router);
-
 app.use('/api/v1', trip_router);
+app.use('/api/v1', login_router);
 
 app.get('/', (req,res) => {
     res.status(200).send('Home Page');
