@@ -1,14 +1,15 @@
-const db = require('../database/db');
+// const db = require('../database/db_connect');
+const sequelize = require('../database/connect_to_db');
+const Trip = require('../models/trip');
 
-const display_trips = async (req,res) => {
+const displayTrips = async (req,res) => {
     try {
-        const result = await db.retrieve_trips();
-        res.status(200).send(result);
+        const trips = await Trip.findAll();
+        res.status(200).send(trips);
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).send('Error retrieving trips:' + error);
     }
 }
-
 module.exports = {
-    display_trips,
+    displayTrips,
 }

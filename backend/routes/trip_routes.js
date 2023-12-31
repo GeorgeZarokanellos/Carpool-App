@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const {display_trips} = require('../controllers/trip_controllers');
+const {displayTrips} = require('../controllers/trip_controllers');
 
-router.get('/trips', display_trips);
+router.get('/trips', displayTrips);
 
 module.exports = router;

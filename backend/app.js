@@ -4,7 +4,8 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const https = require('https');
-const fs = require('fs');
+const fs = require('fs');   //to read ssl certificate
+const db = require('./database/connect_to_db');    //test db connection
 //#endregion
 
 //SSL certificate
@@ -14,6 +15,8 @@ const credentials = {
     key: private_key,
     cert: certificate 
 }
+
+
 
 //routers
 const registration_router = require('./routes/registration_routes');
