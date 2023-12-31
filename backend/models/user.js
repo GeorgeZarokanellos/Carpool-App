@@ -5,22 +5,26 @@ class User extends Model {}
 
 User.init({ 
     //fields
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
+        field: 'user_id'
     },
-    university_id: {
+    universityId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        field: 'university_id'
     },
-    first_name: {
+    firstName: {
         type: DataTypes.STRING,
         allowNull: false,
+        field: 'first_name'
     },
-    last_name: {
+    lastName: {
         type: DataTypes.STRING,
+        field: 'last_name'
     },
     username: {
         type: DataTypes.STRING,
@@ -45,9 +49,10 @@ User.init({
         type: DataTypes.DECIMAL(3,2),
         defaultValue: 0,
     },
-    overall_points: {
+    overallPoints: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
+        field: 'overall_points'
     },
 }, 
 {
