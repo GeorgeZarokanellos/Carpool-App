@@ -9,6 +9,7 @@ Driver.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
+        foreignKey: true,
         autoIncrement: true,
         field: 'driver_id'
     },
@@ -16,11 +17,6 @@ Driver.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'vehicle_id'
-    },
-    licenseId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        field: 'license_id'
     }
 }, 
 {

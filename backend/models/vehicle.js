@@ -5,15 +5,11 @@ class Vehicle extends Model {}
 
 Vehicle.init({
     //fields
-    ownerId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        field: 'owner_id'
-    },
     plateNumber: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
+        foreignKey: true,
         autoIncrement: true,
         field: 'plate_number'
     },
