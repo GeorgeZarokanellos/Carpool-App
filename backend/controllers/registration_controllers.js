@@ -1,10 +1,68 @@
+//#region require statements
 const {Op} = require ('sequelize');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const saltRounds = 10; //determines the complexity of the generated hash
 const multer = require ('multer');
 const fs = require('fs');
-const { urlToHttpOptions } = require('url');
+const Driver = require('../models/driver');
+const Vehicle = require('../models/vehicle');
+const sequelize = require('../database/connect_to_db');
+//#endregion
+
+
+const findUsernameAndInitializeUpload = async (req,res,next) => {
+    const userId = req.params.id;
+
+    const user = await User.findByPk(userId);
+
+    if(!user)
+        return res.status(404).send('User not found');
+
+    initializeUpload(user.username)(req,res,next);
+};
+
+const initializeUpload = (username) => {
+    const storage = multer.diskStorage({    //store the uploaded files in the uploads folder
+        destination: function(req,file,cb){    //cb is callback function that takes an error and a destination folder as parameters
+            const dir = `./uploads/drivers/${username}`;   //create a folder for each driver using the username
+            fs.access(dir, fs.constants.F_OK, (err) => {   //check if the folder already exists
+                if(err){
+                    fs.mkdir(dir, (err)=>{  
+                        if(err){ 
+                            cb(err);
+                            console.log('Error from mkdir in initializeUpload:' + err);
+                        }
+                        else 
+                            cb(null, dir);  //if the folder doesn't exist, create it
+                    });
+                } else {
+                    cb(null, dir);  //if the folder already exists, use it
+                }
+            })
+        },
+        filename: function(req,file,cb){
+            cb(null, Date.now() + '-' + file.originalname); //give the file a name that includes the current date and time
+        }
+    });
+
+    const fileFilter = (req,file,cb) => {
+        if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf')
+            cb(null, true); //accept the file
+        else
+            cb(null, false);    //reject the file
+    };
+
+    return multer({
+        storage: storage,
+        fileFilter: fileFilter
+    }).fields([ //specify the fields to be uploaded
+        {name: 'driversLicense', maxCount: 1},  
+        {name: 'carsRegistration', maxCount: 1},
+        {name: 'carsInsurance', maxCount: 1},
+        {name: 'carImages', maxCount: 4},
+    ]);
+}
 
 const addUser = async (req,res) => {
     try {
@@ -58,39 +116,58 @@ const addUser = async (req,res) => {
     }
 }
 
-const addDriver = async (req,res) => {
+const addDriverAndVehicle = async (req,res) => {
     try {
-        const {carMaker, carModel, carCapacity} = req.body;
-        const requiredFields = ['carMaker', 'carModel', 'carCapacity']
+        const driverId = req.params.id;
+        const {vehicleId, carMaker, carModel, carCapacity} = req.body;
+        const requiredFields = ['vehicleId', 'carMaker', 'carModel', 'carCapacity']
         for (let field of requiredFields){
             if(!req.body[field])
                 return res.status(400).send(`${field} is missing`);
         }
-        const storage = multer.diskStorage({    //store the uploaded files in the uploads folder
-            destination: function(req,file,cb){    //cb is callback
-                const dir = `./uploads/drivers/${req.body.username}`;   //create a folder for each driver using the username
-                fs.existsSync(dir, exist => {   //check if the folder already exists
-                    if(!exist)
-                        return fs.mkdir(dir, error => cb(error, dir));
-                    return cb(null, dir);
-                })
-            },
-            filename: function(req,file,cb){
-                cb(null, Date.now() + '-' + file.originalname); //give the file a name that includes the current date and time
-            }
-        })
+        const upload = initializeUpload(req.body.username); //initialize the upload function
+        try{
+            await new Promise ((resolve,reject) => {
+                upload(req, res, (err) => { //upload the files
+                    if(err){
+                        reject(err);
+                        console.log('Error from upload in addDriver:' + err);
+                    }
+                    else    
+                        resolve();
+                });
+            })
+        } catch(error) { 
+            return res.status(500).send(error);
+        }
+        
+        const transaction = await sequelize.transaction(); //create a transaction to ensure that the driver and vehicle are created together
 
-        const upload = multer({storage: storage}).fields([
-            {name: 'driverLicense', maxCount: 1},
-            {name: 'carRegistration', maxCount: 1},
-            {name: 'carInsurance', maxCount: 1},
-            {name: 'car', maxCount: 4},
-        ]);
+        try {
+            const newDriver = await Driver.create({ //create a new driver
+                //fields
+                driverId: driverId,
+                vehicleId: vehicleId
+            },{transaction});
 
-        upload(req, res, (err) => {
-            if(err)
-                return res.status(500).send(err);
-        })
+            const newVehicle = await Vehicle.create({   //create a new vehicle
+                //fields
+                plateNumber: vehicleId,
+                maker: carMaker,
+                model: carModel,
+                noOfSeats: carCapacity
+            }, {transaction});
+            
+
+            await transaction.commit(); //commit the transaction
+            res.status(200).send({driver:newDriver, vehicle: newVehicle});
+        } catch(error) {
+            if(error.name === 'SequelizeForeignKeyConstraintError')
+                return res.status(400).send(error);
+            console.log('Error from transaction:' + error);
+            await transaction.rollback();  //rollback the transaction if an error occurs
+        }
+
     } catch(error) {
         return res.status(500).send(error);
     }
@@ -98,5 +175,6 @@ const addDriver = async (req,res) => {
 
 module.exports = {
     addUser,
-    addDriver,
+    findUsernameAndInitializeUpload,
+    addDriverAndVehicle,
 }
