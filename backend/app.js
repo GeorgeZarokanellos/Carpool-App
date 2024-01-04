@@ -6,6 +6,7 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');   //to read ssl certificate
 const db = require('./database/connect_to_db');    //test db connection
+const bodyParser = require('body-parser');
 //#endregion
 
 //SSL certificate
@@ -25,7 +26,7 @@ const login_router = require('./routes/login_router');
 
 app.use(express.static('./methods-public'));
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: false}));
 
 //#region middleware
 app.use('/api/v1', registration_router);
@@ -54,6 +55,7 @@ httpsServer.listen(5000, () => {
 });
 
 //#region redirect to https server
+
 //Create http server to redirect to https server for users that type in http://localhost:3000
 const httpApp = express();
 httpApp.get('*', (req,res) => {
