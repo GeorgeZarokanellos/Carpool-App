@@ -9,7 +9,6 @@ Driver.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-        foreignKey: true,
         autoIncrement: true,
         field: 'driver_id'
     },

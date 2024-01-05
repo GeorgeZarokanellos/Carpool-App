@@ -9,7 +9,6 @@ Vehicle.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-        foreignKey: true,
         autoIncrement: true,
         field: 'plate_number'
     },
