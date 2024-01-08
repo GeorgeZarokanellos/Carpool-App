@@ -131,7 +131,7 @@ const addDriverAndVehicle = async (req,res) => {
                 upload(req, res, (err) => { //upload the files
                     if(err){
                         reject(err);
-                        console.log('Error from upload in addDriver:' + err);
+                        // console.log('Error from upload in addDriver:' + err);
                     }
                     else    
                         resolve();
@@ -164,7 +164,7 @@ const addDriverAndVehicle = async (req,res) => {
         } catch(error) {
             if(error.name === 'SequelizeForeignKeyConstraintError')
                 return res.status(400).send(error);
-            console.log('Error from transaction:' + error);
+            // console.log('Error from transaction:' + error);
             await transaction.rollback();  //rollback the transaction if an error occurs
         }
 

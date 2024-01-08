@@ -9,20 +9,23 @@ const db = require('./database/connect_to_db');    //test db connection
 const bodyParser = require('body-parser');
 //#endregion
 
-//SSL certificate
+//#region SSL certificate
 const private_key = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf-8');
 const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf-8');
 const credentials = {
     key: private_key,
     cert: certificate 
 }
+//#endregion
 
 
 
-//routers
+//#region routers
 const registration_router = require('./routes/registration_routes');
 const trip_router = require('./routes/trip_routes');
 const login_router = require('./routes/login_router');
+//#endregion
+
 
 app.use(express.static('./methods-public'));
 app.use(express.json());
