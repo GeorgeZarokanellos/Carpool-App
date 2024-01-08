@@ -1,7 +1,5 @@
 const {DataTypes, Model} = require ('sequelize');
 const sequelize = require('../database/connect_to_db');
-const trip = require('./trip');
-const user = require('./user');
 
 class TripPassengers extends Model {}
 
@@ -13,11 +11,11 @@ TripPassengers.init({
         primaryKey: true,
         field: 'trip_id'
     },
-    userId: {
+    passengerId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-        field: 'user_id'
+        field: 'passenger_id'
     },
 
 }, {
@@ -26,8 +24,5 @@ TripPassengers.init({
     tableName: 'trip_passengers',    //name of the table in the db
     timestamps: false,
 });
-
-TripPassengers.belongsTo(trip, {foreignKey: 'tripId'});
-TripPassengers.belongsTo(user, {foreignKey: 'userId'});
 
 module.exports = TripPassengers;

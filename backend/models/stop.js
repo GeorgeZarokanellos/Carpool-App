@@ -4,15 +4,17 @@ const sequelize = require('../database/connect_to_db');
 class Stops extends Model {}
 
 Stops.init({
-    stop_id: {
+    stopId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
+        field: 'stop_id'
     },
-    stop_loc: {
+    stopLoc: {
         type: DataTypes.ENUM,
         values: ['Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvesteio', 'Aretha'],
         allowNull: false,
+        field: 'stop_loc'
     }
 }, {
     sequelize,

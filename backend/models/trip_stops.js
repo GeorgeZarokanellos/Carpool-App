@@ -1,7 +1,5 @@
 const {DataTypes, Model} = require ('sequelize');
 const sequelize = require('../database/connect_to_db'); //import the connection instance
-const trip = require('./trip');
-const stop = require('./stop');
 
 
 class TripStops extends Model {}
@@ -28,7 +26,5 @@ TripStops.init({
     timestamps: false,
 });
 
-TripStops.belongsTo(trip, {foreignKey: 'tripId'});
-TripStops.belongsTo(stop, {foreignKey: 'stopId'});
 
 module.exports = TripStops;
