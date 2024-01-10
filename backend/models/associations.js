@@ -17,6 +17,7 @@ Trip.hasMany(TripStops, {foreignKey: 'tripId', as: 'tripStops'});
 Trip.hasMany(TripPassengers, {foreignKey: 'tripId', as: 'tripPassengers'});
 
 Trip.belongsTo(Driver, {foreignKey: 'driverId', as: 'driver'});
+Trip.belongsTo(User, {foreignKey: 'tripCreatorId', as: 'tripCreator'});
 
 Driver.belongsTo(User, {foreignKey: 'driverId', as: 'user'});
 

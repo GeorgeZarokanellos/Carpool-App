@@ -12,6 +12,11 @@ Trip.init({
         autoIncrement: true,
         field: 'trip_id'
     },
+    tripCreatorId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'trip_creator_id'
+    },
     driverId: {
         type: DataTypes.INTEGER,
         allowNull: false,
