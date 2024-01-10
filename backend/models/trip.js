@@ -38,6 +38,12 @@ Trip.init({
         allowNull: false,
         field: 'date'
     },
+    status: {
+        type: DataTypes.ENUM,
+        values: ['planning', 'locked', 'in_progress', 'completed', 'cancelled'],
+        defaultValue: 'planning',
+        allowNull: false,
+    },
 },
 {
     sequelize,
