@@ -1,7 +1,6 @@
-const sequelize = require('../database/connect_to_db');
 const {Trip, TripPassengers, TripStops, Stops, User, Driver} = require('../models/associations');
 
-const displayTrips = async (req,res) => {
+const returnTrips = async (req,res) => {
     try {
         const trips = await Trip.findAll({
             include: [
@@ -24,7 +23,7 @@ const displayTrips = async (req,res) => {
     }
 }
 
-const displaySingleTrip = async (req,res) => {
+const returnSingleTrip = async (req,res) => {
     try {
         const TripId = req.params.id;
         const Trip = await Trip.findByPk(TripId,{
@@ -63,22 +62,27 @@ const displaySingleTrip = async (req,res) => {
 }
 
 const createTrip = async (req,res) => {
-    const {driverId, startLocation, stops} = req.body;
-    
+    const {userId, driverId, startLocation, stops} = req.body;
+    //check if the user is a driver and if yes insert the driverId in the trip table
+    const currentUserId = userId;
+    // const currentUserId = req.session.userId;    
+    const currentUserIsDriver = await Driver.findOne({where: {driverId: currentUserId}});
+    const finalDriverId = currentUserIsDriver ? currentUserId : driverId;
+
     const newTrip = await Trip.create({
-        driverId: driverId,
-        tripCreatorId: req.user.userId,
+        driverId: finalDriverId,
+        tripCreatorId: userId,
         startLocation: startLocation,
         stops: stops,
         tripDate: Date.now(),
-        status: 'active'
+        status: 'planning'
     });
     
     res.status(200).send(newTrip);
 }
 
 module.exports = {
-    displayTrips,
-    displaySingleTrip,
+    returnTrips,
+    returnSingleTrip,
     createTrip
 }
