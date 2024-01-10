@@ -1,26 +1,44 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const passport = require('passport');   
+const LocalStrategy = require('passport-local').Strategy;  //strategy for authenticating with a username and password
+const path = require('path');
 
-const login = async (req,res) => {
-    const requiredFields = ['username', 'password'];
-    for (let field of requiredFields){
-        if(!req.body[field])
-            return res.status(400).send(`${field} is missing`);
+//#region passport setup
+passport.use(new LocalStrategy(
+    async (username, password, done) => {
+        try {
+            const user = await User.findOne({where: {username: username}});
+            if(!user)
+                return done(null, false, {message: 'Incorrect username'});
+            const validPassword = await bcrypt.compare(password, user.password);
+            if(!validPassword)
+                return done(null, false, {message: 'Incorrect password'});
+            return done(null, user);
+        } catch (error) {
+            return done(error);
+        }
     }
-    try{
-        const {username, password} = req.body;
-        const existingUser = await User.findOne({where: {username: username}})
-        if(!existingUser)
-            return res.status(400).send('Invalid username');
-        const validPassword = await bcrypt.compare(password, existingUser.password);
-        if(!validPassword)
-            return res.status(400).send('Invalid password');   
-        res.status(200).send(existingUser); 
-    } catch(error) {
-        return res.status(500).send(error);
+));
+
+passport.serializeUser((user, done) => {
+    done(null, user. userId);
+});
+
+passport.deserializeUser(async (userId, done) => {
+    try {
+        const user = await User.findByPk(userId);
+        done(null, user);
+    } catch (error) {
+        done(error);
     }
+});
+//#endregion
+
+const displayLogin = async (req,res) => {
+    res.sendFile(path.join(__dirname, '../views/login.html'));
 }
 
 module.exports = {
-    login,
-}
+    displayLogin
+};

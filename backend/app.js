@@ -5,8 +5,9 @@ const app = express();
 const http = require('http');
 const https = require('https');
 const fs = require('fs');   //to read ssl certificate
-const db = require('./database/connect_to_db');    //test db connection
 const bodyParser = require('body-parser');
+const passport = require('passport');
+const session = require('express-session'); //enables the user stay logged in even after refreshing the page
 //#endregion
 
 //#region SSL certificate
@@ -23,18 +24,24 @@ const credentials = {
 //#region routers
 const registration_router = require('./routes/registration_routes');
 const trip_router = require('./routes/trip_routes');
-const login_router = require('./routes/login_router');
+const authentication_router = require('./routes/authentication_router');
 //#endregion
-
-
 app.use(express.static('./methods-public'));
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true
+}));
+app.use(passport.initialize()); 
+app.use(passport.session());//to use persistent login sessions
+
 //#region middleware
 app.use('/api/v1', registration_router);
 app.use('/api/v1', trip_router);
-app.use('/api/v1', login_router);
+app.use('/api/v1', authentication_router);
 
 app.get('/', (req,res) => {
     res.status(200).send('Home Page');
@@ -64,8 +71,10 @@ const httpApp = express();
 httpApp.get('*', (req,res) => {
     res.redirect('https://' + req.headers.host + req.url);
 });
+
 const httpServer = http.createServer(httpApp);
 httpServer.listen(3000, () => {
     console.log('HTTP Server running on port 3000');
-})
+});
+
 //#endregion
