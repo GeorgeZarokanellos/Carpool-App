@@ -22,11 +22,12 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser((user, done) => {
-    done(null, user. userId);
+    done(null, user.userId);  //user id is the data to be stored in the session
 });
 
 passport.deserializeUser(async (userId, done) => {
     try {
+        //if the user refreshes the page, the user id is retrieved from the session and used to find the user
         const user = await User.findByPk(userId);
         done(null, user);
     } catch (error) {
