@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-
-const {returnTrips, returnSingleTrip, createTrip} = require('../controllers/trip_controller');
+const {returnTrips, returnSingleTrip, createTrip, updateTrip} = require('../controllers/trip_controller');
 
 router.get('/trips', returnTrips);
-router.get('/trips/:id', returnSingleTrip);
 router.post('/trips', createTrip);
+
+router.get('/trips/:id', returnSingleTrip);
+router.patch('/trips/:id', updateTrip)
 
 module.exports = router;

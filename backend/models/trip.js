@@ -33,6 +33,11 @@ Trip.init({
         defaultValue: 0,
         field: 'stops'
     },
+    passengers: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        field: 'passengers'
+    },
     tripDate: {
         type: DataTypes.DATE,
         allowNull: false,
