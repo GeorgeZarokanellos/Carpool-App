@@ -19,7 +19,6 @@ Trip.init({
     },
     driverId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         field: 'driver_id'
     },
     startLocation: {
