@@ -43,12 +43,16 @@ const removePassengersFromTrip = async(passengers, Trip) => {
         });
         const tripPassengersIds = tripPassengersNames.map(passenger => passenger.userId);   //returns an array of the users ids to be removed as passengers
         const tripPassengersPromises = tripPassengersIds.map(passengerId => {  //returns an array of promises for each TripPassengers entry
-            return TripPassengers.destroy({
-                where: {
-                    tripId: Trip.tripId,
-                    passengerId: passengerId
-                }
-            });
+            try {
+                return TripPassengers.destroy({
+                    where: {
+                        tripId: Trip.tripId,
+                        passengerId: passengerId
+                    }
+                });
+            } catch (error) {
+                console.log(`Error deleting passenger with id: ${passengerId}`, error);
+            }
         });
         const removedTripPassengers = await Promise.all(tripPassengersPromises);    //wait for all the promises to be resolved
         const allRemoveOperationsSuccessful = await removedTripPassengers.every(result => !result.isNewRecord);
@@ -72,10 +76,14 @@ const addStopsToTrip = async(stops, Trip) => {
         const stopIds = stopRecords.map(stop => stop.stopId); //iterates over the array of stop objects and returns an array of their ids
     
         const tripStopsPromises = stopIds.map(stopId => {   //create an array of promises for each TripsStop entry
-            return TripStops.create({
-                tripId: Trip.tripId,
-                stopId: stopId
-            });
+            try {
+                return TripStops.create({
+                    tripId: Trip.tripId,
+                    stopId: stopId
+                });
+            } catch (error) {
+                console.log(`Error adding stop with id: ${stopId}`, error);
+            }
         });
         //wait for all the promises to be resolved
         const newTripStops = await Promise.all(tripStopsPromises); 
@@ -102,12 +110,16 @@ const removeStopsFromTrip = async(stops, Trip) => {
         const stopIds = stopRecords.map(stop => stop.stopId); //iterates over the array of stop objects and returns an array of their ids
     
         const tripStopsPromises = stopIds.map(stopId => {   //create an array of promises for each TripsStop entry
-            return TripStops.destroy({
-                where: {
-                    tripId: Trip.tripId,
-                    stopId: stopId
-                }
-            });
+            try {
+                return TripStops.destroy({
+                    where:  {
+                        tripId: Trip.tripId,
+                        stopId: stopId
+                    }
+                });
+            } catch(error) {
+                console.log(`Error deleting stop with id: ${stopId}`, error);
+            }
         });
         //wait for all the promises to be resolved
         const removedTripStops = await Promise.all(tripStopsPromises);    
@@ -247,9 +259,34 @@ const updateTrip = async (req,res) => {
     }
 }
 
+const deleteTrip = async (req,res) => {
+    const tripId = req.params.id;
+    try {
+        const trip = await Trip.findByPk(tripId);
+        if(!trip)
+            throw new Error(`Trip with id ${tripId} not found!`);
+        if(req.userId !== trip.tripCreatorId){
+            const tripStops = tripStops.findAll({where: {tripId: tripId}});
+            const tripPassengers = tripPassengers.findAll({where: {tripId: tripId}});
+    
+            removePassengersFromTrip(tripPassengers, trip);
+            removeStopsFromTrip(tripStops, trip);
+    
+            await trip.destroy();
+
+        } //only the user that created the trip can delete it
+        return res.status(200).json({message: `Trip with id ${tripId} was deleted!`});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('An error occurred while trying to delete a trip: ' + error);
+    }
+
+}
+
 module.exports = {
     returnTrips,
     returnSingleTrip,
     createTrip,
-    updateTrip
+    updateTrip,
+    deleteTrip
 }
