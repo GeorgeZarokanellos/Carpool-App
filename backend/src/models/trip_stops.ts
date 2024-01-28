@@ -1,8 +1,11 @@
-const {DataTypes, Model} = require ('sequelize');
-const sequelize = require('../database/connect_to_db'); //import the connection instance
+import {DataTypes, Model} from 'sequelize';
+import sequelize from '../database/connect_to_db'; //import the connection instance
 
 
-class TripStops extends Model {}
+class TripStops extends Model {
+    declare tripId: number;
+    declare stopId: number;
+}
 
 TripStops.init({
     //fields
@@ -26,5 +29,4 @@ TripStops.init({
     timestamps: false,
 });
 
-
-module.exports = TripStops;
+export default TripStops;

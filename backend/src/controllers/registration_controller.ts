@@ -1,36 +1,42 @@
-//#region require statements
-const {Op} = require ('sequelize');
-const User = require('../models/user');
-const bcrypt = require('bcryptjs');
-const saltRounds = 10; //determines the complexity of the generated hash
-const multer = require ('multer');
-const fs = require('fs');
-const Driver = require('../models/driver');
-const Vehicle = require('../models/vehicle');
-const sequelize = require('../database/connect_to_db');
+//#region import statements
+import { Request, Response, NextFunction } from 'express';
+import { Op } from 'sequelize';
+import User from '../models/user';
+import bcrypt from 'bcryptjs';
+import multer, { FileFilterCallback } from 'multer';
+import fs from 'fs';
+import Driver from '../models/driver';
+import Vehicle from '../models/vehicle';
+import sequelize from '../database/connect_to_db';
+
+const saltRounds = 10;
+
+interface MulterFile {
+    // name: string;
+    mimetype: string;
+}
+
+
 //#endregion
 
 
-const findUsernameAndInitializeUpload = async (req,res,next) => {
+export const findUsernameAndInitializeUpload = async (req: Request,res: Response,next: NextFunction) => {
     const userId = req.params.id;
-
     const user = await User.findByPk(userId);
-
     if(!user)
         return res.status(404).send('User not found');
-
-    initializeUpload(user.username)(req,res,next);
+    initializeUpload(user.getDataValue('username'))(req,res,next);
 };
 
-const initializeUpload = (username) => {
+const initializeUpload = (username: string) => {
     const storage = multer.diskStorage({    //store the uploaded files in the uploads folder
         destination: function(req,file,cb){    //cb is callback function that takes an error and a destination folder as parameters
             const dir = `./uploads/drivers/${username}`;   //create a folder for each driver using the username
             fs.access(dir, fs.constants.F_OK, (err) => {   //check if the folder already exists
-                if(err){
-                    fs.mkdir(dir, (err)=>{  
+                if(err){    //err here means that the folder doesn't exist
+                    fs.mkdir(dir, (err)=>{  //create the folder
                         if(err){ 
-                            cb(err);
+                            cb(err, '');
                             console.log('Error from mkdir in initializeUpload:' + err);
                         }
                         else 
@@ -46,7 +52,7 @@ const initializeUpload = (username) => {
         }
     });
 
-    const fileFilter = (req,file,cb) => {
+    const fileFilter = (req: Request, file: MulterFile, cb: FileFilterCallback) => {  //checks if the file is an image or pdf
         if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf')
             cb(null, true); //accept the file
         else
@@ -64,7 +70,7 @@ const initializeUpload = (username) => {
     ]);
 }
 
-const addUser = async (req,res) => {
+export const addUser = async (req: Request, res: Response) => {
     try {
         const {universityId, firstName, lastName, username, password, email, role, phone} = req.body;
         const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role']
@@ -87,11 +93,11 @@ const addUser = async (req,res) => {
             });
         if(existingUser){
             let message = '';
-            if(existingUser.username === username)
+            if(existingUser.getDataValue('username') === username)
                 message += 'Username already exists!';
-            if(existingUser.universityId === universityId)
+            if(existingUser.getDataValue('universityId') === universityId)
                 message += 'University ID already exists!';
-            if(existingUser.email === email)
+            if(existingUser.getDataValue('email') === email)
                 message += 'Email already exists!';
             return res.status(400).send(message);
         }
@@ -116,7 +122,7 @@ const addUser = async (req,res) => {
     }
 }
 
-const addDriverAndVehicle = async (req,res) => {
+export const addDriverAndVehicle = async (req: Request, res: Response) => {
     try {
         const driverId = req.params.id;
         const {vehicleId, carMaker, carModel, carCapacity} = req.body;
@@ -127,7 +133,7 @@ const addDriverAndVehicle = async (req,res) => {
         }
         const upload = initializeUpload(req.body.username); //initialize the upload function
         try{
-            await new Promise ((resolve,reject) => {
+            await new Promise<void> ((resolve,reject) => {
                 upload(req, res, (err) => { //upload the files
                     if(err){
                         reject(err);
@@ -162,10 +168,15 @@ const addDriverAndVehicle = async (req,res) => {
             await transaction.commit(); //commit the transaction
             res.status(200).send({driver:newDriver, vehicle: newVehicle});
         } catch(error) {
-            if(error.name === 'SequelizeForeignKeyConstraintError')
-                return res.status(400).send(error);
-            // console.log('Error from transaction:' + error);
-            await transaction.rollback();  //rollback the transaction if an error occurs
+            if(error instanceof Error){
+                if(error.name === 'SequelizeForeignKeyConstraintError')
+                    return res.status(400).send(error);
+                // console.log('Error from transaction:' + error);
+                await transaction.rollback(); //rollback the transaction if an error occurs
+            }  else {
+                console.log('Error is not of type Error:' + error);
+                
+            }
         }
 
     } catch(error) {
@@ -173,7 +184,7 @@ const addDriverAndVehicle = async (req,res) => {
     }
 }
 
-module.exports = {
+export default {
     addUser,
     findUsernameAndInitializeUpload,
     addDriverAndVehicle,

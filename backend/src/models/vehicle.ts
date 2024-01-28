@@ -1,5 +1,5 @@
-const {DataTypes, Model} = require ('sequelize');
-const sequelize = require('../database/connect_to_db');
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database/connect_to_db';
 
 class Vehicle extends Model {}
 
@@ -35,4 +35,4 @@ Vehicle.init({
     timestamps: false,
 })
 
-module.exports = Vehicle;
+export default Vehicle;
