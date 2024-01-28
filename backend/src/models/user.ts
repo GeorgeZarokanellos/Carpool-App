@@ -1,7 +1,41 @@
-const {DataTypes, Model} = require ('sequelize');
-const sequelize = require('../database/connect_to_db');
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../database/connect_to_db';
 
-class User extends Model {}
+enum Role {
+    Driver = 'driver',
+    Passenger = 'passenger',
+}
+
+interface UserAttributes{
+    userId?: number;
+    universityId: number;
+    firstName: string;
+    lastName: string;
+    username: string;
+    password: string;
+    email: string;
+    role: Role;
+    phone: string;
+    rating?: number;
+    overallPoints?: number;
+}
+
+//user id is not provided when creating a new user since the database will automatically generate it
+// interface UserCreationAttributes extends Optional<UserAttributes, 'userId'> {}  
+
+class User extends Model<UserAttributes> {
+    declare userId: number;
+    declare universityId: number;
+    declare firstName: string;
+    declare lastName: string;
+    declare username: string;
+    declare password: string;
+    declare email: string;
+    declare role: Role;
+    declare phone: string;
+    declare rating: number;
+    declare overallPoints: number;
+}
 
 User.init({ 
     //fields
@@ -38,8 +72,7 @@ User.init({
         type: DataTypes.STRING,
     },
     role: {
-        type: DataTypes.ENUM,
-        values: ['driver', 'passenger'],
+        type: DataTypes.ENUM(Role.Driver, Role.Passenger),
         allowNull: false,
     },
     phone: {
@@ -62,5 +95,4 @@ User.init({
     timestamps: false,
 });
 
-
-module.exports = User;
+export default User;
