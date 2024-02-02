@@ -1,10 +1,6 @@
-import { DataTypes, Model, Optional } from 'sequelize';
+import { DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db';
-
-enum Role {
-    Driver = 'driver',
-    Passenger = 'passenger',
-}
+import { role } from '../interfaces/trip_interfaces';
 
 interface UserAttributes{
     userId?: number;
@@ -14,13 +10,13 @@ interface UserAttributes{
     username: string;
     password: string;
     email: string;
-    role: Role;
+    role: role;
     phone: string;
     rating?: number;
     overallPoints?: number;
 }
 
-//user id is not provided when creating a new user since the database will automatically generate it
+// user id is not provided when creating a new user since the database will automatically generate it
 // interface UserCreationAttributes extends Optional<UserAttributes, 'userId'> {}  
 
 class User extends Model<UserAttributes> {
@@ -31,14 +27,14 @@ class User extends Model<UserAttributes> {
     declare username: string;
     declare password: string;
     declare email: string;
-    declare role: Role;
+    declare role: role;
     declare phone: string;
     declare rating: number;
     declare overallPoints: number;
 }
 
 User.init({ 
-    //fields
+    // fields
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -72,7 +68,7 @@ User.init({
         type: DataTypes.STRING,
     },
     role: {
-        type: DataTypes.ENUM(Role.Driver, Role.Passenger),
+        type: DataTypes.ENUM(role.driver, role.passenger),
         allowNull: false,
     },
     phone: {
