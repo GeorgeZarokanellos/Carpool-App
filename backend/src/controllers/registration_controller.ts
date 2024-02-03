@@ -19,17 +19,6 @@ interface MulterFile {
 
 
 // #endregion
-
-
-export const findUsernameAndInitializeUpload = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.params.id;
-    const user = await User.findByPk(userId);
-    if(user === null)
-        res.status(404).send('User not found');
-    else
-        initializeUpload(user.getDataValue('username'))(req, res ,next);
-};
-
 const initializeUpload = (username: string): (req: Request, res: Response, next: NextFunction) => void => {
     const storage = multer.diskStorage({    // store the uploaded files in the uploads folder
         destination: function(req,file,cb){    // cb is callback function that takes an error and a destination folder as parameters
@@ -70,131 +59,161 @@ const initializeUpload = (username: string): (req: Request, res: Response, next:
     ]);
 }
 
-export const addUser = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const {universityId, firstName, lastName, username, password, email, role, phone}: addUserRequestBodyInterface = req.body;
-        const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role']
-        // console.log(req.body);
-        for (const field of requiredFields){
-            if(req.body[field] === undefined || req.body[field] === null || req.body[field] === '')
-                res.status(400).send(`${field} is missing`);
-        }
-        
-
-        // check if the username already exists
-        const existingUser = await User.findOne(
-            {where: {
-                    [Op.or]: [    // check if the username or universityId already exists
-                        {username}, 
-                        {universityId},
-                        {email}
-                    ]
-                }
-            });
-        if(existingUser !== null){
-            let message = '';
-            if(existingUser.getDataValue('username') === username)
-                message += 'Username already exists!';
-            if(existingUser.getDataValue('universityId') === universityId)
-                message += 'University ID already exists!';
-            if(existingUser.getDataValue('email') === email)
-                message += 'Email already exists!';
-            res.status(400).send(message);
-        }
-
+export const findUsernameAndInitializeUpload = (req: Request, res: Response, next: NextFunction): void => {
+    async function findUsernameAndInitializeUploadAsync(): Promise<void> {
         try {
-            const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
-            const newUser = await User.create({
-                universityId,
-                firstName, 
-                lastName, 
-                username, 
-                password: hash, // store the hashed password in the database
-                email, 
-                role, 
-                phone
-            });
-            res.status(200).send(newUser);
-        } catch (err) {
+            const userId = req.params.id;
+            const user = await User.findByPk(userId);
+            if(user === null)
+                res.status(404).send('User not found');
+            else
+                initializeUpload(user.getDataValue('username'))(req, res ,next);
+        } catch(err) {
             if(err instanceof Error)
-                console.error('Error from bcrypt.hash in addUser:' + err.message);
+                console.error('Error from findUsernameAndInitializeUploadAsync:' + err.message);
             else if (typeof err === 'string')
-                console.error('Error from bcrypt.hash in addUser:' + err);
-        }    
-    } catch (error) {
-        if (error instanceof Error)
-            console.error('Error: ' + error.message);
-        else if (typeof error === 'string')
-            console.error('Error: ' + error);
-        res.status(500).send(error);
-    }
-}
-
-export const addDriverAndVehicle = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const driverId = req.params.id;
-        const username: string = req.body.username;
-        const {vehicleId, carMaker, carModel, carCapacity}: carRegisterRequestBodyInterface = req.body;
-        const requiredFields = ['vehicleId', 'carMaker', 'carModel', 'carCapacity']
-        for (const field of requiredFields){
-            if(req.body[field] !== undefined || req.body[field] !== null || req.body[field] !== '')
-                res.status(400).send(`${field} is missing`);
+                console.error('Error from findUsernameAndInitializeUploadAsync:' + err);
+            res.status(500).send(err);
         }
-        const upload = initializeUpload(username); // initialize the upload function
-        try{
-            await new Promise<void> ((resolve,reject) => {
-                upload(req, res, (err) => { // upload the files
-                    if(err !== null){
-                        reject(err);
-                        // console.log('Error from upload in addDriver:' + err);
-                    }
-                    else    
-                        resolve();
-                });
-            })
-        } catch(error) { 
-            if(error instanceof Error)
-                console.error('Error from upload in addDriver:' + error.message);
-            else if (typeof error === 'string')
-                console.error('Error from upload in addDriver:' + error);
-            res.status(500).send(error);
-        }
-        
-        const transaction = await sequelize.transaction(); // create a transaction to ensure that the driver and vehicle are created together
+    };
+    findUsernameAndInitializeUploadAsync().catch(next);
+};
 
+export const addUser = (req: Request, res: Response, next: NextFunction): void => {
+    async function addUserAsync(): Promise<void> {
         try {
-            const newDriver = await Driver.create({ // create a new driver
-                // fields
-                driverId,
-                vehicleId
-            },{transaction});
-
-            const newVehicle = await Vehicle.create({   // create a new vehicle
-                // fields
-                plateNumber: vehicleId,
-                maker: carMaker,
-                model: carModel,
-                noOfSeats: carCapacity
-            }, {transaction});
-            
-
-            await transaction.commit(); // commit the transaction
-            res.status(200).send({driver:newDriver, vehicle: newVehicle});
-        } catch(error) {
-            if(error instanceof Error){
-                if(error.name === 'SequelizeForeignKeyConstraintError')
-                    res.status(400).send(error);
-                // console.log('Error from transaction:' + error);
-                await transaction.rollback(); // rollback the transaction if an error occurs
-            }  else if (typeof error === 'string'){
-                console.log('Error is not of type Error:' + error); 
+            const {universityId, firstName, lastName, username, password, email, role, phone}: addUserRequestBodyInterface = req.body;
+            const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role']
+            // console.log(req.body);
+            for (const field of requiredFields){
+                if(req.body[field] === undefined || req.body[field] === null || req.body[field] === '')
+                    res.status(400).send(`${field} is missing`);
             }
-        }
 
-    } catch(error) {
-        res.status(500).send(error);
-    }
+
+            // check if the username already exists
+            const existingUser = await User.findOne(
+                {where: {
+                        [Op.or]: [    // check if the username or universityId already exists
+                            {username}, 
+                            {universityId},
+                            {email}
+                        ]
+                    }
+                });
+            if(existingUser !== null){
+                let message = '';
+                if(existingUser.getDataValue('username') === username)
+                    message += 'Username already exists!';
+                if(existingUser.getDataValue('universityId') === universityId)
+                    message += 'University ID already exists!';
+                if(existingUser.getDataValue('email') === email)
+                    message += 'Email already exists!';
+                res.status(400).send(message);
+            }
+
+            try {
+                const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
+                const newUser = await User.create({
+                    universityId,
+                    firstName, 
+                    lastName, 
+                    username, 
+                    password: hash, // store the hashed password in the database
+                    email, 
+                    role, 
+                    phone
+                });
+                res.status(200).send(newUser);
+            } catch (err) {
+                if(err instanceof Error)
+                    console.error('Error from bcrypt.hash in addUser:' + err.message);
+                else if (typeof err === 'string')
+                    console.error('Error from bcrypt.hash in addUser:' + err);
+            }    
+        } catch (err) {
+            if (err instanceof Error)
+                console.error('Error: ' + err.message);
+            else if (typeof err === 'string')
+                console.error('Error: ' + err);
+            res.status(500).send(err);
+        }
+    };
+    addUserAsync().catch(next);
 }
+
+export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunction): void => {
+    async function addDriverAndVehicleAsync(): Promise<void> {
+        try {
+            const driverId = req.params.id;
+            const username: string = req.body.username;
+            const {vehicleId, carMaker, carModel, carCapacity}: carRegisterRequestBodyInterface = req.body;
+            const requiredFields = ['vehicleId', 'carMaker', 'carModel', 'carCapacity']
+            for (const field of requiredFields){
+                if(req.body[field] !== undefined || req.body[field] !== null || req.body[field] !== '')
+                    res.status(400).send(`${field} is missing`);
+            }
+            const upload = initializeUpload(username); // initialize the upload function
+            try{
+                await new Promise<void> ((resolve,reject) => {
+                    upload(req, res, (err) => { // upload the files
+                        if(err !== null){
+                            reject(err);
+                            // console.log('Error from upload in addDriver:' + err);
+                        }
+                        else    
+                            resolve();
+                    });
+                })
+            } catch(err) { 
+                if(err instanceof Error)
+                    console.error('Error from upload in addDriver:' + err.message);
+                else if (typeof err === 'string')
+                    console.error('Error from upload in addDriver:' + err);
+                res.status(500).send(err);
+            }
+
+            const transaction = await sequelize.transaction(); // create a transaction to ensure that the driver and vehicle are created together
+
+            try {
+                const newDriver = await Driver.create({ // create a new driver
+                    // fields
+                    driverId,
+                    vehicleId
+                },{transaction});
+
+                const newVehicle = await Vehicle.create({   // create a new vehicle
+                    // fields
+                    plateNumber: vehicleId,
+                    maker: carMaker,
+                    model: carModel,
+                    noOfSeats: carCapacity
+                }, {transaction});
+
+
+                await transaction.commit(); // commit the transaction
+                res.status(200).send({driver:newDriver, vehicle: newVehicle});
+            } catch(err) {
+                if(err instanceof Error){
+                    if(err.name === 'SequelizeForeignKeyConstraintError')
+                        res.status(400).send(err);
+                    // console.log('Error from transaction:' + error);
+                    await transaction.rollback(); // rollback the transaction if an error occurs
+                }  else if (typeof err === 'string'){
+                    console.log('Error is not of type Error:' + err); 
+                }
+            }
+
+        } catch(err) {
+            if(err instanceof Error)
+                console.error('Error from addDriverAndVehicleAsync:' + err.message);
+            else if (typeof err === 'string')
+                console.error('Error from addDriverAndVehicleAsync:' + err);
+            res.status(500).send(err);
+        }
+    };
+    addDriverAndVehicleAsync().catch(next);
+}   
 
 export default {
     addUser,
