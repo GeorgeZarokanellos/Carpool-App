@@ -4,7 +4,7 @@ import sequelize from '../database/connect_to_db';
 class Driver extends Model {}
 
 Driver.init({
-    //fields
+    // fields
     driverId: {
         type: DataTypes.INTEGER,
         allowNull: false,

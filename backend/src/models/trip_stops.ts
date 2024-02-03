@@ -1,5 +1,5 @@
 import {DataTypes, Model} from 'sequelize';
-import sequelize from '../database/connect_to_db'; //import the connection instance
+import sequelize from '../database/connect_to_db'; // import the connection instance
 
 
 class TripStops extends Model {
@@ -8,7 +8,7 @@ class TripStops extends Model {
 }
 
 TripStops.init({
-    //fields
+    // fields
     tripId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -24,8 +24,8 @@ TripStops.init({
 
 }, {
     sequelize,
-    modelName: 'trip_stops',    //name of the model in the code
-    tableName: 'trip_stops',    //name of the table in the db
+    modelName: 'trip_stops',    // name of the model in the code
+    tableName: 'trip_stops',    // name of the table in the db
     timestamps: false,
 });
 

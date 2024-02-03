@@ -1,6 +1,5 @@
 import {DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db';
-import exp from 'constants';
 
 class TripPassengers extends Model {
     declare tripId: number; 
@@ -8,7 +7,7 @@ class TripPassengers extends Model {
 }
 
 TripPassengers.init({
-    //fields
+    // fields
     tripId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -24,8 +23,8 @@ TripPassengers.init({
 
 }, {
     sequelize,
-    modelName: 'trip_passengers',    //name of the model in the code
-    tableName: 'trip_passengers',    //name of the table in the db
+    modelName: 'trip_passengers',    // name of the model in the code
+    tableName: 'trip_passengers',    // name of the table in the db
     timestamps: false,
 });
 

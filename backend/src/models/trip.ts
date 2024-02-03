@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import sequelize from '../database/connect_to_db'; //import the connection instance
+import sequelize from '../database/connect_to_db'; // import the connection instance
 
 class Trip extends Model {
     declare tripId: number;
@@ -13,7 +13,7 @@ class Trip extends Model {
 }
 
 Trip.init({
-    //fields
+    // fields
     tripId: {
         type: DataTypes.INTEGER,
         allowNull: false,
