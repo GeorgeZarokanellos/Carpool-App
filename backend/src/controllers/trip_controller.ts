@@ -1,4 +1,4 @@
-import { type Request, type Response } from 'express';
+import { type NextFunction, type Request, type Response } from 'express';
 import { Trip, TripPassengers, TripStops, Stops, User, Driver } from '../models/associations';
 import { type passengerInterface, type stopLocInterface, type updateDetailsInterface } from '../interfaces/trip_interfaces';
 
@@ -172,184 +172,202 @@ const deleteTripStops = async(tripId: string): Promise<void> => {
     }
 }
 
-export const returnTrips = async (req: Request,res: Response): Promise<void> => {
-    try {
-        const trips = await Trip.findAll({
-            include: [
-                {
-                    model: Driver,
-                    as: 'driver',
-                    include:[
-                        {
-                            model: User,
-                            as: 'user',
-                            attributes: ['firstName', 'lastName']
-                        }
-                    ]
-                },
-            ]
-        });
-        res.status(200).send(trips);
-    } catch (error) {
-        console.error(error);
-        if(typeof error === 'string'){
-            console.log("There was an error deleting the trip's passengers: " + error);
-            res.status(500).send('Error retrieving trips: ' + error);
-        } else if (error instanceof Error){
-            console.log(error.message); 
-            res.status(500).send('Error retrieving trips: ' + error.message);
+export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
+    async function returnTripsAsync(): Promise<void> {
+        try {
+            const trips = await Trip.findAll({
+                include: [
+                    {
+                        model: Driver,
+                        as: 'driver',
+                        include:[
+                            {
+                                model: User,
+                                as: 'user',
+                                attributes: ['firstName', 'lastName']
+                            }
+                        ]
+                    },
+                ]
+            });
+            res.status(200).send(trips);
+        } catch (error) {
+            console.error(error);
+            if(typeof error === 'string'){
+                console.log("There was an error deleting the trip's passengers: " + error);
+                res.status(500).send('Error retrieving trips: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving trips: ' + error.message);
+            }
         }
-    }
+    };
+    returnTripsAsync().catch(next);
 }
 
-export const returnSingleTrip = async (req: Request,res: Response): Promise<void> => {
-    try {
-        const TripId = req.params.id;
-        const trip = await Trip.findByPk(TripId,{
-            include: [
-                {
-                    model: Driver,
-                    as: 'driver',
-                },
-                {
-                    model: TripPassengers,
-                    as: 'tripPassengers',
-                    include: [
-                        {
-                            model: User,
-                            as: 'passenger',
-                            attributes: ['firstName', 'lastName']
-                        }
-                    ]
-                },
-                {
-                    model: TripStops,
-                    as: 'tripStops',
-                    include: [
-                        {
-                            model: Stops,
-                            as: 'stopLocation',
-                            attributes: ['stopLoc']
-                        }
-                    ]
+export const returnSingleTrip = (req: Request,res: Response, next: NextFunction): void => {
+    async function returnSingleTripAsync(): Promise<void> {
+        try {
+            const TripId = req.params.id;
+            const trip = await Trip.findByPk(TripId,{
+                include: [
+                    {
+                        model: Driver,
+                        as: 'driver',
+                    },
+                    {
+                        model: TripPassengers,
+                        as: 'tripPassengers',
+                        include: [
+                            {
+                                model: User,
+                                as: 'passenger',
+                                attributes: ['firstName', 'lastName']
+                            }
+                        ]
+                    },
+                    {
+                        model: TripStops,
+                        as: 'tripStops',
+                        include: [
+                            {
+                                model: Stops,
+                                as: 'stopLocation',
+                                attributes: ['stopLoc']
+                            }
+                        ]
+                    }
+                ]
+            });
+            res.status(200).send(trip);
+        } catch (error) {
+            console.error(error);
+            if(typeof error === 'string'){
+                console.log("There was an error deleting the trip's passengers: " + error);
+                res.status(500).send('Error retrieving trips: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving trips: ' + error.message);
+            }
+        }
+    };
+    returnSingleTripAsync().catch(next);
+}
+
+export const createTrip = (req: Request,res: Response, next: NextFunction): void => {
+    async function createTripAsync(): Promise<void> {
+        try { 
+                const {userId, driverId, startLocation} = req.body;
+            // check if the user is a driver and if yes insert the driverId in the trip table
+            const currentUserId: number = userId;
+            // const currentUserId = req.session.userId;    
+            const currentUserIsDriver = await Driver.findOne({where: {driverId: currentUserId}});
+            const finalDriverId = currentUserIsDriver === null ? driverId : currentUserId;  // if the user is a driver, the driverId is the same as the userId
+
+            const stops: stopLocInterface[] = req.body.stops;
+
+            const passengers: passengerInterface[] = req.body.passengers;
+
+            const newTrip = await Trip.create({
+                driverId: finalDriverId,
+                tripCreatorId: userId,
+                startLocation,
+                tripDate: "2024-01-17",
+                status: 'planning'  
+            });
+
+            await addStopsToTrip(stops, newTrip);
+            await addPassengersToTrip(passengers, newTrip);
+
+            res.status(200).send(newTrip);
+        } catch (error) {
+            console.error(error);
+            if(typeof error === 'string'){
+                console.log("There was an error deleting the trip's passengers: " + error);
+                res.status(500).send('Error retrieving trips: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving trips: ' + error.message);
+            }
+        }
+    };
+    createTripAsync().catch(next);
+}   
+
+export const updateTrip = (req: Request,res: Response, next: NextFunction): void => {
+        async function updateTripAsync(): Promise<void> {
+        try {
+            // console.log(req.params.id);
+            const tripId: string = req.params.id;  // take the value from the placeholder in the URL
+            // const typeOfUser = req.user.role;
+            const updateDetails: updateDetailsInterface = req.body; // {startLocation, tripDate}
+
+            // const addPassengers = req.body.addPassengers;
+            const removePassengers: passengerInterface[] = req.body.removePassengers;
+            const addStops: stopLocInterface[] = req.body.addStops;
+            const removeStops: stopLocInterface[] = req.body.removeStops;
+
+            const trip = await Trip.findByPk(tripId);
+            if(trip === null)
+                throw new Error(`Trip with id ${tripId} not found!`);
+            if(req.body.userId !== trip.tripCreatorId){ // only the user that created the trip can update it 
+                // if(addPassengers){
+                //     await addPassengersToTrip(addPassengers, tripId);
+                // }
+                if(removePassengers !== null){
+                    await removePassengersFromTrip(removePassengers, trip);
                 }
-            ]
-        });
-        res.status(200).send(trip);
-    } catch (error) {
-        console.error(error);
-        if(typeof error === 'string'){
-            console.log("There was an error deleting the trip's passengers: " + error);
-            res.status(500).send('Error retrieving trips: ' + error);
-        } else if (error instanceof Error){
-            console.log(error.message); 
-            res.status(500).send('Error retrieving trips: ' + error.message);
-        }
-    }
-}
-
-export const createTrip = async (req: Request,res: Response): Promise<void> => {
-    const {userId, driverId, startLocation} = req.body;
-    // check if the user is a driver and if yes insert the driverId in the trip table
-    const currentUserId: number = userId;
-    // const currentUserId = req.session.userId;    
-    const currentUserIsDriver = await Driver.findOne({where: {driverId: currentUserId}});
-    const finalDriverId = currentUserIsDriver === null ? driverId : currentUserId;  // if the user is a driver, the driverId is the same as the userId
-
-    const stops: stopLocInterface[] = req.body.stops;
-
-    const passengers: passengerInterface[] = req.body.passengers;
-
-    const newTrip = await Trip.create({
-        driverId: finalDriverId,
-        tripCreatorId: userId,
-        startLocation,
-        tripDate: "2024-01-17",
-        status: 'planning'  
-    });
-
-    await addStopsToTrip(stops, newTrip);
-    await addPassengersToTrip(passengers, newTrip);
-
-    res.status(200).send(newTrip);
-}
-
-export const updateTrip = async (req: Request,res: Response): Promise<void> => {
-    // console.log(req.params.id);
-    const tripId: string = req.params.id;  // take the value from the placeholder in the URL
-    // const typeOfUser = req.user.role;
-    const updateDetails: updateDetailsInterface = req.body; // {startLocation, tripDate}
-
-    // const addPassengers = req.body.addPassengers;
-    const removePassengers: passengerInterface[] = req.body.removePassengers;
-    const addStops: stopLocInterface[] = req.body.addStops;
-    const removeStops: stopLocInterface[] = req.body.removeStops;
-
-    try {
-        const trip = await Trip.findByPk(tripId);
-        if(trip === null)
-            throw new Error(`Trip with id ${tripId} not found!`);
-        if(req.body.userId !== trip.tripCreatorId){ // only the user that created the trip can update it 
-            // if(addPassengers){
-            //     await addPassengersToTrip(addPassengers, tripId);
-            // }
-            if(removePassengers !== null){
-                await removePassengersFromTrip(removePassengers, trip);
+                if(addStops !== null){
+                    await addStopsToTrip(addStops, trip);
+                }
+                if(removeStops !== null){
+                    await removeStopsFromTrip(removeStops, trip);
+                }
             }
-            if(addStops !== null){
-                await addStopsToTrip(addStops, trip);
-            }
-            if(removeStops !== null){
-                await removeStopsFromTrip(removeStops, trip);
+            await trip.update(updateDetails);
+            res.status(200).json(trip);
+
+        } catch (error) {
+            console.error(error);
+            if(typeof error === 'string'){
+                console.log("There was an error deleting the trip's passengers: " + error);
+                res.status(500).send('Error retrieving trips: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving trips: ' + error.message);
             }
         }
-        await trip.update(updateDetails);
-        res.status(200).json(trip);
+    };
+    updateTripAsync().catch(next);
+}   
 
-    } catch (error) {
-        console.error(error);
-        if(typeof error === 'string'){
-            console.log("There was an error deleting the trip's passengers: " + error);
-            res.status(500).send('Error retrieving trips: ' + error);
-        } else if (error instanceof Error){
-            console.log(error.message); 
-            res.status(500).send('Error retrieving trips: ' + error.message);
+export const deleteTrip = (req: Request,res: Response, next: NextFunction): void =>{
+    async function deleteTripAsync(): Promise<void> {
+        const tripId = req.params.id;
+        // const userId = req.session.userId;
+        const userId: number = req.body.userId;
+        try {
+            const trip = await Trip.findByPk(tripId);
+            // console.log(trip);
+            if(trip === null)
+                throw new Error(`Trip with id ${tripId} not found!`);
+            if(userId === trip.tripCreatorId){ // only the user that created the trip can delete it
+                deleteTripStops(tripId).catch(error => {throw error});
+                deleteTripPassengers(tripId).catch(error => {throw error});
+                await trip.destroy();
+                res.status(200).json({message: `Trip with id ${tripId} was deleted!`});
+            } 
+        } catch (error) {
+            console.error(error);
+            if(typeof error === 'string'){
+                console.log("There was an error deleting the trip's passengers: " + error);
+                res.status(500).send('Error retrieving trips: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving trips: ' + error.message);
+            }
         }
-    }
+    };
+    deleteTripAsync().catch(next);
 }
 
-export const deleteTrip = async (req: Request,res: Response): Promise<void> => {
-    const tripId = req.params.id;
-    // const userId = req.session.userId;
-    const userId: number = req.body.userId;
-    try {
-        const trip = await Trip.findByPk(tripId);
-        // console.log(trip);
-        if(trip === null)
-            throw new Error(`Trip with id ${tripId} not found!`);
-        if(userId === trip.tripCreatorId){ // only the user that created the trip can delete it
-            deleteTripStops(tripId).catch(error => {throw error});
-            deleteTripPassengers(tripId).catch(error => {throw error});
-            await trip.destroy();
-            res.status(200).json({message: `Trip with id ${tripId} was deleted!`});
-        } 
-    } catch (error) {
-        console.error(error);
-        if(typeof error === 'string'){
-            console.log("There was an error deleting the trip's passengers: " + error);
-            res.status(500).send('Error retrieving trips: ' + error);
-        } else if (error instanceof Error){
-            console.log(error.message); 
-            res.status(500).send('Error retrieving trips: ' + error.message);
-        }
-    }
-
-}
-
-export default {
-    returnTrips,
-    returnSingleTrip,
-    createTrip,
-    updateTrip,
-    deleteTrip
-}
