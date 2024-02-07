@@ -1,10 +1,10 @@
-const {DataTypes, Model} = require ('sequelize');
-const sequelize = require('../database/connect_to_db');
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database/connect_to_db';
 
 class Driver extends Model {}
 
 Driver.init({
-    //fields
+    // fields
     driverId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -25,4 +25,4 @@ Driver.init({
     timestamps: false,
 });
 
-module.exports = Driver;
+export default Driver;

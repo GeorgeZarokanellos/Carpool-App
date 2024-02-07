@@ -1,9 +1,9 @@
-const Trip = require('./trip');
-const Stops = require('./stop');
-const TripStops = require('./trip_stops');
-const TripPassengers = require('./trip_passengers');
-const User = require('./user');
-const Driver = require('./driver');
+import Trip from './trip';
+import Stops from './stop';
+import TripStops from './trip_stops';
+import TripPassengers from './trip_passengers';
+import User from './user';
+import Driver from './driver';
 
 
 
@@ -23,7 +23,7 @@ Driver.belongsTo(User, {foreignKey: 'driverId', as: 'user'});
 
 
 
-module.exports = {
+export {
     Trip,
     TripStops,
     TripPassengers,

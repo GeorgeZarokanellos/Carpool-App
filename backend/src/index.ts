@@ -1,18 +1,22 @@
-//#region require statements
-require('dotenv').config();
-const express = require('express');
+//#region import statements
+import express, {Request, Response, NextFunction} from 'express';
+
+import { env } from './config';
+
 const app = express();
-const http = require('http');
-const https = require('https');
-const fs = require('fs');   //to read ssl certificate
-const bodyParser = require('body-parser');
-const passport = require('passport');
-const session = require('express-session'); //enables the user stay logged in even after refreshing the page
+
+import http from 'http';
+import https from 'https';
+import fs from 'fs'; //to read ssl certificate
+import bodyParser from 'body-parser';
+
+import passport from 'passport'; //import passport
+import session from 'express-session';
 //#endregion
 
 //#region SSL certificate
-const private_key = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf-8');
-const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf-8');
+const private_key = fs.readFileSync(env.SSL_KEY_PATH, 'utf-8');
+const certificate = fs.readFileSync(env.SSL_CERT_PATH, 'utf-8');
 const credentials = {
     key: private_key,
     cert: certificate 
@@ -22,16 +26,16 @@ const credentials = {
 
 
 //#region routers
-const registration_router = require('./routes/registration_routes');
-const trip_router = require('./routes/trip_routes');
-const authentication_router = require('./routes/authentication_router');
+import registration_router from './routes/registration_router';
+import trip_router from './routes/trip_routes';
+import authentication_router from './routes/authentication_router';
 //#endregion
 app.use(express.static('./methods-public'));
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true
 }));
@@ -43,11 +47,11 @@ app.use('/api/v1', registration_router);
 app.use('/api/v1', trip_router);
 app.use('/api/v1', authentication_router);
 
-app.get('/', (req,res) => {
+app.get('/', (req:Request,res:Response) => {
     res.status(200).send('Home Page');
 })
 
-app.use((req,res,next) => {
+app.use((req:Request,res:Response,next:NextFunction) => {
     if(!req.secure){
         return res.redirect('https://' + req.headers.host + req.url);
         //req.headers.host is the domain name(localhost:5000) and req.url is the path(/api/v1/registration)
@@ -68,7 +72,7 @@ httpsServer.listen(5000, () => {
 
 //Create http server to redirect to https server for users that type in http://localhost:3000
 const httpApp = express();
-httpApp.get('*', (req,res) => {
+httpApp.get('*', (req:Request,res:Response) => {
     res.redirect('https://' + req.headers.host + req.url);
 });
 

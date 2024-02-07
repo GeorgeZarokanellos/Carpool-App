@@ -1,7 +1,10 @@
-const {DataTypes, Model} = require ('sequelize');
-const sequelize = require('../database/connect_to_db');
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database/connect_to_db'; 
 
-class Stops extends Model {}
+class Stops extends Model {
+    declare stopId: number;
+    declare stopLoc: string;
+}
 
 Stops.init({
     stopId: {
@@ -23,4 +26,4 @@ Stops.init({
     timestamps: false,
 });
 
-module.exports = Stops;
+export default Stops;
