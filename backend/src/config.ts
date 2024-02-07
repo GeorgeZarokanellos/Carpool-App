@@ -2,7 +2,7 @@ import {config} from 'dotenv';
 import path from 'path';
 config({path: path.join(__dirname, '../.env')});
 
-interface Env{  //interface for environment variables
+interface Env{  // interface for environment variables
     DB_NAME: string;
     DB_USER: string;
     DB_PASSWORD: string;
@@ -13,19 +13,19 @@ interface Env{  //interface for environment variables
     SSL_CERT_PATH: string;
 }
 
-function getEnv(): Env{ //checks if environment variables are set
-    if(!process.env.DB_NAME ||
-        !process.env.DB_USER ||
-        !process.env.DB_PASSWORD ||
-        !process.env.DB_HOST ||
-        !process.env.DB_PORT ||
-        !process.env.SESSION_SECRET ||
-        !process.env.SSL_KEY_PATH ||
-        !process.env.SSL_CERT_PATH){
+function getEnv(): Env{ // checks if environment variables are set
+    if(process.env.DB_NAME !== null ||
+        process.env.DB_USER !== null ||
+        process.env.DB_PASSWORD !== null ||
+        process.env.DB_HOST !== null ||
+        process.env.DB_PORT !== null ||
+        process.env.SESSION_SECRET !== null ||
+        process.env.SSL_KEY_PATH !== null ||
+        process.env.SSL_CERT_PATH !== null){
             throw new Error('Environment variables not set');
         }
 
-    return {    //returns an object with the environment variables
+    return {    // returns an object with the environment variables
         DB_NAME: process.env.DB_NAME,
         DB_USER: process.env.DB_USER,
         DB_PASSWORD: process.env.DB_PASSWORD,

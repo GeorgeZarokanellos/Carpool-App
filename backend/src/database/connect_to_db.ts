@@ -9,7 +9,7 @@ const sequelize = new  Sequelize(env.DB_NAME, env.DB_USER, env.DB_PASSWORD, {
 })
 
 sequelize.authenticate()
-    .then(() => console.log('Database connected'))
-    .catch(err => console.log('Error connecting to database' + err));
+    .then(() => { console.log('Database connected'); })
+    .catch(err => { console.log('Error connecting to database' + err); });
 
 export default sequelize;
