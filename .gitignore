@@ -6,3 +6,5 @@
 /backend/ssl_certificate
 /backend/uploads
 /backend/dist
+/backend/.eslintrc.js
+/backend/tsconfig.json

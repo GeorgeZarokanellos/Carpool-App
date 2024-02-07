@@ -198,10 +198,10 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
                     if(err.name === 'SequelizeForeignKeyConstraintError')
                         res.status(400).send(err);
                     // console.log('Error from transaction:' + error);
-                    await transaction.rollback(); // rollback the transaction if an error occurs
                 }  else if (typeof err === 'string'){
                     console.log('Error is not of type Error:' + err); 
                 }
+                await transaction.rollback(); // rollback the transaction if an error occurs
             }
 
         } catch(err) {
