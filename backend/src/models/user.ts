@@ -2,24 +2,10 @@ import { DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db';
 import { role } from '../interfaces/trip_interfaces';
 
-interface UserAttributes{
-    userId?: number;
-    universityId: number;
-    firstName: string;
-    lastName: string;
-    username: string;
-    password: string;
-    email: string;
-    role: role;
-    phone: string;
-    rating?: number;
-    overallPoints?: number;
-}
-
 // user id is not provided when creating a new user since the database will automatically generate it
 // interface UserCreationAttributes extends Optional<UserAttributes, 'userId'> {}  
 
-class User extends Model<UserAttributes> {
+class User extends Model {
     declare userId: number;
     declare universityId: number;
     declare firstName: string;
@@ -29,7 +15,7 @@ class User extends Model<UserAttributes> {
     declare email: string;
     declare role: role;
     declare phone: string;
-    declare rating: number;
+    declare overallRating: number;
     declare overallPoints: number;
 }
 
@@ -60,23 +46,29 @@ User.init({
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        field: 'username'
     },
     password: {
         type: DataTypes.STRING,
+        field: 'password'
     },
     email: {
         type: DataTypes.STRING,
+        field: 'email'
     },
     role: {
         type: DataTypes.ENUM(role.driver, role.passenger),
         allowNull: false,
+        field: 'role'
     },
     phone: {
         type: DataTypes.STRING,
+        field: 'phone'
     },
-    rating: {
+    overallRating: {
         type: DataTypes.DECIMAL(3,2),
         defaultValue: 0,
+        field: 'overall_rating'
     },
     overallPoints: {
         type: DataTypes.INTEGER,
