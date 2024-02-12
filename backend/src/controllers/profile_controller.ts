@@ -1,14 +1,18 @@
 import type { Request, Response, NextFunction } from "express";
-import { type Reviews} from "../models/associations";
-import User from "../models/associations";
+import { User, Reviews } from "../models/associations";
 
 export const displayProfile = (req: Request, res: Response, next: NextFunction): void => {
     async function displayProfileAsync(): Promise<void> {
         try {
             const userId: string = req.params.id;
+            // const userId: string = req.user.id;  //for later use
             const user: User | null = await User.findByPk(userId);
             if(user !== null){
-                const reviews: Reviews[] = await user.getReviews();
+                const reviews: Reviews[] = await Reviews.findAll({
+                    where: {
+                        reviewedPersonId: userId
+                    }
+                });
                 console.log(reviews);
                 
             } else {
@@ -26,4 +30,10 @@ export const displayProfile = (req: Request, res: Response, next: NextFunction):
             
         }
     }
+    displayProfileAsync().catch(next);
 };
+
+
+export default {
+    displayProfile
+}
