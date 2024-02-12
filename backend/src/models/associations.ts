@@ -8,25 +8,26 @@ import Reviews from './reviews';
 
 
 
-TripPassengers.belongsTo(Trip, {foreignKey: 'tripId', as: 'trip'});
+TripPassengers.belongsTo(Trip, {foreignKey: 'tripId', targetKey: 'tripId'});
 TripPassengers.belongsTo(User, {foreignKey: 'passengerId', as: 'passenger'});
 
-TripStops.belongsTo(Trip, {foreignKey: 'tripId'});
+TripStops.belongsTo(Trip, {foreignKey: 'tripId', targetKey: 'tripId'});
 TripStops.belongsTo(Stops, {foreignKey: 'stopId', as: 'stopLocation'});
 
 Trip.hasMany(TripStops, {foreignKey: 'tripId', as: 'tripStops'});
 Trip.hasMany(TripPassengers, {foreignKey: 'tripId', as: 'tripPassengers'});
 
-Trip.belongsTo(Driver, {foreignKey: 'driverId', as: 'driver'});
-Trip.belongsTo(User, {foreignKey: 'tripCreatorId', as: 'tripCreator'});
+Trip.belongsTo(Driver, {foreignKey: 'driverId', targetKey: 'driverId' ,as: 'driver'});
+Trip.belongsTo(User, {foreignKey: 'tripCreatorId', targetKey: 'userId', as: 'tripCreator'});
 
 Driver.belongsTo(User, {foreignKey: 'driverId', as: 'user'});
 
-Reviews.belongsTo(User, {foreignKey: 'reviewerId'});
+Reviews.belongsTo(User, {foreignKey: 'reviewerId', targetKey: 'userId', as: 'reviewer'});
 
 User.hasMany(Reviews, {foreignKey: 'reviewedPersonId', as: 'reviews'});
 
 export {
+    User,
     Trip,
     TripStops,
     TripPassengers,
@@ -35,4 +36,3 @@ export {
     Reviews
 }
 
-export default User;
