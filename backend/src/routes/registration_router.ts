@@ -3,7 +3,7 @@ import { addUser, findUsernameAndInitializeUpload, addDriverAndVehicle } from '.
 const router = express.Router();
 
 
-router.post('/registration/user', addUser);
-router.post('/registration/driver/:id', findUsernameAndInitializeUpload ,addDriverAndVehicle);
+router.post('/user', addUser);
+router.post('/driver/:id', findUsernameAndInitializeUpload ,addDriverAndVehicle);
 
 export default router;

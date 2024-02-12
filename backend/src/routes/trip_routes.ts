@@ -3,11 +3,11 @@ import {returnTrips, returnSingleTrip, createTrip, updateTrip, deleteTrip} from 
 const router = express.Router();
 
 // return trip info
-router.get('/trips', returnTrips);
-router.get('/trips/:id', returnSingleTrip);
+router.get('/', returnTrips);
+router.get('/:id', returnSingleTrip);
 
 // create, update, delete trip
-router.post('/trips', createTrip);
+router.post('/', createTrip);
 router.patch('/trips/:id', updateTrip)
 router.delete('/trips/:id', deleteTrip);
 
