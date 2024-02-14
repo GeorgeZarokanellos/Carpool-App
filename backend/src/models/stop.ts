@@ -13,7 +13,7 @@ Stop.init({
         primaryKey: true,
         field: 'stop_id'
     },
-    stopLoc: {
+    stopLocation: {
         type: DataTypes.ENUM,
         values: ['Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvesteio', 'Aretha'],
         allowNull: false,

@@ -5,7 +5,7 @@ class Review extends Model {
     declare reviewId: number;
     declare rating: number;
     declare reviewDate: Date;
-    declare reviewedPersonId: number;
+    declare reviewedUserId: number;
     declare reviewerId: number;
 }
 
@@ -27,7 +27,7 @@ Review.init({
         allowNull: false,
         field: 'review_date'
     },
-    reviewedPersonId: {
+    reviewedUserId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'reviewed_user_id'

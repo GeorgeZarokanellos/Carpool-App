@@ -25,7 +25,7 @@ TripStop.init({
 }, {
     sequelize,
     modelName: 'trip_stop',    // name of the model in the code
-    tableName: 'trip_stop',    // name of the table in the db
+    tableName: 'trip_stops',    // name of the table in the db
     timestamps: false,
 });
 

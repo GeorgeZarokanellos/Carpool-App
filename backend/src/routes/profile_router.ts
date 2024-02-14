@@ -1,8 +1,8 @@
 import express, { type Router } from "express";
-import { displayProfile } from "../controllers/profile_controller";
+import { retrieveProfileInfo } from "../controllers/profile_controller";
 // import router from "./registration_router";
 const router: Router = express.Router();
 
-router.get('/:id', displayProfile);
+router.get('/:id', retrieveProfileInfo);
 
 export default router;
