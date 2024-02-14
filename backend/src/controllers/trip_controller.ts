@@ -1,5 +1,5 @@
 import { type NextFunction, type Request, type Response } from 'express';
-import { Trip, TripPassengers, TripStops, Stops, User, Driver } from '../models/associations';
+import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../models/associations';
 import { type passengerInterface, type updateDetailsInterface } from '../interfaces/trip_interfaces';
 import sequelize from '../database/connect_to_db';
 import { type Transaction } from 'sequelize';
@@ -21,8 +21,8 @@ const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, 
         const tripPassengersIds = tripPassengersNames.map(passenger => passenger.userId);   // returns an array of the users ids to be added as passengers
         console.log("trip passenger ids: ", tripPassengersIds);
         
-        const tripPassengersAddPromises = tripPassengersIds.map(async passengerId => {  // returns an array of promises for each TripPassengers entry
-            return await TripPassengers.create({
+        const tripPassengersAddPromises = tripPassengersIds.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
+            return await TripPassenger.create({
                 tripId: Trip.tripId,
                 passengerId
             },{transaction});
@@ -47,8 +47,8 @@ const removePassengersFromTrip = async(passengers: passengerInterface[], Trip: T
             }
         });
         const tripPassengersIds = tripPassengersNames.map(passenger => passenger.userId);   // returns an array of the users ids to be removed as passengers
-        const tripPassengersDeletePromises = tripPassengersIds.map(async passengerId => {  // returns an array of promises for each TripPassengers entry
-                return await TripPassengers.destroy({
+        const tripPassengersDeletePromises = tripPassengersIds.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
+                return await TripPassenger.destroy({
                     where: {
                         tripId: Trip.tripId,
                         passengerId
@@ -64,7 +64,7 @@ const removePassengersFromTrip = async(passengers: passengerInterface[], Trip: T
 
 const addStopsToTrip = async(stops: string[], Trip: Trip, transaction: Transaction): Promise<void> => {
     if(stops.length > 0){
-        const stopRecords = await Stops.findAll({   // returns an array of stop objects
+        const stopRecords = await Stop.findAll({   // returns an array of stop objects
             where: {
                 stopLoc: stops // returns only the names of the stops that are in the stops array
             }
@@ -75,17 +75,17 @@ const addStopsToTrip = async(stops: string[], Trip: Trip, transaction: Transacti
         const stopIds = stopRecords.map(stop => stop.stopId); // iterates over the array of stop objects and returns an array of their ids
         console.log("stop ids: ", stopIds);
         
-        const tripStopsAddPromises = stopIds.map(async stopId => {   // create an array of promises for each TripsStop entry
-                return await TripStops.create({
+        const tripStopAddPromises = stopIds.map(async stopId => {   // create an array of promises for each TripsStop entry
+                return await TripStop.create({
                     tripId: Trip.tripId,
                     stopId
                 },{transaction});
         });
-        console.log("trip stop promises:", tripStopsAddPromises);
+        console.log("trip stop promises:", tripStopAddPromises);
         
         // wait for all the promises to be resolved
-        await Promise.all(tripStopsAddPromises); 
-        Trip.stops += tripStopsAddPromises.length;
+        await Promise.all(tripStopAddPromises); 
+        Trip.stops += tripStopAddPromises.length;
         await Trip.save({transaction});  // include the changes to the trip in the transaction
     }
       
@@ -95,7 +95,7 @@ const removeStopsFromTrip = async(stops: string[], Trip: Trip, transaction: Tran
     console.log(stops);
     // console.log('anything');
     if(stops.length > 0){
-        const stopRecords = await Stops.findAll({   // returns an array of stop objects
+        const stopRecords = await Stop.findAll({   // returns an array of stop objects
             where: {
                 stopLoc: stops // returns only the names of the stops that are in the stops array
             }
@@ -103,8 +103,8 @@ const removeStopsFromTrip = async(stops: string[], Trip: Trip, transaction: Tran
     
         const stopIds = stopRecords.map(stop => stop.stopId); // iterates over the array of stop objects and returns an array of their ids
     
-        const tripStopsDeletePromises = stopIds.map(async stopId => {   // create an array of promises for each TripsStop entry
-                return await TripStops.destroy({
+        const tripStopDeletePromises = stopIds.map(async stopId => {   // create an array of promises for each TripsStop entry
+                return await TripStop.destroy({
                     where:  {
                         tripId: Trip.tripId,
                         stopId
@@ -114,15 +114,15 @@ const removeStopsFromTrip = async(stops: string[], Trip: Trip, transaction: Tran
             
         });
         // wait for all the promises to be resolved
-        await Promise.all(tripStopsDeletePromises);    
-        Trip.stops -= tripStopsDeletePromises.length;
+        await Promise.all(tripStopDeletePromises);    
+        Trip.stops -= tripStopDeletePromises.length;
         await Trip.save({transaction});  // include the changes to the trip in the transaction
         
     }
 }
 
 const deleteTripPassengers = async (tripId: string, transaction: Transaction): Promise<void> => {
-    await TripPassengers.destroy({
+    await TripPassenger.destroy({
         where: {
             tripId
         },
@@ -131,8 +131,8 @@ const deleteTripPassengers = async (tripId: string, transaction: Transaction): P
     
 }
 
-const deleteTripStops = async (tripId: string, transaction: Transaction): Promise<void> => {
-    await TripStops.destroy({
+const deleteTripStop = async (tripId: string, transaction: Transaction): Promise<void> => {
+    await TripStop.destroy({
         where: {
             tripId
         },
@@ -185,7 +185,7 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                         as: 'driver',
                     },
                     {
-                        model: TripPassengers,
+                        model: TripPassenger,
                         as: 'tripPassengers',
                         include: [
                             {
@@ -196,11 +196,11 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                         ]
                     },
                     {
-                        model: TripStops,
-                        as: 'tripStops',
+                        model: TripStop,
+                        as: 'tripStop',
                         include: [
                             {
-                                model: Stops,
+                                model: Stop,
                                 as: 'stopLocation',
                                 attributes: ['stopLoc']
                             }
@@ -338,7 +338,7 @@ export const deleteTrip = (req: Request,res: Response, next: NextFunction): void
                 if(trip === null)
                     throw new Error(`Trip with id ${tripId} not found!`);
                 if(userId === trip.tripCreatorId){ // only the user that created the trip can delete it
-                    await deleteTripStops(tripId, transaction);
+                    await deleteTripStop(tripId, transaction);
                     await deleteTripPassengers(tripId, transaction);
                     await trip.destroy({transaction});
                     res.status(200).json({message: `Trip with id ${tripId} was deleted!`});

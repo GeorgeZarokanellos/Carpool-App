@@ -1,15 +1,15 @@
 import sequelize from "../database/connect_to_db";
 import { Model, DataTypes } from "sequelize";
 
-class Reviews extends Model {
+class Review extends Model {
     declare reviewId: number;
     declare rating: number;
     declare reviewDate: Date;
-    declare reviewedPersonId: number;
+    declare reviewedUserId: number;
     declare reviewerId: number;
 }
 
-Reviews.init({
+Review.init({
     reviewId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -27,7 +27,7 @@ Reviews.init({
         allowNull: false,
         field: 'review_date'
     },
-    reviewedPersonId: {
+    reviewedUserId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'reviewed_user_id'
@@ -44,4 +44,4 @@ Reviews.init({
     timestamps: false,  
 });
 
-export default Reviews;
+export default Review;

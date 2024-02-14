@@ -18,8 +18,8 @@ import session from 'express-session';
 import registration_router from './routes/registration_router';
 import trip_router from './routes/trip_routes';
 import authentication_router from './routes/authentication_router';
+import profile_router from './routes/profile_router';
 
-const app = express();
 // #endregion
 
 // #region SSL certificate
@@ -30,6 +30,7 @@ const credentials = {
     cert: certificate 
 }
 // #endregion
+const app = express();
 app.use(express.static('./methods-public'));
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -43,9 +44,10 @@ app.use(passport.initialize());
 app.use(passport.session());// to use persistent login sessions
 
 // #region middleware
-app.use('/api/v1', registration_router);
-app.use('/api/v1', trip_router);
-app.use('/api/v1', authentication_router);
+app.use('/api/v1/registration', registration_router);
+app.use('/api/v1/trips', trip_router);
+app.use('/api/v1/authenticate', authentication_router);
+app.use('/api/v1/profile', profile_router);
 
 app.get('/', (req:Request,res:Response) => {
     res.status(200).send('Home Page');
