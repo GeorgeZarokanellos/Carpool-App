@@ -1,12 +1,12 @@
 import {DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db';
 
-class TripPassengers extends Model {
+class TripPassenger extends Model {
     declare tripId: number; 
     declare passengerId: number;
 }
 
-TripPassengers.init({
+TripPassenger.init({
     // fields
     tripId: {
         type: DataTypes.INTEGER,
@@ -28,4 +28,4 @@ TripPassengers.init({
     timestamps: false,
 });
 
-export default TripPassengers;
+export default TripPassenger;

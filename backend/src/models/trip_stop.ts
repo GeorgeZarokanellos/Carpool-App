@@ -2,12 +2,12 @@ import {DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db'; // import the connection instance
 
 
-class TripStops extends Model {
+class TripStop extends Model {
     declare tripId: number;
     declare stopId: number;
 }
 
-TripStops.init({
+TripStop.init({
     // fields
     tripId: {
         type: DataTypes.INTEGER,
@@ -24,9 +24,9 @@ TripStops.init({
 
 }, {
     sequelize,
-    modelName: 'trip_stops',    // name of the model in the code
-    tableName: 'trip_stops',    // name of the table in the db
+    modelName: 'trip_stop',    // name of the model in the code
+    tableName: 'trip_stop',    // name of the table in the db
     timestamps: false,
 });
 
-export default TripStops;
+export default TripStop;

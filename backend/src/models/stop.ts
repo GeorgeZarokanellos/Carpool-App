@@ -1,12 +1,12 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database/connect_to_db'; 
 
-class Stops extends Model {
+class Stop extends Model {
     declare stopId: number;
     declare stopLoc: string;
 }
 
-Stops.init({
+Stop.init({
     stopId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -26,4 +26,4 @@ Stops.init({
     timestamps: false,
 });
 
-export default Stops;
+export default Stop;
