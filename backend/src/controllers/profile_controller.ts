@@ -7,18 +7,35 @@ export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunct
         // const userId: string = req.user.id;  //for later use
         const user: User | null = await User.findByPk(userId);
         if(user !== null){
-            const [userReviews, userSubmittedReviews, tripsCreated, tripsParticipated] = await Promise.all([
-                retrieveUserReviews(user),
-                retrieveUserSubmittedReviews(user),
-                retrieveCreatedTrips(user),
-                retrieveParticipatedTrips(user)
-            ]);
-            res.status(200).json({
-                userReviews,
-                userSubmittedReviews,
-                tripsCreated,
-                tripsParticipated
-            });
+            try {
+                const [userReviews, userSubmittedReviews, tripsCreated, tripsParticipated] = await Promise.all([
+                    retrieveUserReviews(user),
+                    retrieveUserSubmittedReviews(user),
+                    retrieveCreatedTrips(user),
+                    retrieveParticipatedTrips(user)
+                ]);
+                const arraysToCheck = [
+                    {array: userReviews, message: 'This user has not been reviewed yet'},
+                    {array: userSubmittedReviews, message: 'This user has not submitted any reviews yet'},
+                    {array: tripsCreated, message: 'This user has not created any trips yet'},
+                    {array: tripsParticipated, message: 'This user has not participated in any trips yet'}
+                ];
+                arraysToCheck.forEach(({array, message}) => {
+                    if(array.length === 0) {
+                        console.log(message);
+                    }
+                });
+                res.status(200).json({
+                    userReviews,
+                    userSubmittedReviews,
+                    tripsCreated,
+                    tripsParticipated
+                });
+            } catch (error){
+                console.error(error);
+                res.status(500).send('There was an error retrieving the user profile information');
+            }
+            
         } else {
             res.status(404).send('User not found');
         }
