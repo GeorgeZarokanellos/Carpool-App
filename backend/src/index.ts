@@ -15,10 +15,11 @@ import session from 'express-session';
 
 
 // #region routers
-import registration_router from './routes/registration_router';
-import trip_router from './routes/trip_routes';
-import authentication_router from './routes/authentication_router';
-import profile_router from './routes/profile_router';
+import registration_router from './routers/registration_router';
+import trip_router from './routers/trip_router';
+import authentication_router from './routers/authentication_router';
+import profile_router from './routers/profile_router';
+import review_router from './routers/review_router';
 
 // #endregion
 
@@ -44,19 +45,21 @@ app.use(passport.initialize());
 app.use(passport.session());// to use persistent login sessions
 
 // #region middleware
-app.use('/api/v1/registration', registration_router);
-app.use('/api/v1/trips', trip_router);
-app.use('/api/v1/authenticate', authentication_router);
-app.use('/api/v1/profile', profile_router);
+const basePath = '/api/v1';
+app.use(`${basePath}/registration`, registration_router);
+app.use(`${basePath}/trips`, trip_router);
+app.use(`${basePath}/authenticate`, authentication_router);
+app.use(`${basePath}/profile`, profile_router);
+app.use(`${basePath}/reviews`, review_router);
 
 app.get('/', (req:Request,res:Response) => {
     res.status(200).send('Home Page');
 })
 
-app.use((req:Request,res:Response,next:NextFunction) => {
+app.use((req:Request, res:Response, next:NextFunction) => {
     if(!req.secure){
         res.redirect('https://' + req.headers.host + req.url); return;
-        // req.headers.host is the domain name(localhost:5000) and req.url is the path(/api/v1/registration)
+        // req.headers.host is the domain name(localhost:5000) and req.url is the path(${basePath}registration)
     }
     next();
 });
