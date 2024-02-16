@@ -32,11 +32,17 @@ interface carRegisterRequestBodyInterface {
     carCapacity: number;
 }
 
+interface reviewRequestBodyInterface {
+    reviewRating: number;
+    reviewDateTime: Date;
+}
+
 export type {
     passengerInterface,
     updateDetailsInterface,
     addUserRequestBodyInterface,
-    carRegisterRequestBodyInterface
+    carRegisterRequestBodyInterface,
+    reviewRequestBodyInterface
 }
 
 export { role };
