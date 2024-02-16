@@ -3,8 +3,8 @@ import { Model, DataTypes } from "sequelize";
 
 class Review extends Model {
     declare reviewId: number;
-    declare rating: number;
-    declare reviewDate: Date;
+    declare reviewRating: number;
+    declare reviewDateTime: Date;
     declare reviewedUserId: number;
     declare reviewerId: number;
 }
@@ -17,12 +17,12 @@ Review.init({
         autoIncrement: true,
         field: 'review_id'
     },
-    rating: {
+    reviewRating: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'rating'
     },
-    reviewDate: {
+    reviewDateTime: {
         type: DataTypes.DATE,
         allowNull: false,
         field: 'review_date'

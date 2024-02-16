@@ -1,16 +1,19 @@
 import type { Request, Response, NextFunction } from "express";
 import { User, Review, Trip, Stop, TripPassenger, TripStop } from "../models/associations";
+import { retrieveUserReviews } from "../utils/common_functions";
 
 export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunction): void => {
     async function retrieveProfileInfoAsync(): Promise<void> {
         const userId: string = req.params.id;
         // const userId: string = req.user.id;  //for later use
         const user: User | null = await User.findByPk(userId);
+        console.log(user);
+        
         if(user !== null){
             try {
                 const [userReviews, userSubmittedReviews, tripsCreated, tripsParticipated] = await Promise.all([
-                    retrieveUserReviews(user),
-                    retrieveUserSubmittedReviews(user),
+                    retrieveUserReviews(userId),
+                    retrieveUserSubmittedReviews(userId),
                     retrieveCreatedTrips(user),
                     retrieveParticipatedTrips(user)
                 ]);
@@ -26,6 +29,7 @@ export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunct
                     }
                 });
                 res.status(200).json({
+                    overallRating: user.overallRating,
                     userReviews,
                     userSubmittedReviews,
                     tripsCreated,
@@ -43,42 +47,14 @@ export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunct
     retrieveProfileInfoAsync().catch(next);
 };
 
-const retrieveUserReviews = async (user: User) : Promise<Review[]> => {
-    // console.log(user);
-    // console.log(user.userId);
-    try {
-            const userReviews: Review[] = await Review.findAll({
-                where: {
-                    reviewedUserId: user.userId
-                },
-                attributes: ['reviewerId', 'rating', 'reviewDate'],
-                include : [
-                    {
-                        model: User,
-                        as : 'reviewer',
-                        attributes: ['firstName', 'lastName']  
-                    }
-                ]
-            });
-            return userReviews;
-    } catch (error) {
-        console.error(error);
-        if(typeof error === 'string'){
-            console.log("There was an error retrieving the reviews: " + error);
-        } else if (error instanceof Error){
-            console.log(error.message); 
-        }
-        return await Promise.resolve([]);
-    }
-};
 
-const retrieveUserSubmittedReviews = async (user: User) : Promise<Review[]> => {
+const retrieveUserSubmittedReviews = async (userId: string) : Promise<Review[]> => {
     try {
         const userSubmittedReviews: Review[] = await Review.findAll({
             where: {
-                reviewerId: user.userId,
+                reviewerId: userId,
             },
-            attributes: ['reviewedUserId', 'reviewerId', 'rating', 'reviewDate'],
+            attributes: ['reviewedUserId', 'reviewerId', 'rating', 'reviewDateTime'],
             include : [
                 {
                     model: User,
@@ -177,5 +153,5 @@ const retrieveParticipatedTrips = async (user: User): Promise<Trip[]> => {
 }
 
 export default {
-    retrieveProfileInfo
+    retrieveProfileInfo,
 }

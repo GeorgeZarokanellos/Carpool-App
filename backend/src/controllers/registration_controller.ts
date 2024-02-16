@@ -63,11 +63,11 @@ export const findUsernameAndInitializeUpload = (req: Request, res: Response, nex
     async function findUsernameAndInitializeUploadAsync(): Promise<void> {
         try {
             const userId = req.params.id;
-            const user = await User.findByPk(userId);
-            if(user === null)
-                res.status(404).send('User not found');
+            const user: User | null = await User.findByPk(userId);
+            if(user !== null)
+                initializeUpload(user.username)(req, res ,next);
             else
-                initializeUpload(user.getDataValue('username'))(req, res ,next);
+                res.status(404).send('User not found');
         } catch(err) {
             if(err instanceof Error)
                 console.error('Error from findUsernameAndInitializeUploadAsync:' + err.message);

@@ -278,16 +278,16 @@ export const updateTrip = (req: Request,res: Response, next: NextFunction): void
 
             // const addPassengers = req.body.addPassengers;
             const removePassengers: passengerInterface[] = req.body.removePassengers;
-            console.log(req.body.removePassengers);
-            console.log(removePassengers);
+            // console.log(req.body.removePassengers);
+            // console.log(removePassengers);
             
             
             const addStops: string[] = req.body.addStops;
             // console.log(addStops);
             
             const removeStops: string[] = req.body.removeStops;
-            console.log(req.body.removeStops);
-            console.log(removeStops);
+            // console.log(req.body.removeStops);
+            // console.log(removeStops);
             
             const trip = await Trip.findByPk(tripId);
             if(trip === null)
@@ -299,15 +299,15 @@ export const updateTrip = (req: Request,res: Response, next: NextFunction): void
                 //     await addPassengersToTrip(addPassengers, tripId);
                 // }
                 if(removePassengers !== null && removePassengers !== undefined){
-                    console.log("remove passengers if: ", removePassengers);
+                    // console.log("remove passengers if: ", removePassengers);
                     await removePassengersFromTrip(removePassengers, trip, transaction);
                 }
                 if(addStops !== null && addStops !== undefined){
-                    console.log("add stops if: ", addStops);
+                    // console.log("add stops if: ", addStops);
                     await addStopsToTrip(addStops, trip, transaction);
                 }
                 if(removeStops !== null && removeStops !== undefined){
-                    console.log("remove stops if: ", removeStops);
+                    // console.log("remove stops if: ", removeStops);
                     await removeStopsFromTrip(removeStops, trip, transaction);
                 }
             }
