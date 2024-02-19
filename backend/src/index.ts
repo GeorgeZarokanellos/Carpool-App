@@ -19,7 +19,7 @@ import registration_router from './routers/registration_router';
 import trip_router from './routers/trip_router';
 import authentication_router from './routers/authentication_router';
 import profile_router from './routers/profile_router';
-import review_router from './routers/review_router';
+import reviews_router from './routers/reviews_router';
 
 // #endregion
 
@@ -50,7 +50,7 @@ app.use(`${basePath}/registration`, registration_router);
 app.use(`${basePath}/trips`, trip_router);
 app.use(`${basePath}/authenticate`, authentication_router);
 app.use(`${basePath}/profile`, profile_router);
-app.use(`${basePath}/reviews`, review_router);
+app.use(`${basePath}/reviews`, reviews_router);
 
 app.get('/', (req:Request,res:Response) => {
     res.status(200).send('Home Page');
