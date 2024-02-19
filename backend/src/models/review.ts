@@ -18,7 +18,7 @@ Review.init({
         field: 'review_id'
     },
     reviewRating: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT(2,1),
         allowNull: false,
         field: 'rating'
     },
