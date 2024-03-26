@@ -8,3 +8,4 @@
 /backend/dist
 /backend/.eslintrc.js
 /backend/tsconfig.json
+/.idea
