@@ -14,14 +14,14 @@ interface Env{  // interface for environment variables
 }
 
 function getEnv(): Env{ // checks if environment variables are set
-    if(process.env.DB_NAME === undefined  ||
-        process.env.DB_USER === undefined ||
-        process.env.DB_PASSWORD === undefined ||
-        process.env.DB_HOST === undefined ||
-        process.env.DB_PORT === undefined ||
-        process.env.SESSION_SECRET === undefined ||
-        process.env.SSL_KEY_PATH === undefined ||
-        process.env.SSL_CERT_PATH === undefined){
+    if(process.env.DB_NAME === 'undefined'  ||
+        process.env.DB_USER === 'undefined' ||
+        process.env.DB_PASSWORD === 'undefined' ||
+        process.env.DB_HOST === 'undefined' ||
+        process.env.DB_PORT === 'undefined' ||
+        process.env.SESSION_SECRET === 'undefined' ||
+        process.env.SSL_KEY_PATH === 'undefined' ||
+        process.env.SSL_CERT_PATH === 'undefined'){
             throw new Error('Environment variables not set');
     } else {
         return {    // returns an object with the environment variables

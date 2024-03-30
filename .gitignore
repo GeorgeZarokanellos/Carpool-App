@@ -9,3 +9,4 @@
 /backend/.eslintrc.js
 /backend/tsconfig.json
 /.idea
+/.vscode/
