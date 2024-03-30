@@ -1,6 +1,8 @@
 // #region import statements
 import express, {type Request, type Response, type NextFunction} from 'express';
 
+import dotenv from 'dotenv';
+dotenv.config({path: '/home/george/Desktop/Carpool-App/backend/env'});
 import { env } from './config';
 
 import http from 'http';
@@ -11,8 +13,6 @@ import bodyParser from 'body-parser';
 import passport from 'passport'; // import passport
 import session from 'express-session';
 // #endregion
-
-
 
 // #region routers
 import registration_router from './routers/registration_router';

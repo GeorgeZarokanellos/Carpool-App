@@ -8,7 +8,7 @@ router.get('/:id', returnSingleTrip);
 
 // create, update, delete trip
 router.post('/', createTrip);
-router.patch('/trips/:id', updateTrip)
-router.delete('/trips/:id', deleteTrip);
+router.patch('/:id', updateTrip)
+router.delete('/:id', deleteTrip);
 
 export default router;

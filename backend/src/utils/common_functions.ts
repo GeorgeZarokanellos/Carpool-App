@@ -1,25 +1,24 @@
-import { User, Review } from '../models/associations';
+import {Review, User} from '../models/associations';
 import {validationResult} from 'express-validator';
-import type {Request, Response, NextFunction} from 'express';
+import type {NextFunction, Request, Response} from 'express';
 
 export const retrieveUserReviews = async (userId: string) : Promise<Review[]> => {
     // console.log(user);
     // console.log(user.userId);
     try {
-            const userReviews: Review[] = await Review.findAll({
+        return await Review.findAll({
                 where: {
                     reviewedUserId: userId
                 },
                 attributes: ['reviewerId', 'reviewRating', 'reviewDateTime'],
-                include : [
+                include: [
                     {
                         model: User,
-                        as : 'reviewer',
-                        attributes: ['firstName', 'lastName']  
+                        as: 'reviewer',
+                        attributes: ['firstName', 'lastName']
                     }
                 ]
             });
-            return userReviews;
     } catch (error) {
         console.error(error);
         if(typeof error === 'string'){
