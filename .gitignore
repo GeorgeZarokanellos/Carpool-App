@@ -10,3 +10,4 @@
 /backend/tsconfig.json
 /.idea
 /.vscode/
+/backend/env
