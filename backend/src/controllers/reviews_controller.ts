@@ -1,7 +1,10 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { retrieveUserReviews } from "../utils/common_functions"; 
 import { Review } from "../models/associations";
 import type { reviewRequestBodyInterface } from "../interfaces/trip_interfaces";
+import sequelize from '../database/connect_to_db';
+import { type Transaction } from 'sequelize';
+
 
 export const getReviews =  (req: Request, res: Response): void => {
     const userId: string = req.params.id;
@@ -15,44 +18,57 @@ export const getReviews =  (req: Request, res: Response): void => {
         });
 }
 
-export const createReview = (req: Request, res: Response): void => {
-    const { reviewRating, reviewDateTime}: reviewRequestBodyInterface = req.body;
-    const reviewedUserId = req.params.reviewedPersonId;
-    // const reviewerId  = req.session.id;
-    const reviewerId = 1; // TODO: change this to the logged in user's id
-    Review.create({
-        reviewRating,
-        reviewDateTime,
-        reviewedUserId,
-        reviewerId
-    })
-    .then(() => {
-        res.status(201).send('Review created');
-    })
-    .catch((error) => {
-        console.error(error);
-        res.status(500).send('There was an error creating the review');
-    });
-}
+//TODO logic to update the average rating of the user being reviewed
+export const createReview = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        await sequelize.transaction(async (transaction: Transaction) => {
+            const { reviewRating}: reviewRequestBodyInterface = req.body;
+            const reviewedUserId = req.params.reviewedPersonId;
+            // const reviewerId  = req.session.id;
+            const reviewerId = 1; // TODO: change this to the logged in user's id
+            const reviewDateTime = new Date().toISOString();
+            await Review.create({
+                    reviewRating,
+                    reviewDateTime,
+                    reviewedUserId,
+                    reviewerId
+                },{transaction});
+            }).catch((err) => {
+                console.error(err);
+                if(typeof err === 'string'){
+                    console.log("There was an error creating the review: " + err);
+                    res.status(500).send('Error creating trip: ' + err);
+                } else if (err instanceof Error){
+                    console.log(err.message); 
+                    res.status(500).send('Error creating review: ' + err.message);
+                }
+            });
+    }
 
-export const updateReview = (req: Request, res: Response): void => {
-    const reviewId = req.params.id;
-    const { reviewRating, reviewDateTime}: reviewRequestBodyInterface = req.body;
-    Review.update({
-        reviewRating,
-        reviewDateTime
-    }, {
-        where: {
-            reviewId
+//TODO logic to update the average rating of the user being reviewed 
+export const updateReview = async (req: Request, res: Response): Promise<void> => {
+    await sequelize.transaction(async (transaction: Transaction) => {
+        const reviewId = req.params.id;
+        const { reviewRating}: reviewRequestBodyInterface = req.body;
+        const reviewDateTime = new Date().toISOString();
+        Review.update({
+            reviewRating,
+            reviewDateTime
+        }, {
+            where: {
+                reviewId
+            },
+            transaction
+        })
+    }).catch((err) => {
+        console.error(err);
+        if(typeof err === 'string'){
+            console.log("There was an error updating the review: " + err);
+            res.status(500).send('Error updating review: ' + err);
+        } else if (err instanceof Error){
+            console.log(err.message); 
+            res.status(500).send('Error updating review: ' + err.message);
         }
-    })
-    .then(() => {
-        res.status(200).send('Review updated');
-    })
-    .catch((error) => {
-        console.error(error);
-        res.status(500).send('There was an error updating the review');
-    })
+    });
 }
 
 export const deleteReview = (req: Request, res: Response): void => {
