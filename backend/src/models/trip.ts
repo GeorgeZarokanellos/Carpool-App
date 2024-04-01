@@ -24,7 +24,7 @@ Trip.init({
     tripCreatorId:{
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'trip_creator_id'
+        field: 'creator_id'
     },
     driverId: {
         type: DataTypes.INTEGER,
@@ -36,15 +36,15 @@ Trip.init({
         allowNull: false,
         field: 'start_loc'
     },
-    stops: {
+    noOfPassengers: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-        field: 'stops'
+        field: 'no_of_passengers'
     },
-    passengers: {
+    noOfStops: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-        field: 'passengers'
+        field: 'no_of_stops'
     },
     tripDate: {
         type: DataTypes.DATE,

@@ -25,7 +25,7 @@ Review.init({
     reviewDateTime: {
         type: DataTypes.DATE,
         allowNull: false,
-        field: 'review_date'
+        field: 'date'
     },
     reviewedUserId: {
         type: DataTypes.INTEGER,

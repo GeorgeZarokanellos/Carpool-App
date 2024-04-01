@@ -17,7 +17,7 @@ Stop.init({
         type: DataTypes.ENUM,
         values: ['Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvesteio', 'Aretha'],
         allowNull: false,
-        field: 'stop_loc'
+        field: 'loc'
     }
 }, {
     sequelize,
