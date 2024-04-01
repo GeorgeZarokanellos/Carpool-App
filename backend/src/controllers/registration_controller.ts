@@ -74,7 +74,7 @@ export const findUsernameAndInitializeUpload = (req: Request, res: Response, nex
                 console.error('Error from findUsernameAndInitializeUploadAsync:' + err);
             res.status(500).send(err);
         }
-    };
+    }
     findUsernameAndInitializeUploadAsync().catch(next);
 };
 
@@ -193,12 +193,7 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
                 console.error('Error from addDriverAndVehicleAsync:' + err);
             res.status(500).send(err);
         }
-    };
+    }
     addDriverAndVehicleAsync().catch(next);
 }   
 
-export default {
-    addUser,
-    findUsernameAndInitializeUpload,
-    addDriverAndVehicle,
-}
