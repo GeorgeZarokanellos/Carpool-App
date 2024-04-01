@@ -1,7 +1,7 @@
 CREATE TYPE user_role AS ENUM ('driver', 'passenger');
 CREATE TYPE start_stop_location AS ENUM ('Gewrgiou Square', 'Olgas square', 'Pyrosvestio', 'Aretha');
-CREATE TYPE choice AS ENUM ('aceept', 'decline');
-
+CREATE TYPE choice AS ENUM ('accept', 'decline');
+CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
 
 CREATE TABLE App_user (
 	user_id SERIAL,
@@ -42,13 +42,6 @@ CREATE TABLE Stops (
 	PRIMARY KEY (stop_id)
 );
 
-CREATE TABLE Trip_stops (
-	trip_id INT NOT NULL ,
-	stop_id INT NOT NULL ,
-	PRIMARY KEY (trip_id, stop_id),
-	FOREIGN KEY (stop_id) REFERENCES Stops (stop_id)
-);
-
 CREATE TABLE Trip (
 	trip_id SERIAL,
     creator_id INT NOT NULL ,
@@ -57,15 +50,19 @@ CREATE TABLE Trip (
     no_of_passengers INT,
 	no_of_stops INT,
 	date DATE NOT NULL,
+    status trip_status,
 	PRIMARY KEY (trip_id),
     FOREIGN KEY (creator_id) REFERENCES app_user(user_id),
     FOREIGN KEY (driver_id) REFERENCES driver(driver_id)
 );
 
-ALTER TABLE trip ADD FOREIGN KEY (creator_id) REFERENCES app_user(user_id);
-ALTER TABLE trip ADD FOREIGN KEY (driver_id) REFERENCES driver(driver_id);
-ALTER TABLE Trip_stops ADD FOREIGN KEY (trip_id) REFERENCES Trip (trip_id);
-
+CREATE TABLE Trip_stops (
+	trip_id INT NOT NULL ,
+	stop_id INT NOT NULL ,
+	PRIMARY KEY (trip_id, stop_id),
+	FOREIGN KEY (stop_id) REFERENCES Stops (stop_id),
+    FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
+);
 
 CREATE TABLE Trip_passengers (
 	trip_id INT,
