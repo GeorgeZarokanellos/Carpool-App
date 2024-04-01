@@ -27,8 +27,7 @@ const initializeUpload = (username: string): (req: Request, res: Response, next:
                 if(err !== null){    // err here means that the folder doesn't exist
                     fs.mkdir(dir, (err)=>{  // create the folder
                         if(err !== null){   // error when creating the folder 
-                            if ( err instanceof Error)
-                                console.log('Error from mkdir in initializeUpload:' + err.message);
+                            console.log('Error from mkdir in initializeUpload:' + err.message);
                             cb(err, '');
                         }
                         else 
@@ -52,7 +51,7 @@ const initializeUpload = (username: string): (req: Request, res: Response, next:
     };
 
     return multer({ storage, fileFilter }).fields([ // specify the fields to be uploaded
-        {name: 'driversLicense', maxCount: 1},  
+        {name: 'driversLicense', maxCount: 1},  //TODO take the id of the license
         {name: 'carsRegistration', maxCount: 1},
         {name: 'carsInsurance', maxCount: 1},
         {name: 'carImages', maxCount: 4},
@@ -112,25 +111,21 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 res.status(400).send(message);
             }
 
-            try {
+            await sequelize.transaction(async (transaction) => {
                 const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
                 const newUser = await User.create({
                     universityId,
-                    firstName, 
-                    lastName, 
-                    username, 
-                    password: hash, // store the hashed password in the database
-                    email, 
-                    role, 
+                    firstName,
+                    lastName,
+                    username,
+                    password: hash,     // store the hashed password
+                    email,
+                    role,
                     phone
-                });
+                }, {transaction});
                 res.status(200).send(newUser);
-            } catch (err) {
-                if(err instanceof Error)
-                    console.error('Error from bcrypt.hash in addUser:' + err.message);
-                else if (typeof err === 'string')
-                    console.error('Error from bcrypt.hash in addUser:' + err);
-            }    
+
+            });
         } catch (err) {
             if (err instanceof Error)
                 console.error('Error: ' + err.message);
@@ -138,8 +133,8 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 console.error('Error: ' + err);
             res.status(500).send(err);
         }
-    };
-    addUserAsync().catch(next);
+    }
+    addUserAsync().catch(next); // catch any errors that occur in the addUserAsync function
 }
 
 export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunction): void => {
@@ -147,8 +142,9 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
         try {
             const driverId = req.params.id;
             const username: string = req.body.username;
-            const {vehicleId, carMaker, carModel, carCapacity}: carRegisterRequestBodyInterface = req.body;
-            const requiredFields = ['vehicleId', 'carMaker', 'carModel', 'carCapacity']
+            //TODO vehicle now has owner id field change logic accordingly
+            const {vehicleId, ownerId, carMaker, carModel, carCapacity}: carRegisterRequestBodyInterface = req.body;
+            const requiredFields = ['vehicleId', 'ownerId' , 'carMaker', 'carModel', 'carCapacity']
             for (const field of requiredFields){
                 if(req.body[field] !== undefined || req.body[field] !== null || req.body[field] !== '')
                     res.status(400).send(`${field} is missing`);
@@ -173,37 +169,23 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
                 res.status(500).send(err);
             }
 
-            const transaction = await sequelize.transaction(); // create a transaction to ensure that the driver and vehicle are created together
-
-            try {
+            await sequelize.transaction(async (transaction) => {
                 const newDriver = await Driver.create({ // create a new driver
                     // fields
-                    driverId,
-                    vehicleId
-                },{transaction});
+                    driverId
+                }, {transaction});
 
                 const newVehicle = await Vehicle.create({   // create a new vehicle
                     // fields
                     plateNumber: vehicleId,
+                    ownerId: ownerId,
                     maker: carMaker,
                     model: carModel,
                     noOfSeats: carCapacity
                 }, {transaction});
 
-
-                await transaction.commit(); // commit the transaction
-                res.status(200).send({driver:newDriver, vehicle: newVehicle});
-            } catch(err) {
-                if(err instanceof Error){
-                    if(err.name === 'SequelizeForeignKeyConstraintError')
-                        res.status(400).send(err);
-                    // console.log('Error from transaction:' + error);
-                }  else if (typeof err === 'string'){
-                    console.log('Error is not of type Error:' + err); 
-                }
-                await transaction.rollback(); // rollback the transaction if an error occurs
-            }
-
+                res.status(200).send({driver: newDriver, vehicle: newVehicle});
+            });
         } catch(err) {
             if(err instanceof Error)
                 console.error('Error from addDriverAndVehicleAsync:' + err.message);
