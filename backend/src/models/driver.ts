@@ -12,11 +12,12 @@ Driver.init({
         autoIncrement: true,
         field: 'driver_id'
     },
-    vehicleId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        field: 'vehicle_id'
-    }
+    // licenseId: {
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    //     field: 'license_id'
+    // }
+    //TODO add license id field
 }, 
 {
     sequelize,

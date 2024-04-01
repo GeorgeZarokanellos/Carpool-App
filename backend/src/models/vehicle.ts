@@ -12,6 +12,11 @@ Vehicle.init({
         autoIncrement: true,
         field: 'plate_number'
     },
+    ownerId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'owner_id'
+    },
     maker: {
         type: DataTypes.STRING,
         allowNull: false,
