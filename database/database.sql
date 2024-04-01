@@ -13,22 +13,21 @@ CREATE TABLE App_user (
 	email VARCHAR(50) NOT NULL,
 	role user_role,
 	phone VARCHAR(20),
-	rating DECIMAL(3,2) DEFAULT 0,
+	overall_rating DECIMAL(3,2) DEFAULT 0,
 	overall_points INT DEFAULT 0,
 	PRIMARY KEY (user_id)
 );
 
 CREATE TABLE Driver (
 	driver_id SERIAL,
-	vehicle_id INT UNIQUE NOT NULL,
-	license_id INT NOT NULL,
+	license_id INT UNIQUE NOT NULL,
 	PRIMARY KEY (driver_id),
 	FOREIGN KEY (driver_id) REFERENCES App_user (user_id)
 );
 
 CREATE TABLE Vehicle (
-	owner_id INT NOT NULL,
 	plate_number INT UNIQUE NOT NULL,
+    owner_id INT UNIQUE NOT NULL,
 	no_of_seats SMALLINT NOT NULL,
 	image BYTEA,
 	model VARCHAR(50),
@@ -39,26 +38,32 @@ CREATE TABLE Vehicle (
 
 CREATE TABLE Stops (
 	stop_id SERIAL,
-	stop_loc start_stop_location NOT NULL,
+	loc start_stop_location NOT NULL,
 	PRIMARY KEY (stop_id)
 );
 
 CREATE TABLE Trip_stops (
-	trip_id INT,
-	stop_id INT,
+	trip_id INT NOT NULL ,
+	stop_id INT NOT NULL ,
 	PRIMARY KEY (trip_id, stop_id),
 	FOREIGN KEY (stop_id) REFERENCES Stops (stop_id)
 );
 
 CREATE TABLE Trip (
 	trip_id SERIAL,
+    creator_id INT NOT NULL ,
 	driver_id INT NOT NULL,
 	start_loc start_stop_location NOT NULL,
-	stops INT,
+    no_of_passengers INT,
+	no_of_stops INT,
 	date DATE NOT NULL,
-	PRIMARY KEY (trip_id)
+	PRIMARY KEY (trip_id),
+    FOREIGN KEY (creator_id) REFERENCES app_user(user_id),
+    FOREIGN KEY (driver_id) REFERENCES driver(driver_id)
 );
 
+ALTER TABLE trip ADD FOREIGN KEY (creator_id) REFERENCES app_user(user_id);
+ALTER TABLE trip ADD FOREIGN KEY (driver_id) REFERENCES driver(driver_id);
 ALTER TABLE Trip_stops ADD FOREIGN KEY (trip_id) REFERENCES Trip (trip_id);
 
 
@@ -68,6 +73,17 @@ CREATE TABLE Trip_passengers (
 	PRIMARY KEY (trip_id, passenger_id),
 	FOREIGN KEY (trip_id) REFERENCES Trip (trip_id),
 	FOREIGN KEY (passenger_id) REFERENCES App_user (user_id)
+);
+
+CREATE TABLE Reviews (
+    review_id SERIAL NOT NULL,
+    rating decimal(2,1) NOT NULL,
+    date DATE NOT NULL,
+    reviewed_user_id INT NOT NULL,
+    reviewer_id INT NOT NULL,
+    PRIMARY KEY (review_id),
+    FOREIGN KEY (reviewed_user_id) REFERENCES app_user (user_id),
+    FOREIGN KEY (reviewer_id) REFERENCES app_user (user_id)
 );
 
 CREATE TABLE Notifications (
