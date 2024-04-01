@@ -70,10 +70,3 @@ export const deleteReview = (req: Request, res: Response): void => {
         res.status(500).send('There was an error deleting the review');
     })
 }
-
-export default {
-    getReviews,
-    createReview,
-    updateReview,
-    deleteReview
-}
