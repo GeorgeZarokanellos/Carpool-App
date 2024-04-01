@@ -11,3 +11,4 @@
 /.idea
 /.vscode/
 /backend/env
+/database/test.sql
