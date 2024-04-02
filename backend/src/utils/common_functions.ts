@@ -32,10 +32,11 @@ export const retrieveUserReviews = async (userId: string) : Promise<Review[]> =>
 
 export const validate = (req: Request, res: Response, next: NextFunction): void => {
     const errors = validationResult(req);
+    console.log(errors);
     if(!errors.isEmpty()){
           res.status(400).json({errors: errors.array()});
-    }
-    next();
+    } else
+        next();
  
 };
 

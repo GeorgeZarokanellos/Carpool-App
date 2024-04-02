@@ -1,21 +1,21 @@
-import {type ValidationChain, check} from 'express-validator';
+import {type ValidationChain, body} from 'express-validator';
 
 export const reviewValidationRules = (): ValidationChain[] => {
     return [
-        check('reviewRating')
-            .isFloat({min: 0, max: 5})
+        body('reviewRating')
+            .isFloat()
             .withMessage('Review rating must be a number between 0 and 5')
-            .bail()
-            .custom((value) => {
-                if(Math.floor(value * 10) !== value * 10) {
+            .custom((value, {req}) => {
+                const reviewRating = req.body.reviewRating;
+                if(!Number.isInteger(reviewRating*10)) {
                     throw new Error('Review rating must have at most one decimal place');
                 }
-            }),
-        check('reviewDateTime').isISO8601()
+                return value;
+            })
     ];
 
 }
 
 export default {
-    reviewValidationRules
 }
+reviewValidationRules
