@@ -17,6 +17,7 @@ class User extends Model {
     declare phone: string;
     declare overallRating: number;
     declare overallPoints: number;
+    declare noOfReviews: number;
 }
 
 User.init({ 
@@ -75,6 +76,11 @@ User.init({
         defaultValue: 0,
         field: 'overall_points'
     },
+    noOfReviews: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        field: 'no_of_reviews'
+    }
 }, 
 {
     sequelize, // We need to pass the connection instance
