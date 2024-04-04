@@ -1,3 +1,8 @@
+/**
+ * Authentication Controller module.
+ * @module controllers/authentication_controller
+ */
+
 import { type Request, type Response } from 'express';
 import User from '../models/user';
 import bcrypt from 'bcryptjs';
@@ -6,6 +11,14 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import path from 'path';
 
 // #region passport setup
+
+/**
+ * Configures the local strategy for passport authentication.
+ * @param {string} username - The username provided by the user.
+ * @param {string} password - The password provided by the user.
+ * @param {function} done - The callback function to be called when authentication is complete.
+ * @returns {Promise<void>} - A promise that resolves when authentication is complete.
+ */
 passport.use(new LocalStrategy(
     (username, password, done) => {
         (async () => {
@@ -29,10 +42,22 @@ passport.use(new LocalStrategy(
     }
 ));
 
+/**
+ * Serializes the user object and stores the user id in the session.
+ * @param {object} user - The user object to be serialized.
+ * @param {function} done - The callback function to be called when serialization is complete.
+ * @returns {void}
+ */
 passport.serializeUser((user: any, done) => {
     done(null, user.userId);  // user id is the data to be stored in the session
 });
 
+/**
+ * Deserializes the user id from the session and retrieves the user object.
+ * @param {number} userId - The user id retrieved from the session.
+ * @param {function} done - The callback function to be called when deserialization is complete.
+ * @returns {Promise<void>} - A promise that resolves when deserialization is complete.
+ */
 passport.deserializeUser(
     (userId, done) => {
         (async () => {

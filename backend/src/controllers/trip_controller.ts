@@ -4,6 +4,17 @@ import { type passengerInterface, type updateDetailsInterface } from '../interfa
 import sequelize from '../database/connect_to_db';
 import { type Transaction } from 'sequelize';
 
+
+//#region private functions
+/**
+ * Adds passengers to a trip.
+ * 
+ * @param passengers - An array of passenger objects.
+ * @param Trip - The trip object to which passengers will be added.
+ * @param transaction - The transaction object for database operations.
+ * @returns A promise that resolves to void.
+ * @throws Error if one or more passengers were not found.
+ */
 const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, transaction: Transaction): Promise<void> => {
     if(passengers.length > 0){
         const firstNames = passengers.map(passenger => passenger.firstName);    // returns an array of first names of the passengers to be added
@@ -62,6 +73,15 @@ const removePassengersFromTrip = async(passengers: passengerInterface[], Trip: T
     }
 }
 
+/**
+ * Adds stops to a trip.
+ * 
+ * @param stops - An array of stop names.
+ * @param Trip - The trip object to add stops to.
+ * @param transaction - The transaction object for database operations.
+ * @returns A promise that resolves to void.
+ * @throws Error if one or more stops were not found.
+ */
 const addStopsToTrip = async(stops: string[], Trip: Trip, transaction: Transaction): Promise<void> => {
     if(stops.length > 0){
         const stopRecords = await Stop.findAll({   // returns an array of stop objects
@@ -121,6 +141,13 @@ const removeStopsFromTrip = async(stops: string[], Trip: Trip, transaction: Tran
     }
 }
 
+/**
+ * Deletes all trip passengers associated with the given trip ID.
+ * 
+ * @param tripId - The ID of the trip.
+ * @param transaction - The transaction object for the database operation.
+ * @returns A Promise that resolves to void.
+ */
 const deleteTripPassengers = async (tripId: string, transaction: Transaction): Promise<void> => {
     await TripPassenger.destroy({
         where: {
@@ -139,7 +166,9 @@ const deleteTripStop = async (tripId: string, transaction: Transaction): Promise
         transaction
     });      
 }
+//#endregion
 
+// #region public crud functions
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
     async function returnTripsAsync(): Promise<void> {
         try {
@@ -162,7 +191,7 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
         } catch (error) {
             console.error(error);
             if(typeof error === 'string'){
-                console.log("There was an error deleting the trip's passengers: " + error);
+                // console.log("There was an error retrieving the trips: " + error);
                 res.status(500).send('Error retrieving trips: ' + error);
             } else if (error instanceof Error){
                 console.log(error.message); 
@@ -202,7 +231,7 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                             {
                                 model: Stop,
                                 as: 'stopLocation',
-                                attributes: ['stopLoc']
+                                attributes: ['loc']
                             }
                         ]
                     }
@@ -356,4 +385,5 @@ export const deleteTrip = (req: Request,res: Response, next: NextFunction): void
     };
     deleteTripAsync().catch(next);
 }
+// #endregion
 
