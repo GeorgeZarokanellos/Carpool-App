@@ -24,7 +24,7 @@ export const createReview = async (req: Request, res: Response, next: NextFuncti
         await sequelize.transaction(async (transaction: Transaction) => {
             const { reviewRating }: reviewRequestBodyInterface = req.body;
             logger.info("Review rating from request body: " + reviewRating);
-            const reviewedUserId = req.params.reviewedPersonId;
+            const reviewedUserId = Number(req.params.reviewedPersonId);
             // const reviewerId  = req.session.id;
             const reviewerId = 1; // TODO: change this to the logged in user's id
             const reviewDateTime = new Date().toISOString();
@@ -79,8 +79,12 @@ export const updateReview = async (req: Request, res: Response): Promise<void> =
         })
         if (updateCount > 0) {  //if the review was updated
             const updatedReview = updatedReviews[0]; //get the updated review
+            const reviewedUserId = updatedReview.reviewedUserId;
             //update the average rating of the user being reviewed
-            await calculateAverageRatingForUpdatedReview(reviewId, reviewRating, req.params.reviewedPersonId);
+            if(isNaN(reviewedUserId))
+                throw new Error("Invalid user id");
+            else
+                await calculateAverageRatingForUpdatedReview(reviewId, reviewRating, reviewedUserId);
             //send the updated review
             res.status(200).json({ message: "Review updated", review: updatedReview.toJSON() });
         } else {
@@ -114,7 +118,7 @@ export const deleteReview = (req: Request, res: Response): void => {
     })
 }
 
-const calculateAverageRatingForNewReview = async (reviewRating: number, reviewedUserId: string): Promise<void> => {
+const calculateAverageRatingForNewReview = async (reviewRating: number, reviewedUserId: number): Promise<void> => {
     try {       
         //find the user to update
         const userToUpdate: User | null = await User.findOne({
@@ -159,7 +163,7 @@ const calculateAverageRatingForNewReview = async (reviewRating: number, reviewed
     
 }
 
-const calculateAverageRatingForUpdatedReview = async (reviewId: number, reviewRating: number, reviewedUserId: string): Promise<void> => {
+const calculateAverageRatingForUpdatedReview = async (reviewId: number, reviewRating: number, reviewedUserId: number): Promise<void> => {
     try {
         const review = await Review.findOne({
             where: {
