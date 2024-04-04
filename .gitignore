@@ -12,3 +12,4 @@
 /.vscode/
 /backend/env
 /database/test.sql
+/backend/src/logs
