@@ -2,5 +2,16 @@
     "cSpell.words": [
         "comms",
         "endregion"
+    ],
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "carpool@localhost",
+            "database": "carpool",
+            "username": "george"
+        }
     ]
 }
