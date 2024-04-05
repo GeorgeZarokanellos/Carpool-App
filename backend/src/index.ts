@@ -15,11 +15,11 @@ import session from 'express-session';
 // #endregion
 
 // #region routers
-import registration_router from './routers/registration_router';
-import trip_router from './routers/trip_router';
-import authentication_router from './routers/authentication_router';
-import profile_router from './routers/profile_router';
-import reviews_router from './routers/reviews_router';
+import registration_router from './router/registration_router';
+import trip_router from './router/trip_router';
+import authentication_router from './router/authentication_router';
+import profile_router from './router/profile_router';
+import reviews_router from './router/review_router';
 
 // #endregion
 
