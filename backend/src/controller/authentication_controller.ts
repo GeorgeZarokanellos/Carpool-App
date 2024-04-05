@@ -4,7 +4,7 @@
  */
 
 import { type Request, type Response } from 'express';
-import User from '../models/user';
+import User from '../model/user';
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';

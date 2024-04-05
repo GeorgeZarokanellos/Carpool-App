@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { User, Review, Trip, Stop, TripPassenger, TripStop } from "../models/associations";
-import { retrieveUserReviews } from "../utils/common_functions";
+import { User, Review, Trip, Stop, TripPassenger, TripStop } from "../model/association";
+import { retrieveUserReviews } from "../util/common_functions";
 
 export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunction): void => {
     async function retrieveProfileInfoAsync(): Promise<void> {
@@ -11,24 +11,28 @@ export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunct
         
         if(user !== null){
             try {
+                // retrieve the user's reviews, submitted reviews, trips created and trips participated
                 const [userReviews, userSubmittedReviews, tripsCreated, tripsParticipated] = await Promise.all([
                     retrieveUserReviews(userId),
                     retrieveUserSubmittedReviews(userId),
                     retrieveCreatedTrips(user),
                     retrieveParticipatedTrips(user)
                 ]);
+                // create an array of objects containing the arrays to check and the message to log if the array is empty
                 const arraysToCheck = [
                     {array: userReviews, message: 'This user has not been reviewed yet'},
                     {array: userSubmittedReviews, message: 'This user has not submitted any reviews yet'},
                     {array: tripsCreated, message: 'This user has not created any trips yet'},
                     {array: tripsParticipated, message: 'This user has not participated in any trips yet'}
                 ];
+                // check if any of the arrays are empty and log a message to the console
                 arraysToCheck.forEach(({array, message}) => {
                     if(array.length === 0) {
                         console.log(message);
                     }
                 });
-                res.status(200).json({
+                res.status(200).json({  // send the user profile information to the client
+                    username: user.username,
                     overallRating: user.overallRating,
                     userReviews,
                     userSubmittedReviews,

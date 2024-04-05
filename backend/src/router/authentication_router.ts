@@ -1,6 +1,6 @@
 import express, {type Router, type Request, type Response, type RequestHandler} from 'express';
 import passport from 'passport';
-import auth_controller from '../controllers/authentication_controller';
+import auth_controller from '../controller/authentication_controller';
 
 const router:Router = express.Router();
 

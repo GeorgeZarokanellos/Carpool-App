@@ -1,14 +1,14 @@
 // #region import statements
 import type { Request, Response, NextFunction } from 'express';
 import { Op } from 'sequelize';
-import User from '../models/user';
+import User from '../model/user';
 import bcrypt from 'bcryptjs';
 import multer, { type FileFilterCallback } from 'multer';
 import fs from 'fs';
-import Driver from '../models/driver';
-import Vehicle from '../models/vehicle';
+import Driver from '../model/driver';
+import Vehicle from '../model/vehicle';
 import sequelize from '../database/connect_to_db';
-import { type addUserRequestBodyInterface, type carRegisterRequestBodyInterface} from '../interfaces/trip_interfaces';
+import { type addUserRequestBodyInterface, type carRegisterRequestBodyInterface} from '../interface/trip_interface';
 
 const saltRounds = 10;
 

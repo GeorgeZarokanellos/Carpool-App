@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from 'express';
-import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../models/associations';
-import { type passengerInterface, type updateDetailsInterface } from '../interfaces/trip_interfaces';
+import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../model/association';
+import { type passengerInterface, type updateDetailsInterface } from '../interface/trip_interface';
 import sequelize from '../database/connect_to_db';
 import { type Transaction } from 'sequelize';
 

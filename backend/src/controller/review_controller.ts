@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
-import { retrieveUserReviews } from "../utils/common_functions"; 
-import { Review,User} from "../models/associations";
-import type { reviewRequestBodyInterface } from "../interfaces/trip_interfaces";
+import { retrieveUserReviews } from "../util/common_functions"; 
+import { Review,User} from "../model/association";
+import type { reviewRequestBodyInterface } from "../interface/trip_interface";
 import sequelize from '../database/connect_to_db';
 import { type Transaction } from 'sequelize';
-import logger from '../utils/winston';
+import logger from '../util/winston';
 
 
 export const getReviews =  (req: Request, res: Response): void => {
