@@ -77,9 +77,11 @@ CREATE TABLE Reviews (
     review_id SERIAL NOT NULL,
     rating decimal(2,1) NOT NULL,
     date DATE NOT NULL,
+    trip_id INT NOT NULL,
     reviewed_user_id INT NOT NULL,
     reviewer_id INT NOT NULL,
     PRIMARY KEY (review_id),
+    FOREIGN KEY (trip_id) REFERENCES Trip (trip_id),
     FOREIGN KEY (reviewed_user_id) REFERENCES app_user (user_id),
     FOREIGN KEY (reviewer_id) REFERENCES app_user (user_id)
 );

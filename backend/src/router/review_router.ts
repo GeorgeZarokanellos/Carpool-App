@@ -9,7 +9,7 @@ const router = express.Router();
 
 
 router.get('/:id', getReviews);
-router.post('/:reviewedPersonId', reviewValidationRules() ,validate, createReview);
+router.post('/:reviewedPersonId&:tripId', reviewValidationRules() ,validate, createReview);
 router.patch('/:id', reviewValidationRules(), validate, updateReview);
 router.delete('/:id', deleteReview);
 
