@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
 import { retrieveUserReviews } from "../util/common_functions"; 
-import { Review,User} from "../model/association";
+import { Review,User, Trip, TripPassenger} from "../model/association";
 import type { reviewRequestBodyInterface } from "../interface/trip_interface";
 import sequelize from '../database/connect_to_db';
-import { type Transaction } from 'sequelize';
+import { type Transaction, Op } from 'sequelize';
 import logger from '../util/winston';
 
 
@@ -19,36 +19,42 @@ export const getReviews =  (req: Request, res: Response): void => {
         });
 }
 
-//TODO logic to update the average rating of the user being reviewed
 export const createReview = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         await sequelize.transaction(async (transaction: Transaction) => {
             const { reviewRating }: reviewRequestBodyInterface = req.body;
             logger.info("Review rating from request body: " + reviewRating);
             const reviewedUserId = Number(req.params.reviewedPersonId);
+            const tripId = Number(req.params.tripId);
+            logger.info("reviewed user id: " + reviewedUserId + " " + "trip id: " + tripId);
             // const reviewerId  = req.session.id;
             const reviewerId = 1; // TODO: change this to the logged in user's id
             const reviewDateTime = new Date().toISOString();
-            const createdReview = await Review.create({
-                    reviewRating,
-                    reviewDateTime,
-                    reviewedUserId,
-                    reviewerId
-                },{transaction});
-            await calculateAverageRatingForNewReview(reviewRating, reviewedUserId);
-            const UserToUpdate = await User.findOne({
-                where: {
-                    userId: reviewedUserId
-                }
-            });
-            if(UserToUpdate != null){
-                logger.debug("no of reviews before update: " + UserToUpdate.noOfReviews);
-                UserToUpdate.noOfReviews += 1;
-                logger.debug("no of reviews after update: " + UserToUpdate.noOfReviews);
-                await UserToUpdate.save();
-            }else
-                throw new Error("User not found when trying to update the number of reviews");
-
-                res.status(200).json({ message: "Review created", review: createdReview.toJSON() });
+            let fromTrip: boolean = await checkIfUsersAreInTrip(tripId, reviewerId, reviewedUserId);
+            if (fromTrip) { //if the reviewer is the driver or a passenger allow them to review someone that was on the trip
+                const createdReview = await Review.create({
+                        reviewRating,
+                        reviewDateTime,
+                        tripId,
+                        reviewedUserId,
+                        reviewerId
+                    },{transaction});
+                await calculateAverageRatingForNewReview(reviewRating, reviewedUserId);
+                const UserToUpdate = await User.findOne({
+                    where: {
+                        userId: reviewedUserId
+                    }
+                });
+                if(UserToUpdate != null){
+                    logger.debug("no of reviews before update: " + UserToUpdate.noOfReviews);
+                    UserToUpdate.noOfReviews += 1;  //increment the number of reviews of the user
+                    logger.debug("no of reviews after update: " + UserToUpdate.noOfReviews);
+                    await UserToUpdate.save();  //save the updated user
+                }else
+                    throw new Error("User not found when trying to update the number of reviews");
+    
+                    res.status(200).json({ message: "Review created", review: createdReview.toJSON() });
+            } else 
+                throw new Error("You are not allowed to review this trip");
         }).catch((err) => {
             if(typeof err === 'string'){
                 console.error(err);
@@ -209,4 +215,35 @@ const calculateAverageRatingForUpdatedReview = async (reviewId: number, reviewRa
             logger.info(error.message); 
         }
     }
+}
+
+const checkIfUsersAreInTrip = async (tripId: number, reviewerId: number, reviewedUserId: number): Promise<boolean> => {
+    let fromTrip: boolean = false;
+    const trip = await Trip.findOne({
+        where: {
+            tripId,
+            [Op.or]: [  //check if either of the users are driver in the trip
+                {driverId: reviewerId},
+                {driverId: reviewerId}
+            ]
+        },
+        include: [
+            {
+                model: TripPassenger,
+                as: 'tripPassengers',
+                where: {
+                    [Op.or]: [
+                        {passengerId: reviewerId},
+                        {passengerId: reviewedUserId}
+                    ]
+                },
+                required: false //check if either of the users are in the trip
+        }]
+    });
+    if(!trip){
+        logger.info("Trip not found or users are not in the trip");
+        throw new Error("Trip not found or users are not in the trip");
+    }
+
+    return fromTrip;
 }
