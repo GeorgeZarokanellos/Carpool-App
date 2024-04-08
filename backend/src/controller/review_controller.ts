@@ -219,6 +219,7 @@ const calculateAverageRatingForUpdatedReview = async (reviewId: number, reviewRa
 
 const checkIfUsersAreInTrip = async (tripId: number, reviewerId: number, reviewedUserId: number): Promise<boolean> => {
     let fromTrip: boolean = false;
+    logger.info("tripId: " + tripId + " reviewerId: " + reviewerId + " reviewedUserId: " + reviewedUserId + " from checkIfUsersAreInTrip");
     const trip = await Trip.findOne({
         where: {
             tripId,
@@ -240,9 +241,12 @@ const checkIfUsersAreInTrip = async (tripId: number, reviewerId: number, reviewe
                 required: false //check if either of the users are in the trip
         }]
     });
+    logger.info("Trip found: " + JSON.stringify(trip));
     if(!trip){
         logger.info("Trip not found or users are not in the trip");
         throw new Error("Trip not found or users are not in the trip");
+    } else {
+        fromTrip = true;
     }
 
     return fromTrip;
