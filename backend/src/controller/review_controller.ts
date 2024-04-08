@@ -6,7 +6,12 @@ import sequelize from '../database/connect_to_db';
 import { type Transaction, Op } from 'sequelize';
 import logger from '../util/winston';
 
-
+/**
+ * Retrieves the reviews for a user.
+ * 
+ * @param req - The request object.
+ * @param res - The response object.
+ */
 export const getReviews =  (req: Request, res: Response): void => {
     const userId: string = req.params.id;
     retrieveUserReviews(userId)
@@ -19,6 +24,14 @@ export const getReviews =  (req: Request, res: Response): void => {
         });
 }
 
+/**
+ * Creates a new review.
+ * 
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next function.
+ * @returns A Promise that resolves to void.
+ */
 export const createReview = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         await sequelize.transaction(async (transaction: Transaction) => {
             const { reviewRating }: reviewRequestBodyInterface = req.body;
@@ -66,8 +79,13 @@ export const createReview = async (req: Request, res: Response, next: NextFuncti
             }
         });
     }
-
-//TODO logic to update the average rating of the user being reviewed 
+/**
+ * Updates a review in the database.
+ * 
+ * @param req - The request object.
+ * @param res - The response object.
+ * @returns A Promise that resolves to void.
+ */
 export const updateReview = async (req: Request, res: Response): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
         const reviewId = Number(req.params.id);
@@ -108,6 +126,12 @@ export const updateReview = async (req: Request, res: Response): Promise<void> =
     });
 }
 
+/**
+ * Deletes a review from the database.
+ * 
+ * @param req - The request object.
+ * @param res - The response object.
+ */
 export const deleteReview = (req: Request, res: Response): void => {
     const reviewId = req.params.id;
     Review.destroy({
@@ -124,6 +148,13 @@ export const deleteReview = (req: Request, res: Response): void => {
     })
 }
 
+/**
+ * Calculates the average rating for a new review and updates the overall rating of the reviewed user.
+ * 
+ * @param reviewRating - The rating given in the new review.
+ * @param reviewedUserId - The ID of the user being reviewed.
+ * @returns A Promise that resolves to void.
+ */
 const calculateAverageRatingForNewReview = async (reviewRating: number, reviewedUserId: number): Promise<void> => {
     try {       
         //find the user to update
@@ -169,6 +200,13 @@ const calculateAverageRatingForNewReview = async (reviewRating: number, reviewed
     
 }
 
+/**
+ * Calculates the average rating for an updated review and updates the overall rating of the reviewed user.
+ * @param reviewId - The ID of the review.
+ * @param reviewRating - The new rating for the review.
+ * @param reviewedUserId - The ID of the user being reviewed.
+ * @returns A Promise that resolves to void.
+ */
 const calculateAverageRatingForUpdatedReview = async (reviewId: number, reviewRating: number, reviewedUserId: number): Promise<void> => {
     try {
         const review = await Review.findOne({
@@ -217,6 +255,13 @@ const calculateAverageRatingForUpdatedReview = async (reviewId: number, reviewRa
     }
 }
 
+/**
+ * Checks if the users are in the specified trip.
+ * @param tripId - The ID of the trip.
+ * @param reviewerId - The ID of the reviewer user.
+ * @param reviewedUserId - The ID of the user being reviewed.
+ * @returns A Promise that resolves to a boolean indicating whether the users are in the trip.
+ */
 const checkIfUsersAreInTrip = async (tripId: number, reviewerId: number, reviewedUserId: number): Promise<boolean> => {
     let fromTrip: boolean = false;
     logger.info("tripId: " + tripId + " reviewerId: " + reviewerId + " reviewedUserId: " + reviewedUserId + " from checkIfUsersAreInTrip");
