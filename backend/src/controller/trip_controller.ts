@@ -3,6 +3,7 @@ import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../model/asso
 import { type passengerInterface, type updateDetailsInterface } from '../interface/trip_interface';
 import sequelize from '../database/connect_to_db';
 import { type Transaction } from 'sequelize';
+import logger from '../util/winston';
 
 // #region public crud functions
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
@@ -93,8 +94,10 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
 export const createTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => { 
         const {userId, driverId, startLocation} = req.body;
-        // check if the user is a driver and if yes insert the driverId in the trip table
+        const stops: string[] = req.body.stops;
+        const passengers: passengerInterface[] = req.body.passengers;
         const currentUserId: number = userId;
+        //TODO uncomment below line to test session when ready
         // const currentUserId = req.session.userId;    
         const currentUserIsDriver = await Driver.findOne({
             where: {
@@ -102,8 +105,6 @@ export const createTrip = async(req: Request,res: Response, next: NextFunction):
             }
         });
         const finalDriverId = currentUserIsDriver === null ? driverId : currentUserId;  // if the user is a driver, the driverId is the same as the userId
-        const stops: string[] = req.body.stops;
-        const passengers: passengerInterface[] = req.body.passengers;
         const newTrip = await Trip.create({
             driverId: finalDriverId,
             tripCreatorId: userId,
@@ -129,47 +130,35 @@ export const createTrip = async(req: Request,res: Response, next: NextFunction):
 
 export const updateTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
-        // console.log(req.params.id);
-    const tripId: string = req.params.id;  // take the value from the placeholder in the URL
-    // const typeOfUser = req.user.role;
-    const updateDetails: updateDetailsInterface = req.body; // {startLocation, tripDate}
-    // const addPassengers = req.body.addPassengers;
-    const removePassengers: passengerInterface[] = req.body.removePassengers;
-    // console.log(req.body.removePassengers);
-    // console.log(removePassengers);
-    
-    
-    const addStops: string[] = req.body.addStops;
-    // console.log(addStops);
-    
-    const removeStops: string[] = req.body.removeStops;
-    // console.log(req.body.removeStops);
-    // console.log(removeStops);
-    
-    const trip = await Trip.findByPk(tripId);
-    if(trip === null)
-        throw new Error(`Trip with id ${tripId} not found!`);
-    // console.log(req.body.userId + " " + trip.tripCreatorId);
-    
-    if(req.body.userId === trip.tripCreatorId){ // only the user that created the trip can update it 
-        // if(addPassengers){
-        //     await addPassengersToTrip(addPassengers, tripId);
-        // }
-        if(removePassengers !== null && removePassengers !== undefined){
-            // console.log("remove passengers if: ", removePassengers);
-            await removePassengersFromTrip(removePassengers, trip, transaction);
+        const tripId: string = req.params.id;  
+        const updateDetails: updateDetailsInterface = req.body; // {startLocation, tripDate}
+        const removePassengers: passengerInterface[] = req.body.removePassengers;
+        const addStops: string[] = req.body.addStops;    
+        const removeStops: string[] = req.body.removeStops;    
+        const trip = await Trip.findByPk(tripId);
+        if(trip === null)
+            throw new Error(`Trip with id ${tripId} not found!`);
+        // console.log(req.body.userId + " " + trip.tripCreatorId);
+
+        if(req.body.userId === trip.tripCreatorId){ // only the user that created the trip can update it 
+            // if(addPassengers){
+            //     await addPassengersToTrip(addPassengers, tripId);
+            // }
+            if(removePassengers !== null && removePassengers !== undefined){
+                // console.log("remove passengers if: ", removePassengers);
+                await removePassengersFromTrip(removePassengers, trip, transaction);
+            }
+            if(addStops !== null && addStops !== undefined){
+                // console.log("add stops if: ", addStops);
+                await addStopsToTrip(addStops, trip, transaction);
+            }
+            if(removeStops !== null && removeStops !== undefined){
+                // console.log("remove stops if: ", removeStops);
+                await removeStopsFromTrip(removeStops, trip, transaction);
+            }
         }
-        if(addStops !== null && addStops !== undefined){
-            // console.log("add stops if: ", addStops);
-            await addStopsToTrip(addStops, trip, transaction);
-        }
-        if(removeStops !== null && removeStops !== undefined){
-            // console.log("remove stops if: ", removeStops);
-            await removeStopsFromTrip(removeStops, trip, transaction);
-        }
-    }
-    await trip.update(updateDetails, {transaction});    // update the trip with the new details and include the changes in the transaction
-    res.status(200).json(trip);
+        await trip.update(updateDetails, {transaction});    // update the trip with the new details and include the changes in the transaction
+        res.status(200).json(trip);
     }).catch((err) => {
         console.error(err);
         if(typeof err === 'string'){
@@ -185,10 +174,10 @@ export const updateTrip = async(req: Request,res: Response, next: NextFunction):
 export const deleteTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> =>{
     await sequelize.transaction(async (transaction: Transaction) => {
         const tripId = req.params.id;
+        //TODO uncomment below line to test session when ready
         // const userId = req.session.userId;
         const userId: number = req.body.userId;
             const trip = await Trip.findByPk(tripId);
-            // console.log(trip);
             if(trip === null)
                 throw new Error(`Trip with id ${tripId} not found!`);
             if(userId === trip.tripCreatorId){ // only the user that created the trip can delete it
@@ -231,24 +220,22 @@ const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, 
                 lastName: lastNames
             }
         });
-        console.log("trip passengers names: ", tripPassengersNames);
+        logger.info("trip passengers names: ", tripPassengersNames);
         if(tripPassengersNames.length !== passengers.length)
             throw new Error('One or more passengers were not found!');
         const tripPassengersIds = tripPassengersNames.map(passenger => passenger.userId);   // returns an array of the users ids to be added as passengers
-        console.log("trip passenger ids: ", tripPassengersIds);
-        
+        logger.info("trip passengers ids: ", tripPassengersIds);        
         const tripPassengersAddPromises = tripPassengersIds.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
             return await TripPassenger.create({
                 tripId: Trip.tripId,
                 passengerId
             },{transaction});
         });
-        console.log("trip passenger promises:", tripPassengersAddPromises);
-        
+        logger.info("trip passengers promises: ", tripPassengersAddPromises);        
         await Promise.all(tripPassengersAddPromises);    // wait for all the promises to be resolved
         Trip.passengers += tripPassengersAddPromises.length;
         await Trip.save({transaction});  // save the updated trip
-        } 
+    } 
 }   
 
 /**
