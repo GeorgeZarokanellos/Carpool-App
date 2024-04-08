@@ -27,6 +27,7 @@ interface addUserRequestBodyInterface {
 
 interface carRegisterRequestBodyInterface {
     vehicleId: string;
+    ownerId: number;
     carMaker: string;
     carModel: string;
     carCapacity: number;

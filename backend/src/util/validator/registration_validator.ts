@@ -6,8 +6,7 @@ export const newUserValidationRules = (): ValidationChain[] => {
             .isNumeric()
             .withMessage('University ID must be a number')
             .isLength({min: 12, max: 12})
-            .withMessage('Unisersity ID must be 12 characters long'),
-
+            .withMessage('University ID must be 12 characters long'),
 
         check('firstName')
             .isString()
@@ -53,6 +52,10 @@ export const newDriverAndVehicleValidationRules = (): ValidationChain[] => {
             .isString()
             .withMessage('Vehicle ID must be a string'),
 
+        check('ownerId')
+            .isNumeric()
+            .withMessage('Owner ID must be a number'),
+        
         check('carMaker')
             .isString()
             .withMessage('Car maker must be a string')
