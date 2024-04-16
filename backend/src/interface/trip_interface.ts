@@ -3,10 +3,18 @@ interface passengerInterface {
     lastName: string;
 }
 
+interface tripInterface {
+    userId: number;
+    driverId: number | null;
+    startLocation: string;
+    startingTime: Date;
+}
+
 interface updateDetailsInterface {
     removePassengers?: passengerInterface[];
     addStops?: string[];
     removeStops?: string[];
+    updateStartingTime?: Date;
 }
 
 enum role {
@@ -43,7 +51,8 @@ export type {
     updateDetailsInterface,
     addUserRequestBodyInterface,
     carRegisterRequestBodyInterface,
-    reviewRequestBodyInterface
+    reviewRequestBodyInterface,
+    tripInterface
 }
 
 export { role };

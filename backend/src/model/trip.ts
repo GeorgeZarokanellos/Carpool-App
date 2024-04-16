@@ -6,8 +6,8 @@ class Trip extends Model {
     declare tripCreatorId: number;
     declare driverId: number;
     declare startLocation: string;
-    declare stops: number;
-    declare passengers: number;
+    declare noOfPassengers: number;
+    declare noOfStops: number;
     declare tripDate: Date;
     declare status: string;
 }
@@ -36,6 +36,11 @@ Trip.init({
         allowNull: false,
         field: 'start_loc'
     },
+    startingTime: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        field: 'starting_time'
+    },
     noOfPassengers: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
@@ -45,11 +50,6 @@ Trip.init({
         type: DataTypes.INTEGER,
         defaultValue: 0,
         field: 'no_of_stops'
-    },
-    tripDate: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        field: 'date'
     },
     status: {
         type: DataTypes.ENUM,
