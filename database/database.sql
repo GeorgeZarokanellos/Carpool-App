@@ -1,5 +1,5 @@
 CREATE TYPE user_role AS ENUM ('driver', 'passenger');
-CREATE TYPE start_stop_location AS ENUM ('Gewrgiou Square', 'Olgas square', 'Pyrosvestio', 'Aretha');
+CREATE TYPE start_stop_location AS ENUM ('Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvestio', 'Aretha');
 CREATE TYPE choice AS ENUM ('accept', 'decline');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
 
@@ -46,12 +46,12 @@ CREATE TABLE Stops (
 CREATE TABLE Trip (
 	trip_id SERIAL,
     creator_id INT NOT NULL ,
-	driver_id INT NOT NULL,
+	driver_id INT,
 	start_loc start_stop_location NOT NULL,
+    starting_time TIMESTAMP NOT NULL,
     no_of_passengers INT,
-	no_of_stops INT,
-	date DATE NOT NULL,
-    status trip_status,
+	no_of_stops INT DEFAULT 0,
+    status trip_status default 'planning',
 	PRIMARY KEY (trip_id),
     FOREIGN KEY (creator_id) REFERENCES app_user(user_id),
     FOREIGN KEY (driver_id) REFERENCES driver(driver_id)
