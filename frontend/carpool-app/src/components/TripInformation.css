@@ -3,5 +3,19 @@
 .pin-icon,
 .location-icon,
 .flag-icon {
-  margin-right: 1rem;
+  margin-right: 0.5rem;
+}
+
+.trip-info-container {
+  border-radius: 1rem; 
+  /* width: 90%; */
+  /* max-width: fit-content; */
+}
+
+.star-icon {
+  color: white;
+}
+
+.card-content {
+  padding: 0;
 }
