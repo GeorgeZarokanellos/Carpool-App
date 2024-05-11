@@ -19,3 +19,8 @@
 .card-content {
   padding: 0;
 }
+
+.start-finish {
+  display: flex;
+  flex-direction: row;
+}
