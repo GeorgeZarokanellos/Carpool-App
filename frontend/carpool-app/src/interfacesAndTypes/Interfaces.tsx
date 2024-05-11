@@ -1,9 +1,11 @@
 
 export interface TripProps {
-    time: string;
+    startingTime: string;
+    dateOfTrip: string;
     origin: string;
     noOfPassengers: number;
     noOfStops: number;
+    finish: string;
     // user: User;
 }
 
