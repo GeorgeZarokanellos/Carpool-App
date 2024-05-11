@@ -31,10 +31,16 @@ const credentials = {
     cert: certificate 
 }
 // #endregion
+
+const cors = require('cors');
 const app = express();
 app.use(express.static('./methods-public'));
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+app.use(cors({
+    origin: 'http://localhost:8100',
+}));
 
 app.use(session({
     secret: env.SESSION_SECRET,
@@ -56,32 +62,32 @@ app.get('/', (req:Request,res:Response) => {
     res.status(200).send('Home Page');
 })
 
-app.use((req:Request, res:Response, next:NextFunction) => {
-    if(!req.secure){
-        res.redirect('https://' + req.headers.host + req.url); return;
-        // req.headers.host is the domain name(localhost:5000) and req.url is the path(${basePath}registration)
-    }
-    next();
-});
+// app.use((req:Request, res:Response, next:NextFunction) => {
+//     if(!req.secure){
+//         res.redirect('https://' + req.headers.host + req.url); return;
+//         // req.headers.host is the domain name(localhost:5000) and req.url is the path(${basePath}registration)
+//     }
+//     next();
+// });
 // #endregion
 
 
 // create https server with express js
-const httpsServer = https.createServer(credentials, app);
+// const httpsServer = https.createServer(credentials, app);
 
-httpsServer.listen(5000, () => {
-    console.log('HTTPS Server running on port 5000');  
-});
+// httpsServer.listen(5000, () => {
+//     console.log('HTTPS Server running on port 5000');  
+// });
 
 // #region redirect to https server
 
 // Create http server to redirect to https server for users that type in http://localhost:3000
-const httpApp = express();
-httpApp.get('*', (req:Request,res:Response) => {
-    res.redirect('https://' + req.headers.host + req.url);
-});
+// const httpApp = express();
+// httpApp.get('*', (req:Request,res:Response) => {
+//     res.redirect('https://' + req.headers.host + req.url);
+// });
 
-const httpServer = http.createServer(httpApp);
+const httpServer = http.createServer(app);
 httpServer.listen(3000, () => {
     console.log('HTTP Server running on port 3000');
 });
