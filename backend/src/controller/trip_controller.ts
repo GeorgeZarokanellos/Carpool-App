@@ -22,6 +22,12 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                             }
                         ]
                     },
+                    {
+                        model: User,
+                        as: 'tripCreator',
+                        foreignKey: 'tripCreatorId',
+                        attributes: ['firstName', 'lastName']
+                    }
                 ]
             });
             res.status(200).send(trips);
