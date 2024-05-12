@@ -1,4 +1,6 @@
 
+
+
 export interface TripProps {
     startingTime: string;
     dateOfTrip: string;
@@ -6,6 +8,15 @@ export interface TripProps {
     noOfPassengers: number;
     noOfStops: number;
     finish: string;
-    // user: User;
+    driver: {
+        user: {
+            firstName: string,
+            lastName: string
+        }
+    };
+    tripCreator:{
+        firstName: string,
+        lastName: string
+    };
 }
 
