@@ -1,5 +1,5 @@
 import React from "react";
-import { IonCard, IonCardContent, IonCardHeader, IonIcon, IonItem, IonGrid, IonRow, IonCol, IonLabel } from "@ionic/react";
+import { IonCard, IonCardContent, IonCardHeader, IonIcon, IonItem, IonGrid, IonRow, IonCol, IonLabel, IonCardTitle } from "@ionic/react";
 import { TripProps } from "../interfacesAndTypes/Interfaces";
 import { 
         timeOutline, 
@@ -7,36 +7,52 @@ import {
         pinOutline, 
         locationOutline, 
         flagOutline,
-        star,
+        starOutline,
         car,
         arrowForward,
     } from 'ionicons/icons';
 import './TripInformation.css';
 
-export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, noOfStops, finish}) => (
-    <IonCol size="12">
+export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, noOfStops, finish, driver, tripCreator}) => {
+    const today = new Date();
+    const tripDate = new Date(dateOfTrip);
+    //check if trip of date is same as today
+    const isTripToday = today.getDate() === tripDate.getDate() &&
+                        today.getMonth() === tripDate.getMonth() &&
+                        today.getFullYear() === tripDate.getFullYear();
+
+    return (
+    <IonCol size="12" >
         <IonCard className="trip-info-container">
-            <IonCardHeader></IonCardHeader>
-            <IonCardContent className="card-content">
+            <IonCardHeader>
+                <IonCardTitle className="custom-font">
+                    {'Διαδρομή του ' + tripCreator.firstName + ' ' + tripCreator.lastName + ' για ' + (isTripToday ? 'σήμερα' : 'της ' + dateOfTrip) }
+                </IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent className="ion-justify-content-center ion-align-items-center">
                 <IonGrid>
-                    <IonRow >
+                    <IonRow>
                         <div className="start-finish">
-                            <IonItem lines="none">
+                            <IonItem lines="none" className="origin-finish-item" >
                                 <IonIcon icon={locationOutline} slot="start" className="location-icon" />
-                                {origin}
+                                <IonLabel >
+                                    {origin}
+                                </IonLabel>
                             </IonItem>
-                            <IonItem lines="none">
+                            <IonItem lines="none" className="arrow-item">
                                 <IonIcon icon={arrowForward} />
                             </IonItem>
-                            <IonItem lines="none">
+                            <IonItem lines="none" className="origin-finish-item">
                                 <IonIcon icon={flagOutline} slot="start" className="flag-icon" />
-                                {finish}
+                                <IonLabel >
+                                    {finish}
+                                </IonLabel>
                             </IonItem>
                         </div>
                     </IonRow>
                     <IonRow>
                         <IonCol size="6" >
-                            <div className="">
+                            <div className="time-people-container">
                                 <IonItem lines="none">
                                     <IonIcon icon={timeOutline} slot="start" className="time-icon" />
                                     <IonLabel>{startingTime}</IonLabel>
@@ -47,19 +63,19 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                 </IonItem>
                             </div>
                         </IonCol>
-                        <IonCol size="6" >
-                            <div>
-                                <IonItem lines="none">
-                                    George
-                                    <IonIcon icon={car} className="flag-icon" />
+                        <IonCol size="6" className="ion-justify-content-center">
+                            <div className="driver-info-container">
+                                <IonItem lines="none" className="">
+                                    <IonIcon icon={car} className="car-icon" />
+                                    <IonLabel>{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'No driver yet')}</IonLabel>
                                 </IonItem>
-                                <div className="stars">
-                                    <IonIcon icon={star} className="star-icon" />
-                                    <IonIcon icon={star} className="star-icon" />
-                                    <IonIcon icon={star} className="star-icon" />
-                                    <IonIcon icon={star} className="star-icon" />
-                                    <IonIcon icon={star} className="star-icon" />
-                                </div>
+                                <IonItem lines="none">
+                                    <IonIcon icon={starOutline} className="star-icon" />
+                                    <IonIcon icon={starOutline} className="star-icon" />
+                                    <IonIcon icon={starOutline} className="star-icon" />
+                                    <IonIcon icon={starOutline} className="star-icon" />
+                                    <IonIcon icon={starOutline} className="star-icon" />
+                                </IonItem>
                             </div>
                         </IonCol>
                     </IonRow>
@@ -67,4 +83,5 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
             </IonCardContent>
         </IonCard>
     </IonCol>
-);
+    );
+}
