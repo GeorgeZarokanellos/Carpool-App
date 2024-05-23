@@ -3,12 +3,10 @@
  * @module controllers/authentication_controller
  */
 
-import { type Request, type Response } from 'express';
 import User from '../model/user';
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import path from 'path';
 
 // #region passport setup
 
@@ -74,10 +72,10 @@ passport.deserializeUser(
     });
 // #endregion
 
-const displayLogin = (req:Request,res:Response):void => {
-    res.sendFile(path.join(__dirname, '../views/login.html'));
-}
+// const displayLogin = (req:Request,res:Response):void => {
+//     res.sendFile(path.join(__dirname, '../views/login.html'));
+// }
 
-export default {
-    displayLogin
-}
+// export default {
+//     displayLogin
+// }

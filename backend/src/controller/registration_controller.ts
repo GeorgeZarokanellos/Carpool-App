@@ -16,47 +16,7 @@ interface MulterFile {
     // name: string;
     mimetype: string;
 }
-
-
 // #endregion
-const initializeUpload = (username: string): (req: Request, res: Response, next: NextFunction) => void => {
-    const storage = multer.diskStorage({    // store the uploaded files in the uploads folder
-        destination: function(req,file,cb){    // cb is callback function that takes an error and a destination folder as parameters
-            const dir = `./uploads/drivers/${username}`;   // create a folder for each driver using the username
-            fs.access(dir, fs.constants.F_OK, (err) => {   // check if the folder already exists
-                if(err !== null){    // err here means that the folder doesn't exist
-                    fs.mkdir(dir, (err)=>{  // create the folder
-                        if(err !== null){   // error when creating the folder 
-                            console.log('Error from mkdir in initializeUpload:' + err.message);
-                            cb(err, '');
-                        }
-                        else 
-                            cb(null, dir);// if the folder doesn't exist, create it
-                    });
-                } else {
-                    cb(null, dir);  // if the folder already exists, use it
-                }
-            })
-        },
-        filename: function(req,file,cb){
-            cb(null, Date.now() + '-' + file.originalname); // give the file a name that includes the current date and time
-        }
-    });
-
-    const fileFilter = (req: Request, file: MulterFile, cb: FileFilterCallback): void => {  // checks if the file is an image or pdf
-        if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf')
-            cb(null, true); // accept the file
-        else
-            cb(null, false);    // reject the file
-    };
-
-    return multer({ storage, fileFilter }).fields([ // specify the fields to be uploaded
-        {name: 'driversLicense', maxCount: 1},  //TODO take the id of the license
-        {name: 'carsRegistration', maxCount: 1},
-        {name: 'carsInsurance', maxCount: 1},
-        {name: 'carImages', maxCount: 4},
-    ]);
-}
 
 export const findUsernameAndInitializeUpload = (req: Request, res: Response, next: NextFunction): void => {
     async function findUsernameAndInitializeUploadAsync(): Promise<void> {
@@ -76,7 +36,7 @@ export const findUsernameAndInitializeUpload = (req: Request, res: Response, nex
         }
     }
     findUsernameAndInitializeUploadAsync().catch(next);
-};
+}
 
 export const addUser = (req: Request, res: Response, next: NextFunction): void => {
     async function addUserAsync(): Promise<void> {
@@ -197,3 +157,41 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
     addDriverAndVehicleAsync().catch(next);
 }   
 
+const initializeUpload = (username: string): (req: Request, res: Response, next: NextFunction) => void => {
+    const storage = multer.diskStorage({    // store the uploaded files in the uploads folder
+        destination: function(req,file,cb){    // cb is callback function that takes an error and a destination folder as parameters
+            const dir = `./uploads/drivers/${username}`;   // create a folder for each driver using the username
+            fs.access(dir, fs.constants.F_OK, (err) => {   // check if the folder already exists
+                if(err !== null){    // err here means that the folder doesn't exist
+                    fs.mkdir(dir, (err)=>{  // create the folder
+                        if(err !== null){   // error when creating the folder 
+                            console.log('Error from mkdir in initializeUpload:' + err.message);
+                            cb(err, '');
+                        }
+                        else 
+                            cb(null, dir);// if the folder doesn't exist, create it
+                    });
+                } else {
+                    cb(null, dir);  // if the folder already exists, use it
+                }
+            })
+        },
+        filename: function(req,file,cb){
+            cb(null, Date.now() + '-' + file.originalname); // give the file a name that includes the current date and time
+        }
+    });
+
+    const fileFilter = (req: Request, file: MulterFile, cb: FileFilterCallback): void => {  // checks if the file is an image or pdf
+        if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf')
+            cb(null, true); // accept the file
+        else
+            cb(null, false);    // reject the file
+    };
+
+    return multer({ storage, fileFilter }).fields([ // specify the fields to be uploaded
+        {name: 'driversLicense', maxCount: 1},  //TODO take the id of the license
+        {name: 'carsRegistration', maxCount: 1},
+        {name: 'carsInsurance', maxCount: 1},
+        {name: 'carImages', maxCount: 4},
+    ]);
+}

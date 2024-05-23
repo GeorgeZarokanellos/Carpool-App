@@ -1,5 +1,16 @@
 import React from "react";
-import { IonCard, IonCardContent, IonCardHeader, IonIcon, IonItem, IonGrid, IonRow, IonCol, IonLabel, IonCardTitle } from "@ionic/react";
+import { 
+        IonCard, 
+        IonCardContent, 
+        IonCardHeader, 
+        IonIcon, 
+        IonItem, 
+        IonGrid, 
+        IonRow, 
+        IonCol, 
+        IonLabel, 
+        IonCardTitle 
+    } from "@ionic/react";
 import { TripProps } from "../interfacesAndTypes/Interfaces";
 import { 
         timeOutline, 
@@ -63,7 +74,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                 </IonItem>
                             </div>
                         </IonCol>
-                        <IonCol size="6" className="ion-justify-content-center">
+                        <IonCol size="6" className="">
                             <div className="driver-info-container">
                                 <IonItem lines="none" className="">
                                     <IonIcon icon={car} className="car-icon" />

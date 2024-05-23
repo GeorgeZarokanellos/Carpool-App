@@ -1,20 +1,20 @@
-import express, {type Router, type Request, type Response, type RequestHandler} from 'express';
+import express from 'express';
 import passport from 'passport';
-import auth_controller from '../controller/authentication_controller';
+import '../controller/authentication_controller';
 
-const router:Router = express.Router();
+const router = express.Router();
 
-router.post('/login', passport.authenticate('local', {failureRedirect: '/api/v1/login-failure', successRedirect: '/api/v1/login-success'}) as RequestHandler);
-
-router.get('/login', auth_controller.displayLogin);
-
-router.get('/login-success', (req:Request,res:Response) => {
+router.post('/login', passport.authenticate('local'), (req,res) => {
     res.status(200).send('Login successful');
 });
 
-router.get('/login-failure', (req:Request,res:Response) => {
-    res.status(400).send('Login failed');
-});
+// router.get('/login-success', (req:Request,res:Response) => {
+//     res.status(200).send('Login successful');
+// });
+
+// router.get('/login-failure', (req:Request,res:Response) => {
+//     res.status(401).send('Login failed');
+// });
 
 // export module for typescript
 export default router;

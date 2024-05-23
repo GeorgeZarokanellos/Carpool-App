@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react';
-import { IonContent, IonGrid, IonHeader, IonItem, IonPage, IonTitle, IonToolbar, IonRow, IonCol, IonSearchbar } from '@ionic/react';
+import { IonContent, IonGrid, IonHeader, IonPage, IonRow, IonSearchbar } from '@ionic/react';
 import { TripInformation } from '../components/TripInformation';
 import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.css';
 import instance from '../AxiosConfig';
-import { time } from 'console';
 
 
 
-const Tab3: React.FC = () => {
+const SearchTrips: React.FC = () => {
   const [trips, setTrips] = React.useState<Trip[]>([]);
   let formattedDate;
   let formattedTime;
@@ -34,7 +33,7 @@ const Tab3: React.FC = () => {
       <IonContent fullscreen >
         <IonGrid >
           <IonRow className='ion-justify-content-center ion-align-items-center'>
-            {trips.map((trip,index) => {
+            {trips.map((trip) => {
               const date = new Date(trip.startingTime);
               formattedDate = date.toLocaleDateString();
               const timeParts = date.toLocaleTimeString().split(':');              
@@ -63,4 +62,4 @@ const Tab3: React.FC = () => {
   );
 };
 
-export default Tab3;
+export default SearchTrips;
