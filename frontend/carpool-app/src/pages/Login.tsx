@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput, IonButton, IonLabel } from '@ionic/react';
-import './Login.css';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput, IonButton, IonLabel, IonAlert } from '@ionic/react';
+import './Login.scss';
 import instance from '../AxiosConfig';
 import { useHistory } from 'react-router';
 
@@ -8,7 +8,9 @@ const Login: React.FC = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
   const history = useHistory();
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent the form from refreshing the page
     // Handle login logic here
@@ -18,16 +20,18 @@ const Login: React.FC = () => {
       password: password    
     })
     .then((response) => {
-      console.log(response.data);
+      console.log("response",response);
       
       if(response.status === 200){
         history.push('/main');
       } else if(response.status === 401){
         alert('Invalid credentials');
       }
-      console.log(response);
     })
-    .catch((error) => {
+    .catch((error) => {      
+      if(error.response.status === 401){
+        setShowAlert(true);
+      }
       console.log(error);
     });
   };
@@ -76,6 +80,19 @@ const Login: React.FC = () => {
               <div className='submit-button-container'>
                 <IonButton expand="full" type="submit" shape='round' >Login</IonButton>
               </div>
+              <div className='register-button-container'>
+                <IonLabel className='custom'>Don&apos;t have an account?</IonLabel>
+                <IonButton expand="full" shape='round' onClick={() => history.push('/registration')}>Register</IonButton>
+              </div>
+              <IonAlert
+                isOpen={showAlert}
+                onDidDismiss={() => setShowAlert(false)}
+                className='custom-alert'
+                header={'Alert'}
+                message={'Invalid username or password!'}
+                buttons={['OK']}
+                animated={true}
+              />
             </div>
           </form>
         </div>
