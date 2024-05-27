@@ -1,0 +1,14 @@
+@mixin display-flex-center($type: 'justify') {
+    display: flex;
+  
+    @if $type == 'justify' {
+      justify-content: center;
+    } @else if $type == 'align' {
+      align-items: center;
+    } @else if($type == 'both'){
+      justify-content: center;
+      align-items: center;
+    }
+} 
+
+$font-size-large: 2rem;
