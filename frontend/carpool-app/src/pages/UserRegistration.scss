@@ -1,0 +1,23 @@
+@import '../global.scss';
+
+
+.registration-container {
+    width: 100%;
+    height: 100%;
+    @include display-flex-center('align');
+
+    .custom-form {
+        @include display-flex-center('justify');
+        width: 100%;
+    }
+
+    .credentials-container {
+        @include display-flex-center('both');
+        text-align: center;
+        flex-direction: column;
+        width: 90%;
+        max-width: 30rem;
+    }
+
+}
+
