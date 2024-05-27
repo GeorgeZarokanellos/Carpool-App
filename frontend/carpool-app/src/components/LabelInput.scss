@@ -1,0 +1,11 @@
+@import '../global.scss';
+
+.label-input{
+    margin: 0.5rem;
+    width: 100%;
+    max-width: 25rem;
+
+    ion-input{
+        font-size: 1.35rem;
+    }
+}
