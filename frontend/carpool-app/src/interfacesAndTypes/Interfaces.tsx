@@ -1,5 +1,4 @@
-
-
+import { TextFieldTypes } from '../interfacesAndTypes/Types';
 
 export interface TripProps {
     startingTime: string;
@@ -20,3 +19,9 @@ export interface TripProps {
     };
 }
 
+export interface LabelInputProps<T extends string | number > {
+    label: string | undefined;
+    value: T;
+    type: TextFieldTypes;
+    onIonChange: React.Dispatch<React.SetStateAction<T>>;
+}
