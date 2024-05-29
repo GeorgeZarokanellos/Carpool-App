@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import {
   IonApp,
   setupIonicReact
@@ -33,16 +33,15 @@ setupIonicReact();
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <Route path ="/login">
+      <Route exact path ="/">
         <Login />
       </Route>
       <Route path="/main">
         <Main />
       </Route>
-      <Route path="/registration">
+      <Route exact path="/registration">
         <UserRegistration />
       </Route>
-      <Redirect exact from="/" to="/login" />
     </IonReactRouter>
   </IonApp>
 );
