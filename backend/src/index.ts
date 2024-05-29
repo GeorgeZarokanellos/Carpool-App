@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config({path: '/home/george/Desktop/Carpool-App/backend/env'});
 import { env } from './config';
 
-import http from 'http';
+import http, { METHODS } from 'http';
 import https from 'https';
 import fs from 'fs'; // to read ssl certificate
 import bodyParser from 'body-parser';
@@ -20,7 +20,7 @@ import trip_router from './router/trip_router';
 import authentication_router from './router/authentication_router';
 import profile_router from './router/profile_router';
 import reviews_router from './router/review_router';
-
+import './controller/authentication_controller';
 // #endregion
 
 // #region SSL certificate
@@ -32,35 +32,67 @@ const credentials = {
 }
 // #endregion
 
-const cors = require('cors');
 const app = express();
+const cors = require('cors');
+const basePath = '/api/v1';
 app.use(express.static('./methods-public'));
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cors({
     origin: 'http://localhost:8100',
+    credentials: true,
+    methods: 'GET, POST, PUT, DELETE',
+    AccessControlAllowCredentials: true,
+    // allowedHeaders: 'Content-Type, Authorization'
 }));
 
 app.use(session({
     secret: env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        secure: false,  // to allow cookies over http
+        maxAge: 1000 * 60 * 60 //1 hour
+    }
 }));
+
 app.use(passport.initialize()); 
-app.use(passport.session());// to use persistent login sessions
+app.use(passport.session());// to use persistent login session
 
 // #region middleware
-const basePath = '/api/v1';
+app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
+    // console.log('Im in login');
+    console.log(req.isAuthenticated());
+    
+    if(req.isAuthenticated())
+        res.status(200).send('Login successful');
+    else 
+        res.status(401).send('Login failed');
+});
 app.use(`${basePath}/registration`, registration_router);
+
+//middleware to check if user is authenticated
+app.use((req, res, next) => {
+    // console.log(req.path !== `${basePath}/login`);
+    // console.log(req.isAuthenticated());
+    console.log(req.session);
+    
+    if(req.path !== `${basePath}/registration` && req.isAuthenticated())
+        next();
+    else {
+        console.log('failed to authenticate');
+        res.status(401).send('Failed to authenticate');
+    }
+});
+
 app.use(`${basePath}/trips`, trip_router);
-app.use(`${basePath}/authenticate`, authentication_router);
 app.use(`${basePath}/profile`, profile_router);
 app.use(`${basePath}/reviews`, reviews_router);
 
-app.get('/', (req:Request,res:Response) => {
-    res.status(200).send('Home Page');
-})
+// app.get('/', (req:Request,res:Response) => {
+//     res.status(200).send('Home Page');
+// })
 
 // app.use((req:Request, res:Response, next:NextFunction) => {
 //     if(!req.secure){
