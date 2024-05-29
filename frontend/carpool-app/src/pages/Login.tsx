@@ -15,21 +15,21 @@ const Login: React.FC = () => {
     e.preventDefault(); // Prevent the form from refreshing the page
     // Handle login logic here
     console.log(`Username: ${username}, Password: ${password}`);
-    instance.post('/authenticate/login', {
+    instance.post('/login', {
       username: username,
       password: password    
     })
     .then((response) => {
       console.log("response",response);
       
-      if(response.status === 200){
-        history.push('/main');
-      } else if(response.status === 401){
+      if(response.data === 'Login successful'){
+        history.push('/main/search-trips');
+      } else {
         alert('Invalid credentials');
       }
     })
     .catch((error) => {      
-      if(error.response.status === 401){
+      if(error.response && error.response.status === 401){
         setShowAlert(true);
       }
       console.log(error);
