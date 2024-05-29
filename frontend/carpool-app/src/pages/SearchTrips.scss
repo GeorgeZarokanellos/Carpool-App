@@ -10,10 +10,11 @@ ion-searchbar.custom{
     --border-radius: 2rem;
     padding: 0.5rem;
     max-width: 35rem;
-
 }
 
 ion-header{
     display: flex;
     justify-content: center;
+    background-color: white;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 }
