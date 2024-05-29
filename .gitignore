@@ -2,8 +2,10 @@
 /pdf
 
 # IDEs
-/.idea
-/.vscode/
+backend/.idea/*
+backend/.vscode/*
+frontend/.vscode/*
+.vscode/settings.json
 
 # Misc
 /database_img
@@ -45,6 +47,7 @@
 /frontend/carpool-app/.nx/cache
 /frontend/carpool-app/.vscode
 /frontend/carpool-app/.idea
+/frontend/carpool-app/public/assets
 
 # Debug logs
 /frontend/carpool-app/npm-debug.log*
@@ -53,3 +56,5 @@
 
 # Optional eslint cache
 /frontend/carpool-app/.eslintcache
+
+
