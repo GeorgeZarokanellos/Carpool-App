@@ -22,8 +22,10 @@ const Login: React.FC = () => {
     .then((response) => {
       console.log("response",response);
       
-      if(response.data === 'Login successful'){
+      if(response.data.message === 'Login successful'){
         history.push('/main/search-trips');
+        localStorage.setItem('userId', response.data.userId);
+        // console.log('userId', localStorage.getItem('userId'));
       } else {
         alert('Invalid credentials');
       }

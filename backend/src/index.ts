@@ -17,7 +17,6 @@ import session from 'express-session';
 // #region routers
 import registration_router from './router/registration_router';
 import trip_router from './router/trip_router';
-import authentication_router from './router/authentication_router';
 import profile_router from './router/profile_router';
 import reviews_router from './router/review_router';
 import './controller/authentication_controller';
@@ -66,7 +65,7 @@ app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
     console.log(req.isAuthenticated());
     
     if(req.isAuthenticated())
-        res.status(200).send('Login successful');
+        res.status(200).json({message: 'Login successful', userId: req.user.userId});
     else 
         res.status(401).send('Login failed');
 });
