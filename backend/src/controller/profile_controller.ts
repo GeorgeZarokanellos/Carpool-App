@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { User, Review, Trip, Stop, TripPassenger, TripStop } from "../model/association";
 import { retrieveUserReviews } from "../util/common_functions";
+import { role } from "../interface/trip_interface";
 
 export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunction): void => {
     async function retrieveProfileInfoAsync(): Promise<void> {
@@ -33,6 +34,10 @@ export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunct
                 });
                 res.status(200).json({  // send the user profile information to the client
                     username: user.username,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    role: user.role,
+                    phone: user.phone,
                     overallRating: user.overallRating,
                     userReviews,
                     userSubmittedReviews,
