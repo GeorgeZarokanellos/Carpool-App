@@ -39,3 +39,25 @@ export type Trip = {
 }
 
 export type TextFieldTypes = 'date' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url' | 'time';
+
+type Review = {
+    reviewId: number;
+    reviewRating: number;
+    reviewDateTime: Date;
+    tripId: number;
+    reviewedUserId: number;
+    reviewerId: number;
+}
+
+export type ProfileData = {
+    username: string;
+    firstName: string;
+    lastName: string;
+    role: Role;
+    phone: string;
+    overallRating: string;
+    userReviews: Review[];
+    userSubmittedReviews: Review[];
+    tripsCreated: Trip[];
+    tripsParticipated: Trip[];
+}
