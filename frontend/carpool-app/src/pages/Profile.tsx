@@ -1,19 +1,41 @@
-import React from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import './Profile.css';
+import React, { useEffect, useState } from 'react';
+import { IonContent, IonHeader, IonLoading, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import './Profile.scss';
 import instance from '../AxiosConfig';
+import { type ProfileData } from '../interfacesAndTypes/Types';
 
 const Profile: React.FC = () => {
-  const username = 'John Doe';
-  
+  const [profileData, setProfileData] = useState<ProfileData>();
+
+  useEffect(() => {
+    fetchProfileInfo();
+  }, []);
+
+  const fetchProfileInfo = async () => {
+    try {
+      const response = await instance.get(`/profile/${localStorage.getItem('userId')}`);
+      console.log(response);
+      setProfileData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <IonPage>
       <IonContent fullscreen>
-        <IonHeader>
-            <IonToolbar>
-                <IonTitle>{username}</IonTitle>
-            </IonToolbar>
-        </IonHeader>
+      { profileData? (
+          <>
+            <IonHeader>
+                <IonToolbar class='ion-text-center'>
+                    <IonTitle >{profileData.firstName + ' ' + profileData.lastName}</IonTitle>
+                </IonToolbar>
+            </IonHeader>
+          </>
+        ) : (
+          <IonLoading isOpen={!profileData} message="Fetching Profile Data" />
+        )
+      }
       </IonContent>
     </IonPage>
   );
