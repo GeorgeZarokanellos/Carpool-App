@@ -7,7 +7,6 @@ import User from '../model/user';
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-
 // #region passport setup
 
 /**
@@ -22,6 +21,7 @@ passport.use(new LocalStrategy(
         (async () => {
             try {
                 const user: User | null = await User.findOne({where: {username}});
+                console.log('user: ', user);
                 if(user === null) {
                     done(null, false, {message: 'Incorrect username'});
                     return;
@@ -46,8 +46,9 @@ passport.use(new LocalStrategy(
  * @param {function} done - The callback function to be called when serialization is complete.
  * @returns {void}
  */
-passport.serializeUser((user: any, done) => {
+passport.serializeUser((user, done) => {
     done(null, user.userId);  // user id is the data to be stored in the session
+    
 });
 
 /**
@@ -60,22 +61,26 @@ passport.deserializeUser(
     (userId, done) => {
         (async () => {
             try {
+                console.log('userId: ', userId);
+                console.log('typeof userId: ', typeof userId);
+                
+                
                 // if the user refreshes the page, the user id is retrieved from the session and used to find the user
                 if(typeof userId === 'number'){
                     const user = await User.findByPk(userId);
-                    done(null, user);
-                }
+                    if(user !== null) {
+                        done(null, user);
+                    }
+                    else {    
+                        console.log('User not found');
+                        done(null, false);
+                    }
+                } else 
+                    console.log('userId is not a number');
+                    
             } catch (error) {
                 done(error);
             }
         })().catch(error => {done(error)});
     });
 // #endregion
-
-// const displayLogin = (req:Request,res:Response):void => {
-//     res.sendFile(path.join(__dirname, '../views/login.html'));
-// }
-
-// export default {
-//     displayLogin
-// }

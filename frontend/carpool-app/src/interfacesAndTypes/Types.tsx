@@ -55,7 +55,7 @@ export type ProfileData = {
     lastName: string;
     role: Role;
     phone: string;
-    overallRating: string;
+    overallRating: number;
     userReviews: Review[];
     userSubmittedReviews: Review[];
     tripsCreated: Trip[];
