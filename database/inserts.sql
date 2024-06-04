@@ -1,59 +1,44 @@
 -- Insert into App_user
 INSERT INTO App_user (university_id, first_name, last_name, username, password, email, role, phone)
-VALUES (101, 'George', 'Zarokanellos', 'gzarokanellos', 'password123', 'gzarokanellos@example.com', 'driver', '1234567890'),
-       (102, 'John', 'Doe', 'jdoe', 'password456', 'jdoe@example.com', 'passenger', '0987654321'),
-       (103, 'Jane', 'Smith', 'jsmith', 'password789', 'jsmith@example.com', 'passenger', '1122334455');
+VALUES (1, 'John', 'Doe', 'johndoe', 'password', 'johndoe@example.com', 'driver', '1234567890'),
+       (2, 'Jane', 'Doe', 'janedoe', 'password', 'janedoe@example.com', 'passenger', '0987654321'),
+       (3, 'Bob', 'Smith', 'bobsmith', 'password', 'bobsmith@example.com', 'driver', '1122334455');
 
 -- Insert into Driver
-INSERT INTO Driver (driver_id, vehicle_id, license_id)
-VALUES (1, 1234, 5678),
-       (2, 5678, 1234),
-       (3, 9012, 3456);
+INSERT INTO Driver (driver_id, license_id)
+VALUES (1, 12345),
+       (3, 67890);
 
 -- Insert into Vehicle
-INSERT INTO Vehicle (owner_id, plate_number, no_of_seats, model)
-VALUES (1, 1234, 4, 'Toyota'),
-       (2, 5678, 5, 'Honda'),
-       (3, 9012, 5, 'Ford');
+INSERT INTO Vehicle (plate_number, owner_id, no_of_seats, model)
+VALUES (1234, 1, 4, 'Toyota'),
+       (5678, 3, 4, 'Honda');
 
 -- Insert into Stops
-INSERT INTO Stops (stop_loc)
-VALUES ('Gewrgiou Square'),
-       ('Olgas square'),
-       ('Pyrosvestio');
+INSERT INTO Stops (loc)
+VALUES ('Plateia Gewrgiou'),
+       ('Plateia Olgas'),
+       ('Pyrosvestio'),
+       ('Aretha');
 
 -- Insert into Trip
-INSERT INTO Trip (driver_id, start_loc, stops, date)
-VALUES (1, 'Gewrgiou Square', 1, '2023-12-31'),
-       (2, 'Olgas square', 1, '2024-01-01'),
-       (3, 'Pyrosvestio', 1, '2024-02-01');
+INSERT INTO Trip (creator_id, driver_id, start_loc, no_of_passengers, no_of_stops, starting_time, status)
+VALUES (1, 1, 'Plateia Gewrgiou', 2, 2, '2022-01-01 15:30:00.000000', 'planning'),
+       (2, 3, 'Plateia Olgas', 1, 1, '2022-01-01 14:30:00.000000', 'completed'),
+       (2, 3, 'Aretha', 2, 1, '2024-05-12 14:30:00.000000', 'completed');
 
 -- Insert into Trip_stops
 INSERT INTO Trip_stops (trip_id, stop_id)
 VALUES (1, 1),
-       (2, 2),
-       (3, 3);
+       (1, 2),
+       (2, 3);
 
 -- Insert into Trip_passengers
 INSERT INTO Trip_passengers (trip_id, passenger_id)
-VALUES (1, 1),
-       (2, 2),
-       (3, 3);
+VALUES (1, 2),
+       (2, 2);
 
--- Insert into Notifications
-INSERT INTO Notifications (user_id, mess_cont, time_sent)
-VALUES (1, 'Your trip has been created.', CURRENT_TIMESTAMP),
-       (2, 'Your trip has been updated.', CURRENT_TIMESTAMP),
-       (3, 'Your trip has been deleted.', CURRENT_TIMESTAMP);
-
--- Insert into Chat
-INSERT INTO Chat (trip_id)
-VALUES (1),
-       (2),
-       (3);
-
--- Insert into Chat_participants
-INSERT INTO Chat_participants (chat_id, participant_id)
-VALUES (1, 1),
-       (2, 2),
-       (3, 3);
+-- Insert into Reviews
+INSERT INTO Reviews (rating, date, reviewed_user_id, reviewer_id)
+VALUES (4.5, '2022-01-03', 1, 2),
+       (3.5, '2022-01-04', 3, 2);
