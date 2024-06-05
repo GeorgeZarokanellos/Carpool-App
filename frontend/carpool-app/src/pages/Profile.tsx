@@ -53,7 +53,7 @@ const Profile: React.FC = () => {
         <IonContent>
           <div>
             <IonImg />
-            <h1>{profileData.firstName} {profileData.lastName}</h1>
+            {/* <h1>{profileData.firstName} {profileData.lastName}</h1> */}
             <IonItem lines='none'>
               <div>
                 {ratingStars}

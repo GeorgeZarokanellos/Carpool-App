@@ -2,7 +2,7 @@
 import express, {type Request, type Response, type NextFunction} from 'express';
 
 import dotenv from 'dotenv';
-dotenv.config({path: '/home/george/Desktop/Carpool-App/backend/env'});
+dotenv.config({path: '/home/george/Desktop/Carpool App/backend/env'});
 import { env } from './config';
 
 import http, { METHODS } from 'http';
@@ -62,7 +62,7 @@ app.use(passport.session());// to use persistent login session
 // #region middleware
 app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
     // console.log('Im in login');
-    console.log(req.isAuthenticated());
+    // console.log(req.isAuthenticated());
     
     if(req.isAuthenticated())
         res.status(200).json({message: 'Login successful', userId: req.user.userId});
@@ -75,7 +75,7 @@ app.use(`${basePath}/registration`, registration_router);
 app.use((req, res, next) => {
     // console.log(req.path !== `${basePath}/login`);
     // console.log(req.isAuthenticated());
-    console.log(req.session);
+    // console.log(req.session);
     
     if(req.path !== `${basePath}/registration` && req.isAuthenticated())
         next();
