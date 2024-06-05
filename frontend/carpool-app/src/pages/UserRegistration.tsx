@@ -32,8 +32,10 @@ export const UserRegistration: React.FC = () => {
       phone: phone,
       role: (isDriver? 'driver' : 'passenger')
     })
-
-    history.push('/login');
+    if(isDriver)
+      history.push('/registration/driver')
+    else
+      history.push('/');
     
   };
 
