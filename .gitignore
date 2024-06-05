@@ -7,6 +7,7 @@ backend/.vscode/*
 frontend/.vscode/*
 .vscode/settings.json
 /.idea
+/database/.idea
 
 # Misc
 /database_img
