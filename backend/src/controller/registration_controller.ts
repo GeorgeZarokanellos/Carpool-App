@@ -45,8 +45,11 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role']
             // console.log(req.body);
             for (const field of requiredFields){
-                if(req.body[field] === undefined || req.body[field] === null || req.body[field] === '')
-                    res.status(400).send(`${field} is missing`);
+                if(req.body[field] === undefined || req.body[field] === null || req.body[field] === ''){
+                    console.log(`${field}`);
+                    res.status(400).json({ error: `${field} is missing` });
+                    return;
+                }
             }
 
 
@@ -106,8 +109,10 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
             const {vehicleId, ownerId, carMaker, carModel, carCapacity}: carRegisterRequestBodyInterface = req.body;
             const requiredFields = ['vehicleId', 'ownerId' , 'carMaker', 'carModel', 'carCapacity']
             for (const field of requiredFields){
-                if(req.body[field] !== undefined || req.body[field] !== null || req.body[field] !== '')
+                if(req.body[field] !== undefined || req.body[field] !== null || req.body[field] !== ''){
                     res.status(400).send(`${field} is missing`);
+                    return;
+                }
             }
             const upload = initializeUpload(username); // initialize the upload function
             try{
