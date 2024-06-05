@@ -39,6 +39,6 @@ VALUES (1, 2),
        (2, 2);
 
 -- Insert into Reviews
-INSERT INTO Reviews (rating, date, reviewed_user_id, reviewer_id)
-VALUES (4.5, '2022-01-03', 1, 2),
-       (3.5, '2022-01-04', 3, 2);
+INSERT INTO Reviews (rating, date, reviewed_user_id, trip_id, reviewer_id)
+VALUES (4.5, '2022-01-03', 1, 1, 2),
+       (3.5, '2022-01-04', 3, 2, 2);

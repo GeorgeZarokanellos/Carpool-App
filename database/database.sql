@@ -97,17 +97,17 @@ CREATE TABLE Notifications (
 	FOREIGN KEY (user_id) REFERENCES App_user (user_id)
 );
 
-CREATE TABLE Chat (
-	chat_id SERIAL,
-	trip_id INT NOT NULL,
-	PRIMARY KEY (chat_id),
-	FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
-);
-
-CREATE TABLE Chat_participants (
-	chat_id INT NOT NULL,
-	participant_id INT NOT NULL,
-	PRIMARY KEY (chat_id, participant_id),
-	FOREIGN KEY (chat_id) REFERENCES Chat (chat_id),
-	FOREIGN KEY (participant_id) REFERENCES App_user (user_id)
-);
+-- CREATE TABLE Chat (
+-- 	chat_id SERIAL,
+-- 	trip_id INT NOT NULL,
+-- 	PRIMARY KEY (chat_id),
+-- 	FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
+-- );
+--
+-- CREATE TABLE Chat_participants (
+-- 	chat_id INT NOT NULL,
+-- 	participant_id INT NOT NULL,
+-- 	PRIMARY KEY (chat_id, participant_id),
+-- 	FOREIGN KEY (chat_id) REFERENCES Chat (chat_id),
+-- 	FOREIGN KEY (participant_id) REFERENCES App_user (user_id)
+-- );
