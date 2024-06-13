@@ -1,7 +1,7 @@
 @import '../global.scss';
 
 .driver-vehicle-registration-container{
-    @include display-flex-center('align');
+    @include display-flex-center('both');
     width: 100%;
     height: 100%;
 
@@ -10,26 +10,34 @@
     }
 
     .custom-form {
-        width: 100%;
+        width: 95%;
         @include display-flex-center('both');
         flex-direction: column;
+        *{
+            width: 100%;
+            max-width: 30rem;
+        }
     }
 
     .pickers{
         @include display-flex-center('both');
         // text-align: center;
-        max-width: 30rem;
+        max-width: 50rem;
+        *{
+            width: 100%;
+        }
+    }
+
+    .no-of-seats-container{
+        ion-button {
+            width: 100%;
+        }
     }
 
     .register-button-container{
         @include display-flex-center('both');
-        width: 100%;
+        width: 60%;
+        max-width: 15rem;
     }
 
-    .no-of-seats-container{
-        ion-input {
-            --margin: 0;
-            --background-color: blue;
-        }
-    }
 }
