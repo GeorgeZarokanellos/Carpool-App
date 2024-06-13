@@ -61,3 +61,12 @@ export type ProfileData = {
     tripsCreated: Trip[];
     tripsParticipated: Trip[];
 }
+
+export type descIndex = {
+    text: string,
+    index: number
+}
+export type autoMaker = {
+    maker: string,
+    models: string[]
+}
