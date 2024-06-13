@@ -27,6 +27,7 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { DriverVehicleRegistration } from './pages/DriverVehicleRegistration';
 
 
 setupIonicReact();  // This function call is required to set up the React app
@@ -44,6 +45,9 @@ const App: React.FC = () => {
         </Route>
         <Route exact path="/registration">
           <UserRegistration />
+        </Route>
+        <Route path="/registration/driver">
+          <DriverVehicleRegistration />
         </Route>
       </IonReactRouter>
     </IonApp>
