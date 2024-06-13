@@ -8,9 +8,11 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import type { autoMaker } from "../interfacesAndTypes/Types";
 import "./DriverVehicleRegistration.scss";
+import { Carousel } from 'react-responsive-carousel';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 export const DriverVehicleRegistration: React.FC = () => {
   const [showMakerPicker, setShowMakerPicker] = useState(false);
@@ -23,9 +25,13 @@ export const DriverVehicleRegistration: React.FC = () => {
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<string>("");
   const [noOfSeats, setNoOfSeats] = useState<number>();
   const [driversLicense, setDriversLicense] = useState<Blob | null>(null);
+  const [driversLicenseFileName, setDriversLicenseFileName] = useState<string>(""); 
   const [vehicleInsurance, setVehicleInsurance] = useState<Blob | null>(null);
+  const [vehicleInsuranceFileName, setVehicleInsuranceFileName] = useState<string>("");
   const [vehicleRegistration, setVehicleRegistration] = useState<Blob | null>(null);
+  const [vehicleRegistrationFileName, setVehicleRegistrationFileName] = useState<string>("");
   const [vehiclePictures, setVehiclePictures] = useState<Blob[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const autoMakers = [
     { maker: "Toyota", models: ["Yaris", "Avensis"] },
@@ -36,23 +42,41 @@ export const DriverVehicleRegistration: React.FC = () => {
     { maker: "Opel", models: ["Corsa", "Astra"] },
     { maker: "Seat", models: ["Ibiza", "Leon"] },
   ];
-  
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file  = e.target.files?.[0];
-    if(file) {
-      console.log(file);
-    }
-  }
 
   const handleDriverVehicleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
+  const createFileUploadButton = (id: string, fileName: string, setMethod: React.Dispatch<React.SetStateAction<string>>) => {
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0] && e.target.files[0].name !== undefined) {
+        console.log(e.target.files[0].name);
+        setMethod(e.target.files[0].name);
+      }
+    }
+    const displayedName = fileName ? fileName : id.split(/(?=[A-Z])/).join(' ');
+    return (
+      <IonButton onClick={() => document.getElementById(id)?.click()}>
+        {displayedName}
+        <input type="file" id={id} hidden accept=".pdf" onChange={handleFileUpload}/>
+      </IonButton>
+    )
+  }
+
+  const handleImagesUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if(e.target.files) {
+      const files = Array.from(e.target.files);
+      const newUrls = files.map((file) => URL.createObjectURL(file));
+      setVehiclePictures(prevPictures => [...prevPictures, ...files]);
+      setImageUrls(prevUrls => [...prevUrls, ...newUrls]);
+    }
+  }, []);
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle style={{ textAlign: "center" }}> Registration </IonTitle>
+          <IonTitle style={{ textAlign: "center" }}> Driver & Vehicle Registration </IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
@@ -150,7 +174,7 @@ export const DriverVehicleRegistration: React.FC = () => {
             </div>
             <div className="no-of-seats-container"> 
               <IonButton onClick={() => setShowNoOfSeatsPicker(true)}>
-                {noOfSeats ? 'Available seats: ' + noOfSeats : "Number of seats"}
+                {noOfSeats ? 'Available seats: ' + noOfSeats : "Select number of seats"}
               </IonButton>
               <IonPicker 
                 isOpen={showNoOfSeatsPicker}
@@ -183,12 +207,30 @@ export const DriverVehicleRegistration: React.FC = () => {
                 ]}
               />
             </div>
-            <div className="driver-vehicle-files">
-              <IonButton onClick={() => document.getElementById('driversLicense')?.click()}>
-                Drivers License
-                <input type="file" id="driversLicense" hidden accept=".pdf" onChange={handleFileUpload}/>
+            <div className="drivers-license-container">
+              {createFileUploadButton( "driversLicense", driversLicenseFileName, setDriversLicenseFileName)}
+            </div>
+            <div className="vehicle-insurance-container">
+              {createFileUploadButton( "vehicleInsurance", vehicleInsuranceFileName, setVehicleInsuranceFileName)}
+            </div>
+            <div className="vehicle-registration-container">
+              {createFileUploadButton( "vehicleRegistration", vehicleRegistrationFileName, setVehicleRegistrationFileName)}
+            </div>
+            <div className="car-images-container">
+              <IonButton onClick={() => document.getElementById('vehiclePictures')?.click()}>
+                {vehiclePictures.length ? 'Selected images' : 'Upload car images'}
+                <input type="file" id="vehiclePictures" hidden multiple accept="image/*" onChange={handleImagesUpload} />
               </IonButton>
-
+              {/* {console.log(imageUrls)} */}
+              <Carousel>
+                {
+                  imageUrls.map((url, index) => (
+                    <div key={index}>
+                      <img src={url} alt="car" />
+                    </div>
+                  ))
+                }
+              </Carousel>
             </div>
             <div className="register-button-container">
               <IonButton expand="full" type="submit" shape="round" className="register-button">
