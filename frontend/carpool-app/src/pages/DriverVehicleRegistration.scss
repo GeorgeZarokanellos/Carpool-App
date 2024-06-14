@@ -1,43 +1,57 @@
 @import '../global.scss';
 
-.driver-vehicle-registration-container{
-    @include display-flex-center('both');
-    width: 100%;
-    height: 100%;
+// .filler{
+//     height: 10%;
+// }
 
-    *{
-        margin-bottom: 0.5rem;
+ion-grid{
+    height: 100%;
+    padding: 0;
+    @include display-flex-center('both');
+    flex-direction: column;
+    ion-row {
+        height: 90%;
+        width: 100%;
     }
+
+    .filler{
+        height: 5%;
+    }
+}
+
+ion-content{
 
     .custom-form {
-        width: 95%;
-        @include display-flex-center('both');
-        flex-direction: column;
-        *{
-            width: 100%;
-            max-width: 30rem;
-        }
-    }
+        // height: 100%;
+        width: 100%;
+        @include display-flex-center('justify');
 
-    .pickers{
-        @include display-flex-center('both');
-        // text-align: center;
-        max-width: 50rem;
-        *{
-            width: 100%;
-        }
-    }
+        .form-contents {
+            height: 100%;
+            width: 80%;
+            @include display-flex-center('both');
+            flex-direction: column;
+            *{
+                width: 100%;
+                max-width: 25rem;
+                margin-bottom: 0.5rem;
+            }
 
-    .no-of-seats-container{
-        ion-button {
-            width: 100%;
+            .no-of-seats-container{
+                ion-button {
+                    width: 100%;
+                }
+            }
         }
     }
+}
 
     .register-button-container{
+        width: 100%;
         @include display-flex-center('both');
-        width: 60%;
-        max-width: 15rem;
+        ion-button{
+            width: 80%;
+            max-width: 15rem;
+        }
+        // max-width: 15rem;
     }
-
-}
