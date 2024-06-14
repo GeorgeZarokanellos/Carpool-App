@@ -14,3 +14,7 @@
 /database/test.sql
 /backend/logs
 /backend/src/logs
+/frontend/carpool-app/node_modules
+/frontend/carpool-app/.vscode
+/database/.idea
+
