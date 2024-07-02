@@ -34,11 +34,10 @@ interface addUserRequestBodyInterface {
 }
 
 interface carRegisterRequestBodyInterface {
-    vehicleId: string;
-    ownerId: number;
-    carMaker: string;
-    carModel: string;
-    carCapacity: number;
+    plateNumber: string;
+    maker: string;
+    model: string;
+    noOfSeats: number;
 }
 
 interface reviewRequestBodyInterface {

@@ -12,11 +12,11 @@ Driver.init({
         autoIncrement: true,
         field: 'driver_id'
     },
-    // licenseId: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    //     field: 'license_id'
-    // }
+    licenseId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'license_id'
+    }
     //TODO add license id field
 }, 
 {

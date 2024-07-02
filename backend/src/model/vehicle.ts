@@ -6,7 +6,7 @@ class Vehicle extends Model {}
 Vehicle.init({
     // fields
     plateNumber: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
