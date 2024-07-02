@@ -48,29 +48,25 @@ export const newUserValidationRules = (): ValidationChain[] => {
 
 export const newDriverAndVehicleValidationRules = (): ValidationChain[] => {
     return [
-        check('vehicleId')
+        check('plateNumber')
             .isString()
-            .withMessage('Vehicle ID must be a string'),
-
-        check('ownerId')
-            .isNumeric()
-            .withMessage('Owner ID must be a number'),
+            .withMessage('Plate number must be a string'),
         
-        check('carMaker')
+        check('maker')
             .isString()
-            .withMessage('Car maker must be a string')
+            .withMessage('maker must be a string')
             .isLength({min: 2, max: 15})
-            .withMessage('Car maker must be between 2 and 15 characters long'),
+            .withMessage('maker must be between 2 and 15 characters long'),
         
-        check('carModel')
+        check('model')
             .isString()
-            .withMessage('Car model must be a string')
+            .withMessage('model must be a string')
             .isLength({min: 2, max: 15})
-            .withMessage('Car model must be between 2 and 15 characters long'),
+            .withMessage('model must be between 2 and 15 characters long'),
         
-        check('carCapacity')
+        check('noOfSeats')
             .isInt({min: 2, max: 4})
-            .withMessage('Car capacity must be a number between 2 and 4')
+            .withMessage('noOfSeats must be a number between 2 and 4')
     ]
 }
 
