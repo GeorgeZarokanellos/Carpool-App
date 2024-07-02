@@ -12,6 +12,7 @@ frontend/.vscode/*
 # Misc
 /database_img
 /screenshots
+/backend/static
 
 # Environments
 /backend/.env
