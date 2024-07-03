@@ -4,6 +4,7 @@ import './UserRegistration.scss';
 import { LabelInput } from '../components/LabelInput';
 import instance from '../AxiosConfig';
 import { useHistory } from 'react-router';
+import { Link } from 'react-router-dom';
 
 
 export const UserRegistration: React.FC = () => {
@@ -31,11 +32,16 @@ export const UserRegistration: React.FC = () => {
       email: email,
       phone: phone,
       role: (isDriver? 'driver' : 'passenger')
-    })
-    if(isDriver)
-      history.push('/registration/driver')
-    else
-      history.push('/');
+    }).then((response) => {
+      if(isDriver){
+        console.log("response",response);
+        history.push(`/registration/driver/${response.data.userId}`, {userId: response.data.userId})
+      }
+      else
+        history.push('/');
+    }).catch((error) => {
+      console.log(error);
+    });
     
   };
 
@@ -61,6 +67,10 @@ export const UserRegistration: React.FC = () => {
                   <IonCheckbox labelPlacement='stacked' alignment='center' onIonChange={e => setIsDriver(e.detail.checked)}>
                     Wanna register as a driver?
                   </IonCheckbox>
+                  {/* <Link to={{
+                    pathname: '/registration/driver',
+                    state: { }
+                  }}>Register as a driver</Link> */}
               </div>
             </form>
         </div>
