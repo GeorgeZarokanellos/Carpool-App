@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput, IonButton, IonLabel, IonCheckbox } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonCheckbox, IonFooter } from '@ionic/react';
 import './UserRegistration.scss';
 import { LabelInput } from '../components/LabelInput';
 import instance from '../AxiosConfig';
@@ -18,7 +18,8 @@ export const UserRegistration: React.FC = () => {
   const [isDriver, setIsDriver] = useState(false);
 //   const [role, setRole] = useState<string>('');  //TODO check if needed
   const history = useHistory();
-
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
 
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,16 +47,16 @@ export const UserRegistration: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
       <IonHeader>
         <IonToolbar>
           <IonTitle style={{textAlign: 'center'}}>Registration</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <div className='registration-container'>
+        {/* <div className='registration-container'> */}
             <form onSubmit={handleRegistration} className='custom-form'>
-              <div className='credentials-container'>
+              <div className='form-contents'>
                   <LabelInput label='University ID' value={universityId ?? ''} type='number' onIonChange={value => setUniversityId(Number(value))} />
                   <LabelInput label='First Name' value={firstName} type='text' onIonChange={value => setFirstName(String(value))} />
                   <LabelInput label='Last Name' value={lastName} type='text' onIonChange={value => setLastName(String(value))} />
@@ -63,9 +64,8 @@ export const UserRegistration: React.FC = () => {
                   <LabelInput label='Password' value={password} type='password' onIonChange={value => setPassword(String(value))} />
                   <LabelInput label='Email' value={email} type='email' onIonChange={value => setEmail(String(value))} />
                   <LabelInput label='Phone' value={phone} type='tel' onIonChange={value => setPhone(String(value))} />
-                  <IonButton expand="full" type="submit" shape='round'>Register</IonButton>
                   <IonCheckbox labelPlacement='stacked' alignment='center' onIonChange={e => setIsDriver(e.detail.checked)}>
-                    Wanna register as a driver?
+                    <span style={{fontSize:'1.3rem'}}>Wanna register as a driver?</span>
                   </IonCheckbox>
                   {/* <Link to={{
                     pathname: '/registration/driver',
@@ -73,8 +73,15 @@ export const UserRegistration: React.FC = () => {
                   }}>Register as a driver</Link> */}
               </div>
             </form>
-        </div>
+        {/* </div> */}
       </IonContent>
+      <IonFooter>
+        <IonToolbar>
+          <div className='register-button-container'>
+            <IonButton expand="block" type="submit" >Register</IonButton>
+          </div>
+        </IonToolbar>
+      </IonFooter>
     </IonPage>
   );
 };
