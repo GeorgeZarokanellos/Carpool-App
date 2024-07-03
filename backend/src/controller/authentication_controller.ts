@@ -18,25 +18,27 @@ import { Strategy as LocalStrategy } from 'passport-local';
  */
 passport.use(new LocalStrategy(
     (username, password, done) => {
-        (async () => {
-            try {
-                const user: User | null = await User.findOne({where: {username}});
-                console.log('user: ', user);
-                if(user === null) {
-                    done(null, false, {message: 'Incorrect username'});
-                    return;
+        User.findOne({where: {username}})
+            .then(user => {
+                if(!user){
+                    return done(null, false, {message: "Incorrect username from passport stategy"})
                 }
-                const userPassword: string =  user.getDataValue('password');    // retrieves the user's password from the database
-                const validPassword: boolean = await bcrypt.compare(password, userPassword);
-                if(!validPassword) {
-                    done(null, false, {message: 'Incorrect password'});
-                    return;
-                }
-                done(null, user); 
-            } catch (error) {
-                done(error); 
-            }
-        })().catch(error => {done(error)});
+                bcrypt.compare(password,user.getDataValue('password'))
+                    .then(passwordsMatch => {
+                        if(passwordsMatch)
+                            return done(null,user);
+                        else 
+                            return done(null,false,{message:"passwords don't match"})
+                    })
+                    .catch(err => {
+                        console.log("Error from bcrypt");
+                        done(err);
+                    });
+            })
+            .catch(err => {
+                console.log("Error from strategy");
+                done(err);
+            })
     }
 ));
 
