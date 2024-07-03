@@ -22,7 +22,6 @@ ion-grid{
 ion-content{
 
     .custom-form {
-        // height: 100%;
         width: 100%;
         @include display-flex-center('justify');
 
@@ -46,12 +45,11 @@ ion-content{
     }
 }
 
-    .register-button-container{
-        width: 100%;
-        @include display-flex-center('both');
-        ion-button{
-            width: 80%;
-            max-width: 15rem;
-        }
-        // max-width: 15rem;
+.register-button-container{
+    width: 100%;
+    @include display-flex-center('both');
+    ion-button{
+        width: 80%;
+        max-width: 15rem;
     }
+}
