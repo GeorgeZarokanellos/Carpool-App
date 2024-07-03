@@ -5,6 +5,7 @@ import {
   IonFooter,
   IonGrid,
   IonHeader,
+  IonInput,
   IonPage,
   IonPicker,
   IonRow,
@@ -167,7 +168,7 @@ export const DriverVehicleRegistration: React.FC = () => {
           <IonRow className="filler"/>
           <IonRow>
             <form
-              onSubmit={handleDriverVehicleRegistration}
+            onSubmit={handleDriverVehicleRegistration}
               className="custom-form"
               encType="multipart/form-data"
             >

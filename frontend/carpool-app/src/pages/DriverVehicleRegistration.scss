@@ -1,9 +1,5 @@
 @import '../global.scss';
 
-// .filler{
-//     height: 10%;
-// }
-
 ion-grid{
     height: 100%;
     padding: 0;
@@ -34,6 +30,23 @@ ion-content{
                 width: 100%;
                 max-width: 25rem;
                 margin-bottom: 0.5rem;
+            }
+
+            .plate-number-container{
+                input {
+                    background-color: #3880ff;
+                    text-align: center;
+                    font-size: 1.1rem;
+                    border-radius: 0.4rem;
+                    height: 100%;
+                    border: none;
+                    color: white;
+
+                    &::placeholder {
+                        color: white;
+                        opacity: 1;
+                    }
+                }
             }
 
             .no-of-seats-container{
