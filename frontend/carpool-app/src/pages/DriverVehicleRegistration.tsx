@@ -1,4 +1,3 @@
-//TODO fix the problem with the carousel display
 
 import {
   IonButton,
@@ -17,8 +16,15 @@ import type { autoMaker } from "../interfacesAndTypes/Types";
 import "./DriverVehicleRegistration.scss";
 import { Swiper,SwiperSlide } from 'swiper/react';
 import 'swiper/css';
+import instance from "../AxiosConfig";
+import { useHistory, useLocation } from "react-router";
+
+interface LocationState {
+  userId: number;
+}
 
 export const DriverVehicleRegistration: React.FC = () => {
+  //#region states
   const [showMakerPicker, setShowMakerPicker] = useState(false);
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [showNoOfSeatsPicker, setShowNoOfSeatsPicker] = useState(false);
@@ -27,16 +33,23 @@ export const DriverVehicleRegistration: React.FC = () => {
     models: [],
   });
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<string>("");
-  const [noOfSeats, setNoOfSeats] = useState<number>();
+  const [noOfSeats, setNoOfSeats] = useState<string>('');
+  const [vehicleNumberPlate, setVehicleNumberPlate] = useState<string>("");
   const [driversLicense, setDriversLicense] = useState<Blob>();
   const [driversLicenseFileName, setDriversLicenseFileName] = useState<string>(""); 
   const [vehicleInsurance, setVehicleInsurance] = useState<Blob>();
   const [vehicleInsuranceFileName, setVehicleInsuranceFileName] = useState<string>("");
   const [vehicleRegistration, setVehicleRegistration] = useState<Blob>();
   const [vehicleRegistrationFileName, setVehicleRegistrationFileName] = useState<string>("");
-  const [vehiclePictures, setVehiclePictures] = useState<Blob[]>([]);
+  const [vehicleImages, setVehicleImages] = useState<Blob[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-
+  //#endregion
+  
+  const history = useHistory();
+  const location = useLocation();
+  const userId = (location.state as LocationState)?.userId;
+  console.log('User id from driver reg page: ', userId);
+  //set width and height to the available screen size to bypass header and footer
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
@@ -52,12 +65,59 @@ export const DriverVehicleRegistration: React.FC = () => {
 
   const handleDriverVehicleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
-  };
+
+    const formData = new FormData();
+
+    const vehicleAndDriverData = {
+      plateNumber: vehicleNumberPlate,
+      maker: selectedVehicleMaker.maker,
+      model: selectedVehicleModel,
+      noOfSeats: noOfSeats,
+      driversLicense: driversLicense,
+      vehicleInsurance: vehicleInsurance,
+      vehicleRegistration: vehicleRegistration,
+      vehicleImages: vehicleImages
+    }
+    
+    Object.entries(vehicleAndDriverData).forEach(([key, value]) => {
+      if(value !== undefined){  //check if the state is not undefined/empty1
+        if(key === 'vehicleImages' && Array.isArray(value)){ 
+          console.log("vehicle images is an array",key);
+          value.forEach((file, index) => {  //if its an array of pictures loop through it and append each picture
+            console.log("image:", file);
+            formData.append(`${key}`, file);
+            console.log(formData);
+          });
+        } else if (value instanceof Blob ) //if value is a single blob append it straight away
+          formData.append(`${key}`, value);
+        else 
+          formData.append(`${key}`, value.toString());
+      }
+    });
+    console.log("form data: ",formData);
+    
+    instance.post(`registration/driver/${userId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': 'Bearer your_token_here'
+      }
+    })
+    .then(response => {
+      console.log("From driver multipart post request", response.data);
+      history.push('/main/search-trips');
+    })
+    .catch(error => {
+      console.log("Error from driver multipart request", error);
+      
+    })
+  }
 
   const createFileUploadButton = (id: string, 
                                   fileName: string, 
+                                  inputName: string,
                                   setFileMethod: React.Dispatch<React.SetStateAction<Blob | undefined>>, 
-                                  setNameMethod: React.Dispatch<React.SetStateAction<string>>) => {
+                                  setNameMethod: React.Dispatch<React.SetStateAction<string>>,
+                                  ) => {
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files?.[0]?.name !== undefined) {
         console.log(e.target.files[0]);
@@ -66,11 +126,12 @@ export const DriverVehicleRegistration: React.FC = () => {
         setNameMethod(e.target.files[0].name);
       }
     }
+    //regular expression to split the id string in the first capital letter and then join the array with a space
     const displayedName = fileName ? fileName : id.split(/(?=[A-Z])/).join(' ');
     return (
       <IonButton onClick={() => document.getElementById(id)?.click()}>
         {displayedName}
-        <input type="file" id={id} hidden accept=".pdf" onChange={handleFileUpload}/>
+        <input type="file" id={id} name={inputName} hidden required accept=".pdf" onChange={handleFileUpload} />
       </IonButton>
     )
   }
@@ -79,12 +140,16 @@ export const DriverVehicleRegistration: React.FC = () => {
     if(e.target.files) {
       const files = Array.from(e.target.files);
       const newUrls = files.map((file) => URL.createObjectURL(file));
-      setVehiclePictures(prevPictures => [...prevPictures, ...files]);
+      setVehicleImages(prevPictures => [...prevPictures, ...files]);
       setImageUrls(prevUrls => [...prevUrls, ...newUrls]);
     }
   }, []);
 
-  
+  const updateVehicleNumberPlate =  (event: React.ChangeEvent<HTMLInputElement>) => {
+    setVehicleNumberPlate(event.target.value);
+    console.log("From updateVehicleNumberPlate",vehicleNumberPlate);
+    
+  }
 
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
@@ -104,6 +169,7 @@ export const DriverVehicleRegistration: React.FC = () => {
             <form
               onSubmit={handleDriverVehicleRegistration}
               className="custom-form"
+              encType="multipart/form-data"
             >
               <div className="form-contents">
                 <div className="pickers">
@@ -228,30 +294,35 @@ export const DriverVehicleRegistration: React.FC = () => {
                     ]}
                   />
                 </div>
+                <div className="plate-number-container">
+                  <input type="text" placeholder="Vehicle number plate" value={vehicleNumberPlate} onChange={updateVehicleNumberPlate}/>
+                </div>
                 <div className="drivers-license-container">
-                  {createFileUploadButton( "driversLicense", driversLicenseFileName, setDriversLicense , setDriversLicenseFileName)}
+                  {createFileUploadButton( "DriversLicense", driversLicenseFileName, "driversLicense" , setDriversLicense , setDriversLicenseFileName)}
                 </div>
                 <div className="vehicle-insurance-container">
-                  {createFileUploadButton( "vehicleInsurance", vehicleInsuranceFileName, setVehicleInsurance, setVehicleInsuranceFileName)}
+                  {createFileUploadButton( "VehicleInsurance", vehicleInsuranceFileName, "vehicleInsurance" , setVehicleInsurance, setVehicleInsuranceFileName)}
                 </div>
                 <div className="vehicle-registration-container">
-                  {createFileUploadButton( "vehicleRegistration", vehicleRegistrationFileName, setVehicleRegistration, setVehicleRegistrationFileName)}
+                  {createFileUploadButton( "VehicleRegistration", vehicleRegistrationFileName, "vehicleRegistration" , setVehicleRegistration, setVehicleRegistrationFileName)}
                 </div>
                 <div className="car-images-container">
-                  <IonButton onClick={() => document.getElementById('vehiclePictures')?.click()}>
-                    {vehiclePictures.length ? 'Selected images' : 'Upload car images'}
-                    <input type="file" id="vehiclePictures" hidden multiple accept="image/*" onChange={handleImagesUpload} />
+                  <IonButton onClick={() => document.getElementById('vehicleImages')?.click()}>
+                    {vehicleImages.length ? 'Selected images' : 'Upload car images'}
+                    <input type="file" id="vehicleImages" name="vehicleImages" hidden required multiple accept="image/*" onChange={handleImagesUpload} />
                   </IonButton>
                   <Swiper
                     spaceBetween={50}
                     slidesPerView={1}
                     onSlideChange={() => console.log('slide change')}
                   >
-                    {imageUrls.map((url, index) => (
-                      <SwiperSlide key={index}>
-                        <img src={url} alt="car" />
-                      </SwiperSlide>
-                    ))}
+                    {
+                      imageUrls.map((url, index) => (
+                        <SwiperSlide key={index}>
+                          <img src={url} alt="car" />
+                        </SwiperSlide>
+                      ))
+                    }
                   </Swiper>
                 </div>
               </div>
@@ -263,12 +334,12 @@ export const DriverVehicleRegistration: React.FC = () => {
       <IonFooter>
         <IonToolbar>
           <div className="register-button-container">
-            <IonButton className="register-button" expand="block" onClick={handleDriverVehicleRegistration}>
+            <IonButton className="register-button" expand="block" onClick={handleDriverVehicleRegistration} >
               Submit
             </IonButton>
           </div>
         </IonToolbar>
       </IonFooter>
     </IonPage>
-  );
+  )
 };
