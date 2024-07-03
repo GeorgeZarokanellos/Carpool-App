@@ -1,23 +1,36 @@
 @import '../global.scss';
 
 
-.registration-container {
+
+ion-content {
+    
+        .custom-form {
+            @include display-flex-center('justify');
+            width: 100%;
+
+            .form-contents {
+                height: 100%;
+                width: 80%;
+                @include display-flex-center('both');
+                flex-direction: column;
+                text-align: center;
+                max-width: 30rem;
+
+                ion-checkbox {
+                    margin-top: 1rem;
+                }
+            }
+        }
+    
+    
+    }
+
+.register-button-container {
     width: 100%;
-    height: 100%;
-    @include display-flex-center('align');
-
-    .custom-form {
-        @include display-flex-center('justify');
-        width: 100%;
+    @include display-flex-center('both');
+    ion-button {
+        width: 80%;
+        max-width: 15rem;
     }
-
-    .credentials-container {
-        @include display-flex-center('both');
-        text-align: center;
-        flex-direction: column;
-        width: 90%;
-        max-width: 30rem;
-    }
-
 }
 
