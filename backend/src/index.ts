@@ -52,7 +52,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: {
         secure: false,  // to allow cookies over http
-        maxAge: 1000 * 60 * 60 //1 hour
+        maxAge: 1000 * 60 * 60 * 24 //1 hour
     }
 }));
 
@@ -73,14 +73,14 @@ app.use(`${basePath}/registration`, registration_router);
 
 //middleware to check if user is authenticated
 app.use((req, res, next) => {
-    // console.log(req.path !== `${basePath}/login`);
-    // console.log(req.isAuthenticated());
+    console.log(req.path !== `${basePath}/registration`);
+    console.log(req.isAuthenticated());
     // console.log(req.session);
     
     if(req.path !== `${basePath}/registration` && req.isAuthenticated())
         next();
     else {
-        console.log('failed to authenticate');
+        console.log('failed to authenticate from index');
         res.status(401).send('Failed to authenticate');
     }
 });

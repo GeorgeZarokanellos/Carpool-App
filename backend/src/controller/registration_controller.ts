@@ -51,7 +51,7 @@ const uploadFiles = async (
         console.log("error from uploadFilesSync", error);
     }
 }
-
+//TODO check if the files to be uploaded are the same with existing ones
 const initializeUpload = async (req:Request, res:Response, next: NextFunction , username: string): Promise<void> => {
     // store the uploaded files in the uploads folder
     const Storage = multer.diskStorage({   
@@ -208,7 +208,7 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
                 }, {transaction});
 
                 const newVehicle = await Vehicle.create({   // create a new vehicle
-                    // fields
+                    // fields   
                     plateNumber,
                     ownerId: driverId,  
                     maker,

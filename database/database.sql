@@ -27,10 +27,10 @@ CREATE TABLE Driver (
 );
 
 CREATE TABLE Vehicle (
-	plate_number INT UNIQUE NOT NULL,
+	plate_number VARCHAR(50) UNIQUE NOT NULL,
     owner_id INT UNIQUE NOT NULL,
 	no_of_seats SMALLINT NOT NULL,
-	image BYTEA,
+    maker VARCHAR(50),
 	model VARCHAR(50),
 	PRIMARY KEY (plate_number),
 	FOREIGN KEY (owner_id) REFERENCES Driver (driver_id)
