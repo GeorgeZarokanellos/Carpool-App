@@ -27,6 +27,7 @@ import './TripInformation.scss';
 export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, noOfStops, finish, driver, tripCreator}) => {
     const today = new Date();
     const tripDate = new Date(dateOfTrip);
+    const itemColor = "";   //TODO change to background color of the app
     //check if trip of date is same as today
     const isTripToday = today.getDate() === tripDate.getDate() &&
                         today.getMonth() === tripDate.getMonth() &&
@@ -34,8 +35,8 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
 
     return (
     <IonCol size="12" >
-        <IonCard className="trip-info-container">
-            <IonCardHeader>
+        <IonCard className="trip-info-container" color={itemColor}>
+            <IonCardHeader >
                 <IonCardTitle className="custom-font">
                     {'Διαδρομή του ' + tripCreator.firstName + ' ' + tripCreator.lastName + ' για ' + (isTripToday ? 'σήμερα' : 'της ' + dateOfTrip) }
                 </IonCardTitle>
@@ -46,7 +47,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                         {/* <div className="start-finish"> */}
                             <IonCol size="5">
                                 <div className="column-contents">
-                                    <IonItem lines="none">
+                                    <IonItem lines="none" color={itemColor}>
                                         <IonIcon icon={locationOutline} slot="start" className="location-icon" />
                                         <IonLabel >
                                             {origin}
@@ -63,7 +64,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                             </IonCol>
                             <IonCol size="5">
                                 <div className="column-contents">
-                                    <IonItem lines="none">
+                                    <IonItem lines="none" color={itemColor}>
                                         <div className="destination">
                                             <IonIcon icon={flagOutline} slot="start" className="flag-icon" />
                                             <IonText>
@@ -78,11 +79,11 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                     <IonRow>
                         <IonCol size="6" >
                             <div className="time-people-container">
-                                <IonItem lines="none">
+                                <IonItem lines="none" color={itemColor}>
                                     <IonIcon icon={timeOutline} slot="start" className="time-icon" />
                                     <IonLabel>{startingTime}</IonLabel>
                                 </IonItem>
-                                <IonItem lines="none">
+                                <IonItem lines="none" color={itemColor}>
                                     <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
                                     {noOfPassengers}
                                 </IonItem>
@@ -90,13 +91,13 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                         </IonCol>
                         <IonCol size="6" className="">
                             <div className="driver-info-container">
-                                <IonItem lines="none" className="">
+                                <IonItem lines="none" color={itemColor}>
                                     <div className="position-end">  {/* TODO: Fix the position of this div to the end of the container */}
                                         <IonIcon icon={car} className="car-icon" />
-                                        <IonText>{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'No driver yet')}</IonText>
+                                        <p>{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'No driver yet')}</p>
                                     </div>
                                 </IonItem>
-                                <IonItem lines="none">
+                                <IonItem lines="none" color={itemColor}>
                                     <div className="position-end">
                                         <IonIcon icon={starOutline} className="star-icon" />
                                         <IonIcon icon={starOutline} className="star-icon" />
