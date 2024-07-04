@@ -18,6 +18,7 @@ class User extends Model {
     declare overallRating: number;
     declare overallPoints: number;
     declare noOfReviews: number;
+    declare profilePicture: Blob;
 }
 
 User.init({ 
@@ -80,7 +81,12 @@ User.init({
         type: DataTypes.INTEGER,
         defaultValue: 0,
         field: 'no_of_reviews'
+    },
+    profilePicture: {
+        type: DataTypes.BLOB,
+        field: 'profile_picture'
     }
+
 }, 
 {
     sequelize, // We need to pass the connection instance

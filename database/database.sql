@@ -16,6 +16,7 @@ CREATE TABLE App_user (
 	overall_rating DECIMAL(3,2) DEFAULT 0,
 	overall_points INT DEFAULT 0,
     no_of_reviews INT DEFAULT 0,
+    profile_picture bytea,
 	PRIMARY KEY (user_id)
 );
 
