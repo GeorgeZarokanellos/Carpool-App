@@ -40,13 +40,17 @@ export type Trip = {
 
 export type TextFieldTypes = 'date' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url' | 'time';
 
-type Review = {
+export type Review = {
     reviewId: number;
     reviewRating: number;
     reviewDateTime: Date;
     tripId: number;
     reviewedUserId: number;
-    reviewerId: number;
+    // reviewerId: number;
+    reviewer: {
+        firstName: string;
+        lastName: string;
+    }
 }
 
 export type ProfileData = {
@@ -56,6 +60,7 @@ export type ProfileData = {
     role: Role;
     phone: string;
     overallRating: number;
+    profilePicture: Blob;
     userReviews: Review[];
     userSubmittedReviews: Review[];
     tripsCreated: Trip[];
