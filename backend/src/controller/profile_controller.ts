@@ -39,6 +39,7 @@ export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunct
                     role: user.role,
                     phone: user.phone,
                     overallRating: user.overallRating,
+                    profilePicture: user.profilePicture,
                     userReviews,
                     userSubmittedReviews,
                     tripsCreated,
@@ -63,7 +64,7 @@ const retrieveUserSubmittedReviews = async (userId: string) : Promise<Review[]> 
             where: {
                 reviewerId: userId,
             },
-            attributes: ['reviewedUserId', 'reviewerId', 'rating', 'reviewDateTime'],
+            attributes: ['reviewedUserId', 'reviewerId', 'reviewRating', 'reviewDateTime'],
             include : [
                 {
                     model: User,
@@ -92,7 +93,7 @@ const retrieveCreatedTrips = async (user: User): Promise<Trip[]> => {
             where : {
                 tripCreatorId: user.userId 
             },
-            attributes : [ 'startLocation', 'stops', 'tripDate', 'passengers'],
+            attributes : [ 'startLocation', 'noOfStops', 'startingTime', 'noOfPassengers'],
             include : [
                 {
                     model: User,
