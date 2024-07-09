@@ -4,7 +4,6 @@ import { Review } from "../interfacesAndTypes/Types";
 import './ReviewsDisplay.scss';
 import { StarRating } from "../util/common_functions";
 
-//TODO: change color when picking type of reviews
 //TODO: add material ui star library
 
 interface SRReviewsDisplayProps {
@@ -15,9 +14,15 @@ interface SRReviewsDisplayProps {
 export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = ({submittedReviews, userReviews}) => {
 
     const [selectedList, setSelectedList] = useState<string>("received");
-    const [disabledReceived, setDisabledReceived] = useState<boolean>(false);
-    const [disabledSubmitted, setDisabledSubmitted] = useState<boolean>(true);
-    console.log("Received reviews from component", userReviews);
+    const [receivedButtonColor, setReceivedButtonColor] = useState<string>('secondary');
+    const [submittedButtonColor, setSubmittedButtonColor] = useState<string>('primary');
+    const formatDate = (dateString: Date) => {
+        const parts = dateString.toString().split('-');
+        const formattedDate = `${parts[1]}/${parts[2]}`;
+        return formattedDate;
+    }
+    let formattedDate;
+    // console.log("Received reviews from component", userReviews);
     console.log("Submitted reviews from component", submittedReviews);
     // console.log(selectedList === "received");
     
@@ -26,28 +31,31 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
             <IonTitle>User Reviews</IonTitle>
             <div className="review-type-picker">
                 <IonButton onClick={() => {
-                    setSelectedList("received"); 
-                    setDisabledSubmitted(true); 
-                    setDisabledReceived(false)}
-                } disabled={disabledReceived}>Received</IonButton>
+                    setSelectedList("received");
+                    setReceivedButtonColor('secondary');
+                    setSubmittedButtonColor('primary');
+                }
+                } color={receivedButtonColor}>Received</IonButton>
                 <IonButton onClick={() => {
-                    setSelectedList("Submitted"); 
-                    setDisabledReceived(true); 
-                    setDisabledSubmitted(false)}
-                } disabled={disabledSubmitted}>Submitted</IonButton>
+                    setSelectedList("Submitted");
+                    setSubmittedButtonColor('secondary');
+                    setReceivedButtonColor('primary');
+                }
+                } color={submittedButtonColor}>Submitted</IonButton>
             </div>
             <div className="reviews-list">
                 {selectedList === "received" ? (
                     <IonList >
                         {userReviews.map((review) => {
                             // console.log(review.reviewDateTime);
+                            console.log(review);
                             
                             return (
                                 <IonItem lines='none' key={review.reviewId} className="review-container" color='primary'>
                                     <div className="item-contents">
                                         <IonText>
-                                            Submitted by {review.reviewer.firstName + review.reviewer.lastName} 
-                                            at {review.reviewDateTime.toString()}
+                                            Submitted by {review.reviewer.firstName + ' ' + review.reviewer.lastName} 
+                                            {' at ' + formatDate(review.reviewDateTime)}
                                         </IonText>
                                         <StarRating rating={review.reviewRating} />
                                     </div>
@@ -57,7 +65,22 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
                     </IonList>
                 ):(
                     <IonList>
-
+                        {submittedReviews.map((review) => {
+                            // console.log(review.reviewDateTime);
+                            // console.log(review.rating);
+                            
+                            return (
+                                <IonItem lines='none' key={review.reviewId} className="review-container" color='primary'>
+                                    <div className="item-contents">
+                                        <IonText>
+                                            Submitted by {review.reviewer.firstName + ' ' + review.reviewer.lastName} 
+                                            {' at ' + formatDate(review.reviewDateTime)}
+                                        </IonText>
+                                        <StarRating rating={review.reviewRating} />
+                                    </div>
+                                </IonItem>
+                            )
+                        })}
                     </IonList>
                 )}
             </div>
