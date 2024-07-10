@@ -18,11 +18,11 @@ import {
         peopleOutline, 
         locationOutline, 
         flagOutline,
-        starOutline,
         car,
         arrowForward,
     } from 'ionicons/icons';
 import './TripInformation.scss';
+import { StarRating } from "../util/common_functions";
 
 export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, noOfStops, finish, driver, tripCreator}) => {
     const today = new Date();
@@ -47,7 +47,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                         {/* <div className="start-finish"> */}
                             <IonCol size="5">
                                 <div className="column-contents">
-                                    <IonItem lines="none" color={itemColor}>
+                                    <IonItem lines="none" color={itemColor} >
                                         <IonIcon icon={locationOutline} slot="start" className="location-icon" />
                                         <IonLabel >
                                             {origin}
@@ -58,7 +58,8 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                             <IonCol size="2">
                                 <div className="arrow-container">
                                     {/* <IonItem lines="none"> */}
-                                        <IonIcon icon={arrowForward} className="arrow-icon"/>
+                                        {/* <IonIcon icon={arrowForward} className="arrow-icon"/> */}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="100px" height="30px" viewBox="0 0 16 16"><path fill="black" fillRule="evenodd" d="M10.159 10.72a.75.75 0 1 0 1.06 1.06l3.25-3.25L15 8l-.53-.53l-3.25-3.25a.75.75 0 0 0-1.061 1.06l1.97 1.97H1.75a.75.75 0 1 0 0 1.5h10.379z" clipRule="evenodd"></path></svg>
                                     {/* </IonItem> */}
                                 </div>
                             </IonCol>
@@ -99,11 +100,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                 </IonItem>
                                 <IonItem lines="none" color={itemColor}>
                                     <div className="position-end">
-                                        <IonIcon icon={starOutline} className="star-icon" />
-                                        <IonIcon icon={starOutline} className="star-icon" />
-                                        <IonIcon icon={starOutline} className="star-icon" />
-                                        <IonIcon icon={starOutline} className="star-icon" />
-                                        <IonIcon icon={starOutline} className="star-icon" />
+                                        < StarRating rating={Number(driver.user.overallRating)}/>
                                     </div>
                                 </IonItem>
                             </div>
