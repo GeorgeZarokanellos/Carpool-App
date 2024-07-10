@@ -40,9 +40,21 @@ export const createReview = async (req: Request, res: Response, next: NextFuncti
             const tripId = Number(req.params.tripId);
             logger.info("reviewed user id: " + reviewedUserId + " " + "trip id: " + tripId);
             // const reviewerId  = req.session.id;
-            const reviewerId = 1; // TODO: change this to the logged in user's id
+            const reviewerId = 4; // TODO: change this to the logged in user's id
             const reviewDateTime = new Date().toISOString();
-            let fromTrip: boolean = await checkIfUsersAreInTrip(tripId, reviewerId, reviewedUserId);
+            let fromTrip: boolean = false;
+            await checkIfUsersAreInTrip(tripId, reviewerId, reviewedUserId)
+            .then((returnValue) => {
+                console.log("return value: ", returnValue);
+                fromTrip = returnValue;
+                console.log(fromTrip);
+                
+            }).catch((err) => {
+                console.log("Error from checkIfUsers: ", err);
+                
+            });
+            console.log("fromTrip before if: ", fromTrip);
+            
             if (fromTrip) { //if the reviewer is the driver or a passenger allow them to review someone that was on the trip
                 const createdReview = await Review.create({
                         reviewRating,
@@ -263,18 +275,23 @@ const calculateAverageRatingForUpdatedReview = async (reviewId: number, reviewRa
  * @returns A Promise that resolves to a boolean indicating whether the users are in the trip.
  */
 const checkIfUsersAreInTrip = async (tripId: number, reviewerId: number, reviewedUserId: number): Promise<boolean> => {
-    let fromTrip: boolean = false;
-    logger.info("tripId: " + tripId + " reviewerId: " + reviewerId + " reviewedUserId: " + reviewedUserId + " from checkIfUsersAreInTrip");
+    let inTrip: boolean = false;
+    console.log("tripId: " + tripId + " reviewerId: " + reviewerId + " reviewedUserId: " + reviewedUserId + " from checkIfUsersAreInTrip");
+    
+    // logger.info("tripId: " + tripId + " reviewerId: " + reviewerId + " reviewedUserId: " + reviewedUserId + " from checkIfUsersAreInTrip");
+    //TODO: logic to check if they are both passengers if none of them is the driver
     const trip = await Trip.findOne({
         where: {
             tripId,
             [Op.or]: [  //check if either of the users are driver in the trip
                 {driverId: reviewerId},
-                {driverId: reviewerId}
-            ]
+                {driverId: reviewedUserId}
+            ],
+            
         },
         include: [
             {
+                //check if either of the users are in the trip
                 model: TripPassenger,
                 as: 'tripPassengers',
                 where: {
@@ -283,7 +300,7 @@ const checkIfUsersAreInTrip = async (tripId: number, reviewerId: number, reviewe
                         {passengerId: reviewedUserId}
                     ]
                 },
-                required: false //check if either of the users are in the trip
+                required: false //return results even if you dont find
         }]
     });
     logger.info("Trip found: " + JSON.stringify(trip));
@@ -291,8 +308,9 @@ const checkIfUsersAreInTrip = async (tripId: number, reviewerId: number, reviewe
         logger.info("Trip not found or users are not in the trip");
         throw new Error("Trip not found or users are not in the trip");
     } else {
-        fromTrip = true;
+        inTrip = true;
     }
-
-    return fromTrip;
+    console.log("inTrip from function:", inTrip);
+    
+    return inTrip;
 }
