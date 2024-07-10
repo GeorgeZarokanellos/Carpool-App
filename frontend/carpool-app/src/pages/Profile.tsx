@@ -3,14 +3,13 @@ import { IonContent, IonIcon, IonImg, IonItem, IonLoading, IonPage, IonTitle} fr
 import './Profile.scss';
 import instance from '../AxiosConfig';
 import { type ProfileData } from '../interfacesAndTypes/Types';
-import { star, starHalf, starOutline } from 'ionicons/icons';
 import { SubmittedReceivedReviewsDisplay } from '../components/ReviewsDisplay';
+import { TripsDisplay } from '../components/TripsDisplay';
 
 const Profile: React.FC = () => {
   const [profileData, setProfileData] = useState<ProfileData>();
-  const [ratingStars, setRatingStars] = useState<JSX.Element[]>([]);
   const [imageUrl, setImageUrl] = useState<string>('');
-  let rating:number;
+  // let rating:number;
 
   // function bufferToBase64(buffer: Buffer){
   //   let binary = '';
@@ -25,7 +24,6 @@ const Profile: React.FC = () => {
       setProfileData(response.data);
       console.log("Profile data retrieved: ", profileData);
       if(profileData){
-        rating = Number(profileData.overallRating);
         // const url = URL.createObjectURL(profileData.profilePicture);  //create a url for the image stored in the memory
         // setImageUrl(url);
       }
@@ -35,28 +33,6 @@ const Profile: React.FC = () => {
       
     })
   }, [])
-
-  useEffect(() => {
-    const icons = [];
-    if(rating !== 0) {
-      const ratingIntegerPart = Math.floor(rating); 
-      const ratingFractionPart = rating - ratingIntegerPart; 
-      for(let index = 0; index < ratingIntegerPart; index++){
-        icons.push(<IonIcon key={`star_${index}`} icon={star} />);
-      }
-      if(ratingFractionPart === 0.5){
-        icons.push(<IonIcon key="star_half" icon={starHalf} />)
-      } else {
-        icons.push(<IonIcon key="star_outline" icon={starOutline} />)
-      }
-      setRatingStars(icons);
-    } else if(rating === 0) {
-      for(let i = 0; i < 5; i++){
-        icons.push(<IonIcon key={`star_outline_${i}`} icon={starOutline} />);
-      }
-      setRatingStars(icons);
-    }
-  },[profileData])
 
 
   return (
@@ -75,6 +51,9 @@ const Profile: React.FC = () => {
                 </IonItem>
                 <IonItem lines='none'>
                     < SubmittedReceivedReviewsDisplay submittedReviews={profileData.userSubmittedReviews} userReviews={profileData.userReviews}/>
+                </IonItem>
+                <IonItem lines='none'>
+                  < TripsDisplay tripsCreated={profileData.tripsCreated} tripsParticipated={profileData.tripsParticipated}/>
                 </IonItem>
               </div>
             </div>
