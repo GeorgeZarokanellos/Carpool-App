@@ -28,8 +28,9 @@ export type Trip = {
     status: Status;
     driver: {
         user: {
-            firstName:string;
-            lastName:string;
+            firstName: string;
+            lastName: string;
+            overallRating: string;
         }
     };
     tripCreator: {

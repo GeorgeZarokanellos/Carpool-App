@@ -10,8 +10,9 @@ export interface TripProps {
     driver: {
         user: {
             firstName: string,
-            lastName: string
-        }
+            lastName: string,
+            overallRating: string
+        };
     };
     tripCreator:{
         firstName: string,
