@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import { Review } from "../interfacesAndTypes/Types";
 import './ReviewsDisplay.scss';
 import { StarRating } from "../util/common_functions";
-
-//TODO: add material ui star library
+import { formatDate } from "../util/common_functions";
 
 interface SRReviewsDisplayProps {
     submittedReviews: Review[]; 
@@ -16,14 +15,10 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
     const [selectedList, setSelectedList] = useState<string>("received");
     const [receivedButtonColor, setReceivedButtonColor] = useState<string>('secondary');
     const [submittedButtonColor, setSubmittedButtonColor] = useState<string>('primary');
-    const formatDate = (dateString: Date) => {
-        const parts = dateString.toString().split('-');
-        const formattedDate = `${parts[1]}/${parts[2]}`;
-        return formattedDate;
-    }
+
     let formattedDate;
     // console.log("Received reviews from component", userReviews);
-    console.log("Submitted reviews from component", submittedReviews);
+    // console.log("Submitted reviews from component", submittedReviews);
     // console.log(selectedList === "received");
     
     return (
@@ -48,7 +43,7 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
                     <IonList >
                         {userReviews.map((review) => {
                             // console.log(review.reviewDateTime);
-                            console.log(review);
+                            // console.log(review);
                             
                             return (
                                 <IonItem lines='none' key={review.reviewId} className="review-container" color='primary'>
@@ -67,7 +62,7 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
                     <IonList>
                         {submittedReviews.map((review) => {
                             // console.log(review.reviewDateTime);
-                            // console.log(review.rating);
+                            // console.log(review.reviewRating);
                             
                             return (
                                 <IonItem lines='none' key={review.reviewId} className="review-container" color='primary'>
