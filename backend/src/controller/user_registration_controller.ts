@@ -8,6 +8,7 @@ import { type addUserRequestBodyInterface} from '../interface/trip_interface';
 import fs from 'fs';
 import { promisify } from 'util'; //takes a function and makes it return a promise
 
+//TODO: handle image deletion after request has been made
 
 const saltRounds = 10;
 interface MulterFile {
@@ -41,7 +42,7 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
                     // console.log(req.file);
                     
                     if(req.file !== undefined){
-                        // console.log("request body: ", req);
+                        // console.log("request body: ", req);  
                         resolve(req);
                         next();
                         console.log("image was uploaded");
@@ -62,6 +63,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             let fileBuffer;
             const {universityId, firstName, lastName, username, password, email, role, phone}: addUserRequestBodyInterface = req.body;
             const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role'];
+            const uniIdInt = parseInt(universityId,10); //convert to int because multipart only sends strings
             let profilePicture: Buffer;
             // console.log(req.body);
             for (const field of requiredFields){
@@ -78,7 +80,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 {where: {
                         [Op.or]: [    // check if the username or universityId already exists
                             {username}, 
-                            {universityId},
+                            {uniIdInt},
                             {email}
                         ]
                     }
@@ -87,7 +89,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 let message = '';
                 if(existingUser.getDataValue('username') === username)
                     message += 'Username already exists!';
-                if(existingUser.getDataValue('universityId') === universityId)
+                if(existingUser.getDataValue('universityId') === uniIdInt)
                     message += 'University ID already exists!';
                 if(existingUser.getDataValue('email') === email)
                     message += 'Email already exists!';
@@ -115,7 +117,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             await sequelize.transaction(async (transaction) => {
                 const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
                 const newUser = await User.create({
-                    universityId,
+                    uniIdInt,
                     firstName,
                     lastName,
                     username,

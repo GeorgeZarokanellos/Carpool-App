@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Trip } from "../interfacesAndTypes/Types";
 import { IonButton, IonItem, IonList, IonText, IonTitle } from "@ionic/react";
 import './TripsDisplay.scss';
+import { formatDate, formatDateTime} from "../util/common_functions";
 
 interface TripsDisplayProps{
     tripsParticipated: Trip[];
@@ -12,13 +13,9 @@ export const TripsDisplay: React.FC<TripsDisplayProps> = ({tripsCreated, tripsPa
     const [selectedList, setSelectedList] = useState<string>("created");
     const [createdTripsButtonColor, setCreateTripsButtonColor] = useState<string>('secondary');
     const [participatedTripsButtonColor, setParticipatedTripsButtonColor] = useState<string>('primary');
-    const formatDate = (dateString: Date) => {
-        const parts = dateString.toString().split('-');
-        const formattedDate = `${parts[1]}/${parts[2]}`;
-        return formattedDate;
-    }
-    let formattedDate;
-    
+    console.log("Trips participated: ", tripsParticipated);
+    console.log("Trips created; ", tripsCreated);
+        
     return (
         <div className="trip-display-container">
             <IonTitle>User Trips</IonTitle>
@@ -46,10 +43,13 @@ export const TripsDisplay: React.FC<TripsDisplayProps> = ({tripsCreated, tripsPa
                             // console.log(review);
                             
                             return (
-                                <IonItem lines='none' key={trip.tripId} className="review-container" color='primary'>
+                                <IonItem lines='none' key={trip.tripId} className="trip-container" color='primary'>
                                     <div className="item-contents">
                                         <IonText>
-                                            {trip.driver? (trip.driver.user.firstName + trip.driver.user.lastName):('No driver yet')}
+                                            {"Completed at " + formatDateTime(trip.startingTime).formattedDate + 
+                                                ' from ' + trip.startLocation + 
+                                                ' with ' + trip.noOfPassengers + ' passengers'} <br />
+                                            Driver: {trip.driver? (trip.driver.user.firstName + trip.driver.user.lastName):('No driver yet')}
                                         </IonText>
                                     </div>
                                 </IonItem>

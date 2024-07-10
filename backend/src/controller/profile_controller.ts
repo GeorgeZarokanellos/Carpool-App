@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { User, Review, Trip, Stop, TripPassenger, TripStop } from "../model/association";
+import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver } from "../model/association";
 import { retrieveUserReviews } from "../util/common_functions";
 import { role } from "../interface/trip_interface";
 
@@ -91,37 +91,48 @@ const retrieveCreatedTrips = async (user: User): Promise<Trip[]> => {
     try {
         const tripsCreated : Trip[] = await Trip.findAll({
             where : {
-                tripCreatorId: user.userId 
+                tripCreatorId: user.userId,
+                // status: 'completed'
             },
-            attributes : [ 'startLocation', 'noOfStops', 'startingTime', 'noOfPassengers'],
+            attributes : [ 'startLocation', 'noOfStops', 'startingTime', 'noOfPassengers', 'status'],
             include : [
+                // {
+                //     model: User,
+                //     as: 'tripCreator',
+                //     attributes: ['firstName', 'lastName'] 
+                // },
                 {
-                    model: User,
-                    as: 'tripCreator',
-                    attributes: ['firstName', 'lastName'] 
-                },
-                {
-                    model: TripPassenger,
-                    as: 'tripPassengers',
-                    include: [
-                        {
-                            model: User,
-                            as: 'passenger',
-                            attributes: ['firstName', 'lastName']
-                        }
-                    ]
-                },
-                {
-                    model: TripStop,
-                    as: 'tripStop',
-                    include: [
-                        {
-                            model: Stop,
-                            as: 'stopLocation',
-                            attributes: ['stopLocation']
-                        }
-                    ]
+                    model: Driver,
+                    as: 'driver',
+                    attributes: ['driverId'],
+                    include: [{
+                        model: User,
+                        as: 'user',
+                        attributes: ['firstName', 'lastName']
+                    }]
                 }
+                // {
+                //     model: TripPassenger,
+                //     as: 'tripPassengers',
+                //     include: [
+                //         {
+                //             model: User,
+                //             as: 'passenger',
+                //             attributes: ['firstName', 'lastName']
+                //         }
+                //     ]
+                // },
+                // {
+                //     model: TripStop,
+                //     as: 'tripStop',
+                //     include: [
+                //         {
+                //             model: Stop,
+                //             as: 'stopLocation',
+                //             attributes: ['stopLocation']
+                //         }
+                //     ]
+                // }
             ]
         });
         return tripsCreated;
