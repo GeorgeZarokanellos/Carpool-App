@@ -4,7 +4,6 @@ import './UserRegistration.scss';
 import { LabelInput } from '../components/LabelInput';
 import instance from '../AxiosConfig';
 import { useHistory } from 'react-router';
-import { Link } from 'react-router-dom';
 
 
 export const UserRegistration: React.FC = () => {
@@ -15,6 +14,7 @@ export const UserRegistration: React.FC = () => {
   const [password, setPassword] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
+  const [profilePicture, setProfilePicture] = useState<Blob>();
   const [isDriver, setIsDriver] = useState(false);
 //   const [role, setRole] = useState<string>('');  //TODO check if needed
   const history = useHistory();
@@ -23,6 +23,29 @@ export const UserRegistration: React.FC = () => {
 
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    const userRegistrationRequestBody = {
+      universityId: universityId,
+      firstName: firstName,
+      lastName: lastName,
+      username: username,
+      password: password,
+      email: email,
+      phone: phone,
+      role: (isDriver? 'driver' : 'passenger'),
+      profilePicture 
+    }
+
+    //loop through the string/number entries of the object and append the the formData var
+    Object.entries(userRegistrationRequestBody).forEach(([key, value])=>{
+      if(value !== undefined && key !== 'profilePicture'){
+        formData.append(`${key}`, value.toString());
+      }
+    });
+
+    if(userRegistrationRequestBody.profilePicture !== undefined)
+      formData.append('profilePicture', userRegistrationRequestBody.profilePicture);
     // Handle registration here
     instance.post('/registration/user', {
       universityId: universityId,
@@ -55,7 +78,7 @@ export const UserRegistration: React.FC = () => {
       </IonHeader>
       <IonContent>
         {/* <div className='registration-container'> */}
-            <form onSubmit={handleRegistration} className='custom-form'>
+            <form onSubmit={handleRegistration} className='custom-form' encType='multipart/form-data'>
               <div className='form-contents'>
                   <LabelInput label='University ID' value={universityId ?? ''} type='number' onIonChange={value => setUniversityId(Number(value))} />
                   <LabelInput label='First Name' value={firstName} type='text' onIonChange={value => setFirstName(String(value))} />
@@ -67,10 +90,6 @@ export const UserRegistration: React.FC = () => {
                   <IonCheckbox labelPlacement='stacked' alignment='center' onIonChange={e => setIsDriver(e.detail.checked)}>
                     <span style={{fontSize:'1.3rem'}}>Wanna register as a driver?</span>
                   </IonCheckbox>
-                  {/* <Link to={{
-                    pathname: '/registration/driver',
-                    state: { }
-                  }}>Register as a driver</Link> */}
               </div>
             </form>
         {/* </div> */}

@@ -18,7 +18,7 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                             {
                                 model: User,
                                 as: 'user',
-                                attributes: ['firstName', 'lastName']
+                                attributes: ['firstName', 'lastName', 'overallRating']
                             }
                         ]
                     },

@@ -10,13 +10,18 @@
 {
   margin-right: 0.5rem;
   font-size: 1.2rem;
-}
+} 
 
 .trip-info-container {
+  cursor: pointer;
   border-radius: 1rem; 
-  width: 100%;
+  width: 95%;
   max-width: 30rem;
   margin: 0.5rem 0;
+  
+  ion-card-header{
+    border-bottom: 1px solid white;
+  }
 
   .custom-content {
     padding: 0;
@@ -24,6 +29,7 @@
 
   .column-contents{
     width: 100%;
+    max-width: 10rem; //TODO: change it to adjust the space from the arrow
   }
 
   .arrow-container{
@@ -48,9 +54,12 @@
     justify-content: center;
 
     .position-end{
-      @include display-flex-center('align');
-      justify-content: end;
+      @include display-flex-center('both');
       width: 100%;
+      font-size: 1.3rem;
+      p {
+        font-size: 1rem;
+      }
     }
   }
 }

@@ -1,0 +1,24 @@
+@import '../global.scss';
+
+.profile-container{
+    @include display-flex-center('justify');
+    width: 100%;
+    overflow-y: auto;
+    
+    .profile-contents{
+        @include display-flex-center('both');
+        width: 95%;
+        flex-direction: column;
+        ion-img{
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+        ion-item{
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+
+}
