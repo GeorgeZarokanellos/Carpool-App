@@ -4,6 +4,7 @@ import { TripInformation } from '../components/TripInformation';
 import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.scss';
 import instance from '../AxiosConfig';
+import { Link } from 'react-router-dom';
 
 interface searchTripProps {
   refreshKey: number;
@@ -33,7 +34,7 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
 
   const handleSearch = (event: CustomEvent) => {
     console.log(event.detail.value);
-    if(event.detail.value === ""){
+    if(event.detail && event.detail.value === ""){
       console.log("Event content empty", event.detail.value);
       setFilteredResults(trips);
       console.log("Filtered results", filteredResults);
@@ -49,7 +50,9 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
     }
   }
 
-
+  const handleClearSearch = () => {
+    setFilteredResults(trips);
+  }
 
   return (
     <IonPage>
@@ -58,6 +61,7 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
           placeholder='Search available trips' 
           animated={true}
           onIonChange={handleSearch} 
+          onIonClear={handleClearSearch}
           class='custom'/>
       </IonHeader>
       <IonContent >
@@ -75,8 +79,8 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
               // console.log(formattedTime);
               
               return(
+                <Link to={{pathname: `/${trip.tripId}`, state: {tripId: trip.tripId}}} key={trip.tripId} style={{textDecoration: "none"}}>
                   <TripInformation 
-                    key={trip.tripId}
                     startingTime={formattedTime} 
                     dateOfTrip={formattedDate} 
                     origin={trip.startLocation}
@@ -86,6 +90,8 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
                     driver={{user: trip.driver.user}}
                     tripCreator ={trip.tripCreator}
                     />
+                </Link>
+                  
               )
             })}
           </IonRow>
