@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Trip } from "../interfacesAndTypes/Types";
 import { IonButton, IonItem, IonList, IonText, IonTitle } from "@ionic/react";
 import './TripsDisplay.scss';
-import { formatDate, formatDateTime} from "../util/common_functions";
+import { formatDateTime} from "../util/common_functions";
 
 interface TripsDisplayProps{
     tripsParticipated: Trip[];

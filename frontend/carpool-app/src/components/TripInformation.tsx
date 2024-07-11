@@ -19,7 +19,6 @@ import {
         locationOutline, 
         flagOutline,
         car,
-        arrowForward,
     } from 'ionicons/icons';
 import './TripInformation.scss';
 import { StarRating } from "../util/common_functions";
