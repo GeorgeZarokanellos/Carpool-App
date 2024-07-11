@@ -23,7 +23,7 @@ enum role {
 }
 
 interface addUserRequestBodyInterface {
-    universityId: number;
+    universityId: string;
     firstName: string;
     lastName: string;
     username: string;

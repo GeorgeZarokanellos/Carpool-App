@@ -25,7 +25,10 @@ VALUES ('Plateia Gewrgiou'),
 INSERT INTO Trip (creator_id, driver_id, start_loc, no_of_passengers, no_of_stops, starting_time, status)
 VALUES (1, 1, 'Plateia Gewrgiou', 2, 2, '2022-01-01 15:30:00.000000', 'planning'),
        (2, 3, 'Plateia Olgas', 1, 1, '2022-01-01 14:30:00.000000', 'completed'),
-       (2, 3, 'Aretha', 2, 1, '2024-05-12 14:30:00.000000', 'completed');
+       (2, 3, 'Aretha', 2, 1, '2024-05-12 14:30:00.000000', 'completed'),
+       (2, 18, 'Pyrosvestio', 2, 2, '2023-05-12 14:30:00.000000', 'completed'),
+       (2, 4, 'Aretha', 2, 1, '2024-05-12 14:30:00.000000', 'completed'),
+       (2, 3, 'Plateia Gewrgiou', 2, 1, '2024-06-12 14:30:00.000000', 'completed');
 
 -- Insert into Trip_stops
 INSERT INTO Trip_stops (trip_id, stop_id)
@@ -40,5 +43,8 @@ VALUES (1, 2),
 
 -- Insert into Reviews
 INSERT INTO Reviews (rating, date, reviewed_user_id, trip_id, reviewer_id)
-VALUES (4.5, '2022-01-03', 1, 1, 2),
-       (3.5, '2022-01-04', 3, 2, 2);
+VALUES (4.5, '2022-01-03', 4, 1, 2),
+       (3.5, '2022-01-04', 4, 2, 2),
+       (5.0, '2023-01-04', 4, 2, 1),
+       (3.5, '2024-01-04', 4, 2, 17),
+       (3.5, '2025-01-04', 4, 2, 24);

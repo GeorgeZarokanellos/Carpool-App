@@ -1,20 +1,16 @@
 // #region import statements
 import type { Request, Response, NextFunction } from 'express';
-import { Op } from 'sequelize';
 import User from '../model/user';
-import bcrypt from 'bcryptjs';
 import multer, { type FileFilterCallback } from 'multer';
 import fs from 'fs';
 import Driver from '../model/driver';
 import Vehicle from '../model/vehicle';
 import sequelize from '../database/connect_to_db';
-import { type addUserRequestBodyInterface, type carRegisterRequestBodyInterface} from '../interface/trip_interface';
 import path from 'path';
+import { carRegisterRequestBodyInterface } from '../interface/trip_interface';
 
-const saltRounds = 10;
 
 interface MulterFile {
-    // name: string;
     mimetype: string;
 }
 // #endregion
@@ -109,7 +105,7 @@ export const findUsernameAndInitializeUpload = async (req:Request, res: Response
         if (user !== null) {
             const username: string = user.username;
             try {
-                await initializeUpload(req,res, next,username); // initialize the upload function
+                await initializeUpload(req, res, next, username); // initialize the upload function
             } catch (error) {
                 console.log("error in initializing upload", error);
                 // next(error);
@@ -128,74 +124,12 @@ export const findUsernameAndInitializeUpload = async (req:Request, res: Response
     }
 };
 
-export const addUser = (req: Request, res: Response, next: NextFunction): void => {
-    async function addUserAsync(): Promise<void> {
-        try {
-            const {universityId, firstName, lastName, username, password, email, role, phone}: addUserRequestBodyInterface = req.body;
-            const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role']
-            // console.log(req.body);
-            for (const field of requiredFields){
-                if(req.body[field] === undefined || req.body[field] === null || req.body[field] === ''){
-                    console.log(`${field}`);
-                    res.status(400).json({ error: `${field} is missing` });
-                    return;
-                }
-            }
-
-
-            // check if the username already exists
-            const existingUser = await User.findOne(
-                {where: {
-                        [Op.or]: [    // check if the username or universityId already exists
-                            {username}, 
-                            {universityId},
-                            {email}
-                        ]
-                    }
-                });
-            if(existingUser !== null){
-                let message = '';
-                if(existingUser.getDataValue('username') === username)
-                    message += 'Username already exists!';
-                if(existingUser.getDataValue('universityId') === universityId)
-                    message += 'University ID already exists!';
-                if(existingUser.getDataValue('email') === email)
-                    message += 'Email already exists!';
-                res.status(400).send(message);
-            }
-
-            await sequelize.transaction(async (transaction) => {
-                const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
-                const newUser = await User.create({
-                    universityId,
-                    firstName,
-                    lastName,
-                    username,
-                    password: hash,     // store the hashed password
-                    email,
-                    role,
-                    phone
-                }, {transaction});
-                res.status(200).json(newUser);
-
-            });
-        } catch (err) {
-            if (err instanceof Error)
-                console.error('Error: ' + err.message);
-            else if (typeof err === 'string')
-                console.error('Error: ' + err);
-            res.status(500).send(err);
-        }
-    }
-    addUserAsync().catch(next); // catch any errors that occur in the addUserAsync function
-}
-
 export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunction): void => {
     async function addDriverAndVehicleAsync(): Promise<void> {
         try {
             const driverId = Number(req.params.id);
             // const bodyFromMulter: carRegisterRequestBodyInterface =  await findUsernameAndInitializeUpload(req, res, next, driverId);
-            const {plateNumber, maker, model, noOfSeats} = req.body;
+            const {plateNumber, maker, model, noOfSeats}: carRegisterRequestBodyInterface = req.body;
             // console.log('body from multer', bodyFromMulter);
 
             // create a new driver and vehicle in a transaction

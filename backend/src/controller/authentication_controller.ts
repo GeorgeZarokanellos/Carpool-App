@@ -60,8 +60,7 @@ passport.serializeUser((user, done) => {
  * @returns {Promise<void>} - A promise that resolves when deserialization is complete.
  */
 passport.deserializeUser(
-    (userId, done) => {
-        (async () => {
+    async (userId, done) => {
             try {
                 console.log('userId: ', userId);
                 console.log('typeof userId: ', typeof userId);
@@ -83,6 +82,5 @@ passport.deserializeUser(
             } catch (error) {
                 done(error);
             }
-        })().catch(error => {done(error)});
-    });
+        });
 // #endregion
