@@ -1,10 +1,10 @@
 import React, { useEffect, useState} from 'react';
-import { IonContent, IonGrid, IonHeader, IonPage, IonRow, IonSearchbar } from '@ionic/react';
+import { IonButton, IonContent, IonFooter, IonGrid, IonHeader, IonItem, IonPage, IonRow, IonSearchbar } from '@ionic/react';
 import { TripInformation } from '../components/TripInformation';
 import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.scss';
 import instance from '../AxiosConfig';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 interface searchTripProps {
   refreshKey: number;
@@ -13,6 +13,7 @@ interface searchTripProps {
 const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
+  const history = useHistory();
   let formattedDate;
   let formattedTime;
 
@@ -52,6 +53,10 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
 
   const handleClearSearch = () => {
     setFilteredResults(trips);
+  }
+
+  const transferToNewTripPage = () => {
+    history.push("/main/create-trip")
   }
 
   return (
@@ -97,6 +102,11 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
           </IonRow>
         </IonGrid>
       </IonContent>
+      <div className='create-trip-button-container'>
+        <IonButton shape='round' onClick={transferToNewTripPage}>
+          Create a new trip
+        </IonButton>
+      </ div>
     </IonPage>
   );
 };
