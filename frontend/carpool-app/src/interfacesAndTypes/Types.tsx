@@ -76,3 +76,8 @@ export type autoMaker = {
     maker: string,
     models: string[]
 }
+
+export type Stop = {
+    stopId: number;
+    stopLocation: string;
+}
