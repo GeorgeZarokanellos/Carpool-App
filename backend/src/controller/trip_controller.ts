@@ -391,4 +391,22 @@ const deleteTripStop = async (tripId: string, transaction: Transaction): Promise
         transaction
     });      
 }
+
+export const retrieveAllStartingLocations = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const stops = await Stop.findAll();
+        console.log(stops);
+        
+        res.status(200).send(stops);
+    } catch (error) {
+        console.error(error);
+            if(typeof error === 'string'){
+                // console.log("There was an error retrieving the stops: " + error);
+                res.status(500).send('Error retrieving stops: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving stops: ' + error.message);
+            }
+    }
+}
 //#endregion
