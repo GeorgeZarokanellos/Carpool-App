@@ -66,7 +66,7 @@ app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
     
     if(req.isAuthenticated()){
         req.session.save(); 
-        res.status(200).json({message: 'Login successful', userId: req.user.userId});
+        res.status(200).json({message: 'Login successful', userId: req.user.userId, role: req.user.role });
     }
     else 
         res.status(401).send('Login failed');
