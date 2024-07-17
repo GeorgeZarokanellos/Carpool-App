@@ -85,7 +85,15 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
               const amPm = timeParts[2].split(' ');
               formattedTime = `${timeParts[0]}:${timeParts[1]} ${amPm[1]}`;
               // console.log(formattedTime);
-              
+              if(trip.driver === null || trip.driver === undefined){  //if there is no driver assigned to the trip
+                trip.driver = {
+                  user: {
+                    firstName: 'No driver yet',
+                    lastName: '',
+                    overallRating: '0'
+                  }
+                }
+              }
               return(
                 <Link to={{pathname: `/${trip.tripId}`, state: {tripId: trip.tripId}}} key={trip.tripId} style={{textDecoration: "none"}}>
                   <TripInformation 

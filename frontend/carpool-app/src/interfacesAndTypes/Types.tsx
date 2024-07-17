@@ -26,7 +26,7 @@ export type Trip = {
     noOfPassengers: number;
     noOfStops: number;
     status: Status;
-    driver: {
+    driver?: {
         user: {
             firstName: string;
             lastName: string;
