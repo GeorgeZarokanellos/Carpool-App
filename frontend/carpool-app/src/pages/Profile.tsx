@@ -57,9 +57,11 @@ const Profile: React.FC = () => {
                 </IonItem>
               </div>
             </div>
-          ): (
-            <IonLoading isOpen={true} message={"Retrieving profile information.."} />
-          )}
+          ): ''
+          // (
+            // <IonLoading isOpen={true} message={"Retrieving profile information.."} />
+          // )
+          }
         </IonContent>
       </IonContent>
     </IonPage>

@@ -9,6 +9,13 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 // #region passport setup
 
+interface SessionData {
+    userId: number;
+    role: role;
+}
+
+let sessionDetails: SessionData;
+
 /**
  * Configures the local strategy for passport authentication.
  * @param {string} username - The username provided by the user.
@@ -49,7 +56,13 @@ passport.use(new LocalStrategy(
  * @returns {void}
  */
 passport.serializeUser((user, done) => {
-    done(null, user.userId);  // user id is the data to be stored in the session
+    console.log((user));
+    
+    sessionDetails = {
+        userId: user.userId,
+        role: user.role
+    }
+    done(null, sessionDetails);  // userSessionDetails is the data to be stored in the session
     
 });
 
@@ -60,13 +73,11 @@ passport.serializeUser((user, done) => {
  * @returns {Promise<void>} - A promise that resolves when deserialization is complete.
  */
 passport.deserializeUser(
-    (userId, done) => {
-        (async () => {
+    async (sessionDetails: SessionData, done) => {
             try {
-                console.log('userId: ', userId);
-                console.log('typeof userId: ', typeof userId);
-                
-                
+                console.log('Session data: ',  sessionDetails);
+                // console.log('typeof userId: ', typeof userId);
+                const userId  = sessionDetails.userId;
                 // if the user refreshes the page, the user id is retrieved from the session and used to find the user
                 if(typeof userId === 'number'){
                     const user = await User.findByPk(userId);
@@ -83,6 +94,5 @@ passport.deserializeUser(
             } catch (error) {
                 done(error);
             }
-        })().catch(error => {done(error)});
-    });
+        });
 // #endregion

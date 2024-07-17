@@ -11,11 +11,13 @@ export const LabelInput: React.FC<LabelInputProps<string | number>> = ({ label, 
       <IonInput 
         value={value}
         type={type}
+        autocomplete='new-password'
         onIonChange={e => {
           if (e.detail.value != undefined) {
             onIonChange(e.detail.value as string | number);
           }
         }}
+
       />
     </div>
   );

@@ -4,7 +4,7 @@ interface passengerInterface {
 }
 
 interface tripInterface {
-    userId: number;
+    tripCreatorId: number;
     driverId: number | null;
     startLocation: string;
     startingTime: Date;
@@ -23,7 +23,7 @@ enum role {
 }
 
 interface addUserRequestBodyInterface {
-    universityId: string;
+    universityId: number;
     firstName: string;
     lastName: string;
     username: string;

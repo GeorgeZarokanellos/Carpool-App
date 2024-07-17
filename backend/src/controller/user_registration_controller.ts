@@ -63,7 +63,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             let fileBuffer;
             const {universityId, firstName, lastName, username, password, email, role, phone}: addUserRequestBodyInterface = req.body;
             const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role'];
-            const uniIdInt = parseInt(universityId,10); //convert to int because multipart only sends strings
+            // const uniIdInt = parseInt(universityId,10); //convert to int because multipart only sends strings
             let profilePicture: Buffer;
             // console.log(req.body);
             for (const field of requiredFields){
@@ -80,7 +80,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 {where: {
                         [Op.or]: [    // check if the username or universityId already exists
                             {username}, 
-                            {uniIdInt},
+                            {universityId},
                             {email}
                         ]
                     }
@@ -89,7 +89,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 let message = '';
                 if(existingUser.getDataValue('username') === username)
                     message += 'Username already exists!';
-                if(existingUser.getDataValue('universityId') === uniIdInt)
+                if(existingUser.getDataValue('universityId') === universityId)
                     message += 'University ID already exists!';
                 if(existingUser.getDataValue('email') === email)
                     message += 'Email already exists!';
@@ -117,7 +117,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             await sequelize.transaction(async (transaction) => {
                 const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
                 const newUser = await User.create({
-                    uniIdInt,
+                    universityId,
                     firstName,
                     lastName,
                     username,

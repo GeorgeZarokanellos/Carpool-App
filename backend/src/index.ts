@@ -10,7 +10,7 @@ import https from 'https';
 import fs from 'fs'; // to read ssl certificate
 import bodyParser from 'body-parser';
 
-import passport from 'passport'; // import passport
+import passport, { use } from 'passport'; // import passport
 import session from 'express-session';
 // #endregion
 
@@ -23,12 +23,12 @@ import './controller/authentication_controller';
 // #endregion
 
 // #region SSL certificate
-const privateKey = fs.readFileSync(env.SSL_KEY_PATH, 'utf-8');
-const certificate = fs.readFileSync(env.SSL_CERT_PATH, 'utf-8');
-const credentials = {
-    key: privateKey,
-    cert: certificate 
-}
+// const privateKey = fs.readFileSync(env.SSL_KEY_PATH, 'utf-8');
+// const certificate = fs.readFileSync(env.SSL_CERT_PATH, 'utf-8');
+// const credentials = {
+//     key: privateKey,
+//     cert: certificate 
+// }
 // #endregion
 
 const app = express();
@@ -40,6 +40,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cors({
     origin: 'http://localhost:8100',
+    // origin: 'http://192.168.1.22:8100',
     credentials: true,
     methods: 'GET, POST, PUT, DELETE',
     AccessControlAllowCredentials: true,
@@ -64,8 +65,10 @@ app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
     // console.log('Im in login');
     // console.log(req.isAuthenticated());
     
-    if(req.isAuthenticated())
-        res.status(200).json({message: 'Login successful', userId: req.user.userId});
+    if(req.isAuthenticated()){
+        req.session.save(); 
+        res.status(200).json({message: 'Login successful', userId: req.user.userId, role: req.user.role });
+    }
     else 
         res.status(401).send('Login failed');
 });

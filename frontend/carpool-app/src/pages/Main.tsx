@@ -6,6 +6,8 @@ import Tab1 from './Tab1';
 import Tab2 from './Tab2';
 import SearchTrips from './SearchTrips';
 import Profile from './Profile';
+import { DetailedTripInformation } from '../components/DetailedTripInformation';
+import { NewTrip } from './NewTrip';
 
 export const Main: React.FC = () => {
   //for testing purposes 
@@ -23,7 +25,8 @@ export const Main: React.FC = () => {
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={refreshKey}/>}/>
           <Route path="/main/tab4" />
           <Route path="/main/profile" component={Profile} />
-
+          <Route path="/main/search-trips/:tripId" component={DetailedTripInformation}/>
+          <Route path="/main/create-trip" component={NewTrip} />
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
           <IonTabButton tab="tab1" href="/main/tab1">

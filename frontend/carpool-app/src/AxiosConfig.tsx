@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { useHistory } from 'react-router';
 
 const instance = axios.create({
+  // baseURL: 'http://192.168.1.22:3000/api/v1',
   baseURL: 'http://localhost:3000/api/v1',
   headers: {
     'Content-Type': 'application/json',
