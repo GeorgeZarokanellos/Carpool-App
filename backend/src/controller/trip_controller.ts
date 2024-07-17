@@ -98,23 +98,17 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
 }
 
 export const createTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
-    await sequelize.transaction(async (transaction: Transaction) => { 
-        const {userId, driverId, startLocation, startingTime}: tripInterface = req.body;
+    await sequelize.transaction(async (transaction: Transaction) => {
+        console.log(req.body); 
+        const {tripCreatorId, driverId, startLocation, startingTime}: tripInterface = req.body;
         const stops: string[] = req.body.stops;
         const passengers: passengerInterface[] = req.body.passengers;
         
-        // logger.debug("stops: ", stops), "passengers: ", passengers), " from createTrip");
         //TODO uncomment below line to test session when ready
         // const currentUserId = req.session.userId;  
-        //TODO the existence or not of the driver id will depend on the user role  
-        // const currentUserIsDriver = await Driver.findOne({
-        //     where: {
-        //         driverId: userId
-        //     }
-        // });
-        // const finalDriverId = currentUserIsDriver === null ? driverId : userId;  // if the user is a driver, the driverId is the same as the userId
+   
         const newTrip = await Trip.create({
-            tripCreatorId: userId,
+            tripCreatorId,
             driverId,
             startLocation,
             startingTime,
