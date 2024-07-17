@@ -9,15 +9,19 @@
         @include display-flex-center('both');
         width: 95%;
         flex-direction: column;
-        ion-img{
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-        }
         ion-item{
             width: 100%;
             margin-bottom: 1rem;
+        }
+        .profile-picture-container{
+            @include display-flex-center('both');
+            flex-direction: column;
+            ion-avatar {
+                height: 10rem;
+                width: 10rem;
+                
+            }
+
         }
     }
 
