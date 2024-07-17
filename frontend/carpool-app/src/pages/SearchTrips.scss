@@ -1,10 +1,5 @@
-.trip-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
+@import '../global.scss';
+
 
 ion-searchbar.custom{
     --border-radius: 2rem;
@@ -17,4 +12,16 @@ ion-header{
     justify-content: center;
     background-color: white;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.create-trip-button-container{
+    background-color: white;
+    width: 100%;
+    @include display-flex-center('justify');
+
+    ion-button {
+        width: 50%;
+        height: 70%;
+        background-color: white;
+    }
 }

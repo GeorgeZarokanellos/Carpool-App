@@ -39,10 +39,11 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cors({
-    origin: 'http://localhost:8100',
+    // origin: 'http://localhost:8100',
+    origin: 'http://192.168.1.22:8100',
     credentials: true,
     methods: 'GET, POST, PUT, DELETE',
-    // AccessControlAllowCredentials: true,
+    AccessControlAllowCredentials: true,
     // allowedHeaders: 'Content-Type, Authorization'
 }));
 
@@ -66,7 +67,7 @@ app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
     
     if(req.isAuthenticated()){
         req.session.save(); 
-        res.status(200).json({message: 'Login successful', userId: req.user.userId});
+        res.status(200).json({message: 'Login successful', userId: req.user.userId, role: req.user.role });
     }
     else 
         res.status(401).send('Login failed');
