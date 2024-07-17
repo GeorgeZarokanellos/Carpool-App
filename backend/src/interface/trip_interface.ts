@@ -4,7 +4,7 @@ interface passengerInterface {
 }
 
 interface tripInterface {
-    userId: number;
+    tripCreatorId: number;
     driverId: number | null;
     startLocation: string;
     startingTime: Date;

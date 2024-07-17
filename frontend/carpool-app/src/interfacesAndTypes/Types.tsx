@@ -26,7 +26,7 @@ export type Trip = {
     noOfPassengers: number;
     noOfStops: number;
     status: Status;
-    driver: {
+    driver?: {
         user: {
             firstName: string;
             lastName: string;
@@ -75,4 +75,9 @@ export type descIndex = {
 export type autoMaker = {
     maker: string,
     models: string[]
+}
+
+export type Stop = {
+    stopId: number;
+    stopLocation: string;
 }
