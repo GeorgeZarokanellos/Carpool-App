@@ -9,8 +9,9 @@ import { PassengerCredentials } from "../components/PassengerCredentials";
 interface requestBody {
     tripCreatorId: number,
     driverId: number | null,
-    startingLocation: string,
-    startingTime: Date,
+    startLocation: string,
+    startingTime: string,
+    stops: Stop[],
     passengers: {firstName: string, lastName: string}[]
 }
 
@@ -40,10 +41,13 @@ export const NewTrip: React.FC = () => {
     const [passengerCredentials, setPassengerCredentials] = useState<{firstName: string, lastName: string}[]>([]);
     //hour picker
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    //additional stops
+    const [stops, setStops] = useState<Stop[]>([]);
 
     let userIdInt: number;
-    if(userIdString)
+    if(userIdString){
         userIdInt = parseInt(userIdString, 10);
+    }
 
     useEffect(() => {
         instance.get('/trips/starting-locations')
@@ -53,18 +57,18 @@ export const NewTrip: React.FC = () => {
         })
     },[]);
 
-    const handleSubmit = () => {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
         requestBody = {
             tripCreatorId: userIdInt,
             driverId: tripDriverId,
-            startingLocation: selectedStartingLocation,
-            startingTime: selectedDate,
+            startLocation: selectedStartingLocation,
+            startingTime: selectedDate.toISOString(),
+            stops: stops,
             passengers: passengerCredentials
         }
 
-        console.log("Request body: ", requestBody);
-        
         instance.post('/trips', requestBody)
         .then(response => {
             console.log(response.data);
@@ -73,6 +77,8 @@ export const NewTrip: React.FC = () => {
         })
         .catch(error => {
             console.log(error);
+            //reset the passenger credentials
+            setPassengerCredentials([]);
             alert("Trip creation failed");
         });
 
