@@ -16,6 +16,27 @@ ion-content {
                 text-align: center;
                 max-width: 30rem;
 
+                .profile-picture-container{
+                    @include display-flex-center('both');
+                    flex-direction: column;
+                    ion-avatar {
+                        height: 10rem;
+                        width: 10rem;
+                        
+                    }
+                    
+                    .hover-space{
+                        @include display-flex-center('both');
+
+                        .profile-picture-hover {
+                            position: absolute;
+                            background-color: black;
+                            color: white;
+                        }
+                    }
+
+                }
+
                 ion-checkbox {
                     margin-top: 1rem;
                 }

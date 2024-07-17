@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonCheckbox, IonFooter } from '@ionic/react';
+import React, { useEffect, useState } from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonCheckbox, IonFooter, IonAvatar, IonLabel } from '@ionic/react';
 import './UserRegistration.scss';
 import { LabelInput } from '../components/LabelInput';
 import instance from '../AxiosConfig';
 import { useHistory } from 'react-router';
-
+//TODO add tooltip for profile image
 
 export const UserRegistration: React.FC = () => {
   const [universityId, setUniversityId] = useState<number>();
@@ -20,6 +20,7 @@ export const UserRegistration: React.FC = () => {
   const history = useHistory();
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
+  
 
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,23 +47,22 @@ export const UserRegistration: React.FC = () => {
 
     if(userRegistrationRequestBody.profilePicture !== undefined)
       formData.append('profilePicture', userRegistrationRequestBody.profilePicture);
-    // Handle registration here
-    instance.post('/registration/user', {
-      universityId: universityId,
-      firstName: firstName,
-      lastName: lastName,
-      username: username,
-      password: password,
-      email: email,
-      phone: phone,
-      role: (isDriver? 'driver' : 'passenger')
+
+    instance.post('/registration/user', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': 'Bearer your_token_here'
+      }
     }).then((response) => {
       if(isDriver){
         console.log("response",response);
+        alert('You have successfully registered as a user. Please fill out the driver registration form.');
         history.push(`/registration/driver/${response.data.userId}`, {userId: response.data.userId})
       }
-      else
+      else{
+        alert('You have successfully registered as a user. Please log in.');
         history.push('/');
+      }
     }).catch((error) => {
       console.log(error);
     });
@@ -78,8 +78,17 @@ export const UserRegistration: React.FC = () => {
       </IonHeader>
       <IonContent>
         {/* <div className='registration-container'> */}
-            <form onSubmit={handleRegistration} className='custom-form' encType='multipart/form-data'>
+            <form onSubmit={handleRegistration} id='userCredentials' className='custom-form' encType='multipart/form-data'>
               <div className='form-contents'>
+                  <div className='profile-picture-container'>
+                    {/* <IonLabel>Insert profile <br /> picture below</IonLabel> */}
+                    <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
+                        <IonAvatar >
+                          <img alt="Silhouette of a person's head" src={profilePicture? URL.createObjectURL(profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
+                        </IonAvatar>
+                      <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} />
+                    </IonButton>
+                  </div>  
                   <LabelInput label='University ID' value={universityId ?? ''} type='number' onIonChange={value => setUniversityId(Number(value))} />
                   <LabelInput label='First Name' value={firstName} type='text' onIonChange={value => setFirstName(String(value))} />
                   <LabelInput label='Last Name' value={lastName} type='text' onIonChange={value => setLastName(String(value))} />
@@ -97,7 +106,7 @@ export const UserRegistration: React.FC = () => {
       <IonFooter>
         <IonToolbar>
           <div className='register-button-container'>
-            <IonButton expand="block" type="submit" >Register</IonButton>
+            <IonButton form='userCredentials' expand="block" type="submit" shape='round'>Register</IonButton>
           </div>
         </IonToolbar>
       </IonFooter>
