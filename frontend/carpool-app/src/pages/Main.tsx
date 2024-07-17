@@ -25,8 +25,8 @@ export const Main: React.FC = () => {
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={refreshKey}/>}/>
           <Route path="/main/tab4" />
           <Route path="/main/profile" component={Profile} />
-          <Route path={"/main/search-trips/:tripId"} component={DetailedTripInformation}/>
-          <Route path={"/main/create-trip"} component={NewTrip} />
+          <Route path="/main/search-trips/:tripId" component={DetailedTripInformation}/>
+          <Route path="/main/create-trip" component={NewTrip} />
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
           <IonTabButton tab="tab1" href="/main/tab1">
