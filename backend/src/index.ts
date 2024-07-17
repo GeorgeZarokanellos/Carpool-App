@@ -39,8 +39,8 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cors({
-    origin: 'http://localhost:8100',
-    // origin: 'http://192.168.1.22:8100',
+    // origin: 'http://localhost:8100',
+    origin: 'http://192.168.1.22:8100',
     credentials: true,
     methods: 'GET, POST, PUT, DELETE',
     AccessControlAllowCredentials: true,

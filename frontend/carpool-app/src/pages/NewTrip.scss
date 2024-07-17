@@ -1,8 +1,11 @@
 @import '../global.scss';
 
+
+
 .new-trip-input-container {
     @include display-flex-center('justify');
     overflow-y: auto;
+    margin-top: 1rem;
     
     .trip-form{
         @include display-flex-center('both');

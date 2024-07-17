@@ -9,7 +9,7 @@ interface detailedTripInfoProps {
 export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ tripClicked }) => {
     return (
         <IonContent>
-            <IonTitle>{tripClicked.}</IonTitle>
+            {/* <IonTitle>{tripClicked.}</IonTitle> */}
         </IonContent>
     )
 }
