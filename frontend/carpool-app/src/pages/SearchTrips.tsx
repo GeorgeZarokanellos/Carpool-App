@@ -17,6 +17,9 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
   let formattedDate;
   let formattedTime;
 
+  //screen dimensions
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
 
   useEffect(() => {
     instance.get('/trips')
@@ -60,7 +63,7 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
   }
 
   return (
-    <IonPage>
+    <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
       <IonHeader className='ion-no-border'>
         <IonSearchbar 
           placeholder='Search available trips' 
