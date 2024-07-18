@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IonAvatar, IonButton, IonContent, IonIcon, IonImg, IonItem, IonLoading, IonPage, IonTitle} from '@ionic/react';
+import { IonAvatar, IonButton, IonContent, IonItem, IonLoading, IonPage, IonTitle} from '@ionic/react';
 import './Profile.scss';
 import instance from '../AxiosConfig';
 import { type ProfileData } from '../interfacesAndTypes/Types';
@@ -18,11 +18,11 @@ const Profile: React.FC = () => {
     instance.get(`/profile/${localStorage.getItem('userId')}`)
     .then(response => {
       setProfileData(response.data);
-      console.log("Profile data retrieved: ", profileData);
-      if(profileData && profileData.profilePicture){
-        base64String = btoa(String.fromCharCode(...profileData.profilePicture.data));
+      // console.log("Profile data retrieved: ", profileData);
+      if(response.data && response.data.profilePicture){  //check response data because profile data gets set asynchronously
+        base64String = btoa(String.fromCharCode(...response.data.profilePicture.data));
         setImageSrc(`data:image/jpeg;base64,${base64String}`);
-        console.log("Base64 string: ", base64String);
+        // console.log("Base64 string: ", base64String);
         
       }
     })
@@ -30,11 +30,11 @@ const Profile: React.FC = () => {
       console.log(error);
       
     })
-  }, [])
+  }, []);
 
-  useEffect(() => {
-    console.log("Profile data: ", profileData);
-  }, [profileData]);
+  // useEffect(() => {
+  //   console.log("Profile data: ", profileData);
+  // }, [profileData]);
     
   return (
     <IonPage>
