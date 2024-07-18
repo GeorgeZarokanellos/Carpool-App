@@ -1,7 +1,5 @@
 import React from "react";
 import Rating from '@mui/material/Rating';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 
 interface RatingProps {
     rating: number;
@@ -13,32 +11,39 @@ export const StarRating: React.FC<RatingProps> = ({ rating }) => {
     )
 }
 
-export const formatDate = (dateString: string | Date) => {
+export const formatDate = (dateString: string | Date): string => {
     let dateParts: string[] = [];
-    let formattedDate: string;
     if(dateString instanceof Date){
         dateParts = dateString.toString().split('-');
     } else 
         dateParts = dateString.split('-');
-    if(dateParts.length !== 0){
-        formattedDate = `${dateParts[1]}/${dateParts[2]}`;
-        return formattedDate;
-    } else 
+    if(dateParts.length !== 0 && dateParts.length >= 3){
+        return `${dateParts[1]}/${dateParts[2]}`;
+    } else {
         console.log("DateParts is empty:", dateParts);
-        
+        return ""; // Add a return statement here
+    }
 }
 
-export const formatDateTime = (dateString: string) => {
+export const formatDateTime = (dateString: string): {formattedDate: string, formattedTime: string} => {
+    let formattedDate: string;
+    let formattedTime: string;
+
     const dateTimeParts = dateString.split('T');
-    console.log(dateTimeParts);
-    const formattedDate = formatDate(dateTimeParts[0]);
-    console.log(formattedDate);
     const timeParts = `${dateTimeParts[1]}`.split(':');
-    console.log(timeParts);
-    const formattedTime = `${timeParts[0]}:${timeParts[1]}`;
+    if(dateTimeParts[0] && timeParts.length >= 2){
+        formattedDate = formatDate(dateTimeParts[0]);
+        formattedTime = `${timeParts[0]}:${timeParts[1]}`;
+        return {
+            formattedDate,
+            formattedTime
+        }
+    } else {
+        console.log("DateParts or timeParts is empty:", dateTimeParts, timeParts);
+        return {
+            formattedDate: "",
+            formattedTime: ""
+        }
+    }    
     
-    return {
-        formattedDate,
-        formattedTime
-    }
 }
