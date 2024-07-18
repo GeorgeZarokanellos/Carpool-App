@@ -1,3 +1,5 @@
+import { ProfilePictureBuffer } from "./Interfaces";
+
 enum Role {
     DRIVER = "Driver",
     PASSENGER = "Passenger",
@@ -54,6 +56,8 @@ export type Review = {
     }
 }
 
+
+
 export type ProfileData = {
     username: string;
     firstName: string;
@@ -61,7 +65,7 @@ export type ProfileData = {
     role: Role;
     phone: string;
     overallRating: number;
-    profilePicture: Blob;
+    profilePicture: ProfilePictureBuffer;
     userReviews: Review[];
     userSubmittedReviews: Review[];
     tripsCreated: Trip[];

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IonContent, IonIcon, IonImg, IonItem, IonLoading, IonPage, IonTitle} from '@ionic/react';
+import { IonAvatar, IonButton, IonContent, IonItem, IonLoading, IonPage, IonTitle} from '@ionic/react';
 import './Profile.scss';
 import instance from '../AxiosConfig';
 import { type ProfileData } from '../interfacesAndTypes/Types';
@@ -8,33 +8,34 @@ import { TripsDisplay } from '../components/TripsDisplay';
 
 const Profile: React.FC = () => {
   const [profileData, setProfileData] = useState<ProfileData>();
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageSrc, setImageSrc] = useState<string>('');
+  let base64String = '';
   // let rating:number;
+    
 
-  // function bufferToBase64(buffer: Buffer){
-  //   let binary = '';
-  //   const bytes = [].slice.call(new Uint8Array(buffer));
-  //   bytes.forEach((b) => binary += String.fromCharCode(b));
-  //   return window.btoa(binary);
-  // }
 
   useEffect(() => {
     instance.get(`/profile/${localStorage.getItem('userId')}`)
     .then(response => {
       setProfileData(response.data);
-      console.log("Profile data retrieved: ", profileData);
-      if(profileData){
-        // const url = URL.createObjectURL(profileData.profilePicture);  //create a url for the image stored in the memory
-        // setImageUrl(url);
+      // console.log("Profile data retrieved: ", profileData);
+      if(response.data && response.data.profilePicture){  //check response data because profile data gets set asynchronously
+        base64String = btoa(String.fromCharCode(...response.data.profilePicture.data));
+        setImageSrc(`data:image/jpeg;base64,${base64String}`);
+        // console.log("Base64 string: ", base64String);
+        
       }
     })
     .catch(error => {
       console.log(error);
       
     })
-  }, [])
+  }, []);
 
-
+  // useEffect(() => {
+  //   console.log("Profile data: ", profileData);
+  // }, [profileData]);
+    
   return (
     <IonPage>
       <IonContent fullscreen>
@@ -42,7 +43,15 @@ const Profile: React.FC = () => {
           { profileData ? (
             <div className='profile-container'>
               <div className='profile-contents'>
-                {/* <IonImg src={imageUrl} alt=''/> */}
+                <div className='profile-picture-container'>
+                    {/* <IonLabel>Insert profile <br /> picture below</IonLabel> */}
+                    <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
+                        <IonAvatar >
+                          <img alt="Silhouette of a person's head" src={imageSrc? imageSrc : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
+                        </IonAvatar>
+                      {/* <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} /> */}
+                    </IonButton>
+                  </div>
                 <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
                 <IonItem lines='none' >
                   {/* <div>

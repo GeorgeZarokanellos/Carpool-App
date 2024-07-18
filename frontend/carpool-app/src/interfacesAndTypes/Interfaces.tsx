@@ -26,3 +26,8 @@ export interface LabelInputProps<T extends string | number > {
     type: TextFieldTypes;
     onIonChange: React.Dispatch<React.SetStateAction<T>>;
 }
+
+export interface ProfilePictureBuffer {
+    type: 'Buffer';
+    data: number[];
+}
