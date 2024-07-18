@@ -55,15 +55,24 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                     {
                         model: Driver,
                         as: 'driver',
+                        attributes: ['licenseId'],
+                        include:[
+                            {
+                                model: User,
+                                as: 'user',
+                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
+                            }
+                        ]
                     },
                     {
                         model: TripPassenger,
                         as: 'tripPassengers',
+                        attributes: ['passengerId'],
                         include: [
                             {
                                 model: User,
                                 as: 'passenger',
-                                attributes: ['firstName', 'lastName']
+                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
                             }
                         ]
                     },
