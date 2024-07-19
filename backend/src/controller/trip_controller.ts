@@ -53,6 +53,12 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
             const trip = await Trip.findByPk(TripId,{
                 include: [
                     {
+                        model: User,
+                        as: 'tripCreator',
+                        attributes: ['firstName','lastName'],
+
+                    },
+                    {
                         model: Driver,
                         as: 'driver',
                         attributes: ['licenseId'],
@@ -78,12 +84,13 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                     },
                     {
                         model: TripStop,
-                        as: 'tripStop',
+                        as: 'tripStops',
+                        attributes: ['stopId'],
                         include: [
                             {
                                 model: Stop,
-                                as: 'stopLocation',
-                                attributes: ['loc']
+                                as: 'details',
+                                attributes: ['stopLocation', 'lat', 'lng']
                             }
                         ]
                     }

@@ -18,6 +18,16 @@ Stop.init({
         values: ['Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvesteio', 'Aretha'],
         allowNull: false,
         field: 'loc'
+    },
+    lat: {
+        type: DataTypes.DOUBLE,
+        allowNull: false,
+        field: 'lat'
+    },
+    lng: {
+        type: DataTypes.DOUBLE,
+        allowNull: false,
+        field: 'lng'
     }
 }, {
     sequelize,
