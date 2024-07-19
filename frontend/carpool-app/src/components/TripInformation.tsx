@@ -22,22 +22,17 @@ import {
     } from 'ionicons/icons';
 import './TripInformation.scss';
 import { StarRating } from "../util/common_functions";
+import { TripTitle } from "./TripTitle";
 
 export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, noOfStops, finish, driver, tripCreator}) => {
-    const today = new Date();
-    const tripDate = new Date(dateOfTrip);
     const itemColor = "";   //TODO change to background color of the app
-    //check if trip of date is same as today
-    const isTripToday = today.getDate() === tripDate.getDate() &&
-                        today.getMonth() === tripDate.getMonth() &&
-                        today.getFullYear() === tripDate.getFullYear();
 
     return (
     <IonCol size="12" >
         <IonCard className="trip-info-container" color={itemColor}>
             <IonCardHeader >
                 <IonCardTitle className="custom-font">
-                    {'Διαδρομή του ' + tripCreator.firstName + ' ' + tripCreator.lastName + ' για ' + (isTripToday ? 'σήμερα' : 'της ' + dateOfTrip) }
+                    <TripTitle dateOfTrip={dateOfTrip} tripCreator={tripCreator}/>
                 </IonCardTitle>
             </IonCardHeader>
             <IonCardContent className="ion-justify-content-center ion-align-items-center custom-content">

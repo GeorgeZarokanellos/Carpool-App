@@ -95,7 +95,7 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
                 }
               }
               return(
-                <Link to={{pathname: `/${trip.tripId}`, state: {tripId: trip.tripId}}} key={trip.tripId} style={{textDecoration: "none"}}>
+                <Link to={{pathname: `./trip-info/${trip.tripId}`, state: {tripId: trip.tripId}}} key={trip.tripId} style={{textDecoration: "none"}}>
                   <TripInformation 
                     startingTime={formattedTime} 
                     dateOfTrip={formattedDate} 

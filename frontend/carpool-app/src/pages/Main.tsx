@@ -8,6 +8,7 @@ import SearchTrips from './SearchTrips';
 import Profile from './Profile';
 import { DetailedTripInformation } from '../components/DetailedTripInformation';
 import { NewTrip } from './NewTrip';
+import { TripInfoPage } from './TripInfoPage';
 
 export const Main: React.FC = () => {
   //for testing purposes 
@@ -20,12 +21,12 @@ export const Main: React.FC = () => {
  return (
     <IonTabs>
         <IonRouterOutlet>
-          <Route path="/main/tab1" component={Tab1} />
+          <Route path="/main/trip-info/:tripId" component={TripInfoPage} />
           <Route path="/main/tab2" component={Tab2} />
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={refreshKey}/>}/>
           <Route path="/main/tab4" />
           <Route path="/main/profile" component={Profile} />
-          <Route path="/main/search-trips/:tripId" component={DetailedTripInformation}/>
+          {/* <Route path="/main/search-trips/:tripId" component={}/> */}
           <Route path="/main/create-trip" component={NewTrip} />
         </IonRouterOutlet>
         <IonTabBar slot="bottom">

@@ -13,10 +13,10 @@ Trip.hasMany(TripPassenger, {foreignKey: 'tripId', as: 'tripPassengers'});
 
 TripPassenger.belongsTo(User, {foreignKey: 'passengerId', as: 'passenger'});
 
-TripStop.belongsTo(Stop, {foreignKey: 'stopId', as: 'stopLocation'});
+TripStop.belongsTo(Stop, {foreignKey: 'stopId', as: 'details'});
 
 TripStop.belongsTo(Trip, {foreignKey: 'tripId', targetKey: 'tripId'});
-Trip.hasMany(TripStop, {foreignKey: 'tripId', as: 'tripStop'});
+Trip.hasMany(TripStop, {foreignKey: 'tripId', as: 'tripStops'});
 
 Trip.belongsTo(Driver, {foreignKey: 'driverId', targetKey: 'driverId' ,as: 'driver'});
 Trip.belongsTo(User, {foreignKey: 'tripCreatorId', targetKey: 'userId', as: 'tripCreator'});

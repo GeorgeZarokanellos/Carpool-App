@@ -11,7 +11,8 @@ export interface TripProps {
         user: {
             firstName: string,
             lastName: string,
-            overallRating: string
+            overallRating: string,
+            profilePicture?: ProfilePictureBuffer
         };
     };
     tripCreator:{
