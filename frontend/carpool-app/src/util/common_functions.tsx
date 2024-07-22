@@ -1,5 +1,6 @@
 import React from "react";
 import Rating from '@mui/material/Rating';
+import { ProfilePictureBuffer } from "../interfacesAndTypes/Interfaces";
 
 interface RatingProps {
     rating: number;
@@ -46,4 +47,11 @@ export const formatDateTime = (dateString: string): {formattedDate: string, form
         }
     }    
     
+}
+
+export const arrayBufferTo64String = (buffer: ProfilePictureBuffer | undefined): string => {
+    if(buffer){
+        return `data:image/jpeg;base64,${btoa(String.fromCharCode(...buffer.data))}`;
+    } else 
+        return "Buffer is empty and cannot be converted!";
 }
