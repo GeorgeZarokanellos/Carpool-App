@@ -45,16 +45,19 @@ export type Trip = {
 }
 
 export type ExtendedTrip = Trip & {
-    tripPassengers: {
-        passengerId: number;
-        passenger: {
-            firstName: string;
-            lastName: string;
-            overallRating: string;
-            profilePicture?: ProfilePictureBuffer;
-        }
-    }[];
+    tripPassengers: tripPassenger[];
     tripStops: TripStops
+}
+
+export type tripPassenger = {
+    passengerId: number;
+    //TODO change passenger to details
+    passenger: {
+        firstName: string;
+        lastName: string;
+        overallRating: string;
+        profilePicture?: ProfilePictureBuffer;
+    }
 }
 
 export type TripStops = {
