@@ -5,11 +5,11 @@ import instance from '../AxiosConfig';
 import { type ProfileData } from '../interfacesAndTypes/Types';
 import { SubmittedReceivedReviewsDisplay } from '../components/ReviewsDisplay';
 import { TripsDisplay } from '../components/TripsDisplay';
+import { arrayBufferTo64String } from '../util/common_functions';
 
 const Profile: React.FC = () => {
   const [profileData, setProfileData] = useState<ProfileData>();
   const [imageSrc, setImageSrc] = useState<string>('');
-  let base64String = '';
   // let rating:number;
     
 
@@ -20,10 +20,8 @@ const Profile: React.FC = () => {
       setProfileData(response.data);
       // console.log("Profile data retrieved: ", profileData);
       if(response.data && response.data.profilePicture){  //check response data because profile data gets set asynchronously
-        base64String = btoa(String.fromCharCode(...response.data.profilePicture.data));
-        setImageSrc(`data:image/jpeg;base64,${base64String}`);
+        setImageSrc(arrayBufferTo64String(response.data.profilePicture));
         // console.log("Base64 string: ", base64String);
-        
       }
     })
     .catch(error => {
@@ -31,6 +29,10 @@ const Profile: React.FC = () => {
       
     })
   }, []);
+
+  useEffect(() => {
+    console.log("imageSrc: ", imageSrc);
+  }, [imageSrc]);
 
   // useEffect(() => {
   //   console.log("Profile data: ", profileData);
