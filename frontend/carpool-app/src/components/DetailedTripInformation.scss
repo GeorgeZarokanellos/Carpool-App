@@ -11,13 +11,12 @@ ion-content{
     
     .grid-contents{
         height: 60%;
-    
+
         .custom-col{
             display: flex;
             flex-direction: column;
             height: 100%;
-            // justify-content: space-between;
-            
+                
             .passenger-time-info{
                 display: flex;
                 align-items: center;
@@ -29,10 +28,33 @@ ion-content{
                     width: 100%;
                 }
 
+                .driver-details{
+                    display: flex;
+                    align-items: center;
+                    flex-direction: column;
+                    .car-icon{
+                        font-size: 1.5rem;
+                    }
+                }
+
                 .people-icon,
                 .time-icon{
                     font-size: 1.5rem;
                 }
+            }
+
+            .stops-display{
+                @include display-flex-center('align');
+                flex-direction: column;
+                // overflow-y: auto;
+                height: 100%;
+                width: 100%;
+                
+                .stop{
+                    @include display-flex-center('align');
+                    flex-direction: column;
+                }
+                
             }
     
             ion-item{
