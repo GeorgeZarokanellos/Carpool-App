@@ -19,7 +19,7 @@ export const formatDate = (dateString: string | Date): string => {
     } else 
         dateParts = dateString.split('-');
     if(dateParts.length !== 0 && dateParts.length >= 3){
-        return `${dateParts[1]}/${dateParts[2]}`;
+        return `${dateParts[2]}/${dateParts[1]}`;
     } else {
         console.log("DateParts is empty:", dateParts);
         return ""; // Add a return statement here
