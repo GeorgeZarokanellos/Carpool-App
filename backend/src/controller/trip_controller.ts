@@ -4,6 +4,7 @@ import { type passengerInterface, type updateDetailsInterface, type tripInterfac
 import sequelize from '../database/connect_to_db';
 import { type Transaction } from 'sequelize';
 import logger from '../util/winston';
+import Vehicle from '../model/vehicle';
 
 // #region public crud functions
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
@@ -67,6 +68,12 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                                 model: User,
                                 as: 'user',
                                 attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
+                            },
+                            {
+                                model: Vehicle,
+                                as: 'vehicle',
+                                
+                                attributes: ['noOfSeats']
                             }
                         ]
                     },
@@ -79,7 +86,7 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                                 model: User,
                                 as: 'passenger',
                                 attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
-                            }
+                            },
                         ]
                     },
                     {

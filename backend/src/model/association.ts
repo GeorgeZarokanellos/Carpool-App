@@ -5,6 +5,7 @@ import TripPassenger from './trip_passenger';
 import User from './user';
 import Driver from './driver';
 import Review from './review';
+import Vehicle from './vehicle';
 
 
 
@@ -22,6 +23,9 @@ Trip.belongsTo(Driver, {foreignKey: 'driverId', targetKey: 'driverId' ,as: 'driv
 Trip.belongsTo(User, {foreignKey: 'tripCreatorId', targetKey: 'userId', as: 'tripCreator'});
 
 Driver.belongsTo(User, {foreignKey: 'driverId', as: 'user'});
+
+Driver.hasOne(Vehicle, {foreignKey: 'ownerId', as: 'vehicle'});
+Vehicle.belongsTo(Driver, {foreignKey: 'driverId', as: 'driver'});
 
 Review.belongsTo(User, {foreignKey: 'reviewerId', targetKey: 'userId', as: 'reviewer'});
 User.hasMany(Review, {foreignKey: 'reviewerId', as: 'reviewer'});
