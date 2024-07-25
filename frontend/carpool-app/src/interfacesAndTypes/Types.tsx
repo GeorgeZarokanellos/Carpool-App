@@ -36,6 +36,9 @@ export type Trip = {
             lastName: string;
             overallRating: string;
             profilePicture?: ProfilePictureBuffer;
+        };
+        vehicle: {
+            noOfSeats: number;
         }
     } | null;
     tripCreator: {

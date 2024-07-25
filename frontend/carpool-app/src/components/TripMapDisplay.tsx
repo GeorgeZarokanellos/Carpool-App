@@ -13,20 +13,17 @@ export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops}) => {
     const startPosition: LatLngExpression = [38.24368476508384, 21.73212381808353]; 
     const endPosition: LatLngExpression = [38.28623463741879, 21.785996514033958]; //prutaneia    
     const stops: LatLngExpression[] = tripStops.map(stop => [stop.details.lat, stop.details.lng]);
-    console.log(stops);
+    // console.log(stops);
     
     return (
-        <MapContainer center={[38.24368476508384, 21.73212381808353]} zoom={14} style={{height: '60vh', width: '100%'}}>
+        <MapContainer center={[38.24368476508384, 21.73212381808353]} zoom={14} className='map'>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {stops.map((position, index) => (
-                console.log();
-                
                 <Marker key={index} position={position} />
             ))}
-            <Polyline positions={[startPosition, ...stops, endPosition]} color='blue'/>
         </MapContainer>
     )
 }

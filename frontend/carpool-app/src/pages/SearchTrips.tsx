@@ -91,11 +91,14 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
                     firstName: 'No driver yet',
                     lastName: '',
                     overallRating: '0'
+                  },
+                  vehicle: {
+                    noOfSeats: 0
                   }
                 }
               }
               return(
-                <Link to={{pathname: `./trip-info/${trip.tripId}`, state: {tripId: trip.tripId}}} key={trip.tripId} style={{textDecoration: "none"}}>
+                <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId} style={{textDecoration: "none"}}>
                   <TripInformation 
                     startingTime={formattedTime} 
                     dateOfTrip={formattedDate} 
