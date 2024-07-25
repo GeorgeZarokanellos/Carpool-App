@@ -1,5 +1,12 @@
 @import '../global.scss';
 
+ion-header{
+    width: 100%;
+    *{
+        color: black;
+    }
+}
+
 ion-content{
 
     display: flex;
@@ -11,6 +18,11 @@ ion-content{
     
     .grid-contents{
         height: 60%;
+        overflow-y: scroll;
+
+        ion-title{
+            text-decoration: underline;
+        }
 
         .custom-col{
             display: flex;
@@ -38,7 +50,8 @@ ion-content{
                 }
 
                 .people-icon,
-                .time-icon{
+                .time-icon,
+                .calendar-icon{
                     font-size: 1.5rem;
                 }
             }
@@ -65,4 +78,12 @@ ion-content{
             }
         }
     }
+
+}
+.join-leave-buttons{
+    width: 100%;
+    @include display-flex-center('justify');
+    background-color: white;
+    
+
 }

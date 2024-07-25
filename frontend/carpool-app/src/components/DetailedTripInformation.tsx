@@ -1,4 +1,4 @@
-import { IonAvatar, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonTitle } from "@ionic/react";
+import { IonAvatar, IonButton, IonCol, IonContent, IonFooter, IonGrid, IonHeader, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop, Trip, TripStops } from "../interfacesAndTypes/Types";
 import { TripTitle } from "./TripTitle";
@@ -11,11 +11,10 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { arrayBufferTo64String, StarRating } from "../util/common_functions";
 
 //icons
-import { carOutline, peopleOutline, timeOutline } from "ionicons/icons";
+import { calendarOutline, carOutline, peopleOutline, timeOutline } from "ionicons/icons";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import HailIcon from '@mui/icons-material/Hail';
 
-//TODO make the right column scrollable
 
 interface detailedTripInfoProps {
     clickedTripId: number;
@@ -40,24 +39,26 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         })
     }, [clickedTripId]);
 
-    // useEffect(() => {
-    //     console.log('tripData', tripData);
-    // }, [tripData]);
+    const checkAvailability = () => {
+        if(tripData && tripData.driver !== null){
+            return tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες';
+        } else if (tripData && tripData.driver === null){
+            return tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος';
+        }
+        
+    }
+
+    // const handleRequestForJoiningTrip = () => {
+
+    // }
+
+    useEffect(() => {
+        console.log('tripData', tripData);
+    }, [tripData]);
 
     return (
         <IonPage style={{height: `${viewportHeight}`, width: `${viewportWidth}`}}>
-            {/* { tripData? (
-                <IonHeader>
-                    <IonTitle>
-                        <TripTitle 
-                            dateOfTrip={formatDateTime(tripData.startingTime).formattedDate} 
-                            tripCreator={tripData.tripCreator}
-                        />
-                    </IonTitle>
-                </IonHeader>
-            ) : ''} */}
-            { tripData ? (
-                
+        { tripData && (
                 <IonContent>
                     <TripMapDisplay tripStops={tripData.tripStops}/>
                     <div className="grid-contents">
@@ -69,10 +70,12 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                                         <IonItem lines="none" >
                                             <IonIcon icon={timeOutline} slot="start" className="time-icon" />
                                             <IonLabel>{formatDateTime(tripData.startingTime).formattedTime}</IonLabel>
+                                            <IonIcon icon={calendarOutline} className="calendar-icon" style={{marginRight: '0.5rem'}} />
+                                            <IonLabel>{formatDateTime(tripData.startingTime).formattedDate}</IonLabel>
                                         </IonItem>
                                         <IonItem lines="none">
                                             <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
-                                            <IonLabel>{tripData.noOfPassengers + ' συνεπιβάτες'} </IonLabel>
+                                            <IonLabel>{(tripData.driver? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' συνεπιβάτες'} </IonLabel>
                                         </IonItem>
                                         <div className="passengers-details">
                                             <PassengersDetails passengers={tripData.tripPassengers}/>
@@ -135,7 +138,15 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                     </div>
                 </IonContent>
             
-            ): ''}
+        )}
+            <IonFooter style={{backgroundColor: "transparent"}}>
+                
+                <div className="join-leave-buttons">
+                    <IonButton shape="round" >
+                        {checkAvailability()}
+                    </IonButton>
+                </div>
+            </IonFooter>
         </IonPage>
     )
 }
