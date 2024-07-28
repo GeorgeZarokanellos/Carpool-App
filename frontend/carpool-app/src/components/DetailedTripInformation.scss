@@ -1,28 +1,21 @@
 @import '../global.scss';
 
-ion-header{
-    width: 100%;
-    *{
-        color: black;
-    }
-}
-
 ion-content{
 
     display: flex;
     flex-direction: column;
+
+    ion-title{
+        text-decoration: underline;
+    }
 
     .map{
         height: 40%;
     }
     
     .grid-contents{
-        height: 60%;
+        max-height: 60%;
         overflow-y: scroll;
-
-        ion-title{
-            text-decoration: underline;
-        }
 
         .custom-col{
             display: flex;
@@ -44,6 +37,7 @@ ion-content{
                     display: flex;
                     align-items: center;
                     flex-direction: column;
+                    width: 100%;
                     .car-icon{
                         font-size: 1.5rem;
                     }

@@ -1,4 +1,4 @@
-import { IonAvatar, IonButton, IonCol, IonContent, IonFooter, IonGrid, IonHeader, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonText, IonTitle } from "@ionic/react";
+import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonFooter, IonGrid, IonHeader, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop, Trip, TripStops } from "../interfacesAndTypes/Types";
 import { TripTitle } from "./TripTitle";
@@ -7,13 +7,13 @@ import instance from "../AxiosConfig";
 import { TripMapDisplay } from "./TripMapDisplay";
 import './DetailedTripInformation.scss';
 import { PassengersDetails } from "./PassengersDetails";
-import { Swiper, SwiperSlide } from "swiper/react";
 import { arrayBufferTo64String, StarRating } from "../util/common_functions";
 
 //icons
 import { calendarOutline, carOutline, peopleOutline, timeOutline } from "ionicons/icons";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import HailIcon from '@mui/icons-material/Hail';
+import { UserSelectStopModal } from "./UserSelectStopModal";
 
 
 interface detailedTripInfoProps {
@@ -25,11 +25,15 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight
     const [tripData, setTripData] = useState<ExtendedTrip>();
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [alertIsOpen, setAlertIsOpen] = useState(false);
+    const [availableStops, setAvailableStops] = useState<Stop[]>([]);
+    const [selectedStop, setSelectedStop] = useState<number>();
 
     useEffect(() => {
         instance.get(`/trips/${clickedTripId}`)
         .then(response => {
-            console.log(response.data.tripStops);
+            // console.log(response.data.tripStops);
             setTripData(response.data);
             // console.log('tripData', tripData);
             
@@ -38,6 +42,18 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             console.log(error);
         })
     }, [clickedTripId]);
+
+    useEffect(() => {
+        if(tripData){
+            instance.get(`/stops`)
+            .then(response => {
+                setAvailableStops(response.data);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        }
+    }, [tripData]);
 
     const checkAvailability = () => {
         if(tripData && tripData.driver !== null){
@@ -48,9 +64,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         
     }
 
-    // const handleRequestForJoiningTrip = () => {
-
-    // }
+    const handleRequestForJoiningTrip = () => {
+        
+    }
 
     useEffect(() => {
         console.log('tripData', tripData);
@@ -61,8 +77,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         { tripData && (
                 <IonContent>
                     <TripMapDisplay tripStops={tripData.tripStops}/>
+                    <IonTitle class="ion-text-center">Πληροφορίες ταξιδιού</IonTitle>
                     <div className="grid-contents">
-                        <IonTitle class="ion-text-center">Πληροφορίες ταξιδιού</IonTitle>
                         <IonGrid>    
                             <IonRow>
                                 <IonCol size="7" className="custom-col">
@@ -101,37 +117,33 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                                     </div>
                                 </IonCol>
                                 <IonCol size="5" className="custom-col">
-                                    {/* <Swiper direction="vertical" freeMode={true} scrollbar={true} style={{height: '100%'}}> */}
-                                        {/* <SwiperSlide> */}
-                                            <div className="stops-display" style={{ overflowY: 'auto', maxHeight: '100%' }}>
-                                                <div className="stop">
-                                                    <LocationOnIcon />
-                                                    {tripData.startLocation}
-                                                </div>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                                                    <g transform="scale(1.4)">{/* used to scale only the arrow and not the rectangle around it */}
-                                                        <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2"/>
-                                                    </g>
-                                                </svg>
-                                                {tripData.tripStops.map((stop, index) => {
-                                                    return (
-                                                        <>
-                                                            <div key={index} className="stop">
-                                                                <HailIcon />
-                                                                {stop.details.stopLocation}
-                                                            </div>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                                                                <g transform="scale(1.4)">{/* used to scale only the arrow and not the rectangle around it */}
-                                                                    <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2"/>
-                                                                </g>
-                                                            </svg>
-                                                        </>
-                                                    );
-                                                })}
-                                                Πρυτανεία
-                                            </div>
-                                        {/* </SwiperSlide> */}
-                                    {/* </Swiper> */}
+                                    <div className="stops-display" style={{ overflowY: 'auto', maxHeight: '100%' }}>
+                                        <div className="stop">
+                                            <LocationOnIcon />
+                                            {tripData.startLocation}
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
+                                            <g transform="scale(1.4)">{/* used to scale only the arrow and not the rectangle around it */}
+                                                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2"/>
+                                            </g>
+                                        </svg>
+                                        {tripData.tripStops.map((stop, index) => {
+                                            return (
+                                                <>
+                                                    <div key={index} className="stop">
+                                                        <HailIcon />
+                                                        {stop.details.stopLocation}
+                                                    </div>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
+                                                        <g transform="scale(1.4)">{/* used to scale only the arrow and not the rectangle around it */}
+                                                            <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2"/>
+                                                        </g>
+                                                    </svg>
+                                                </>
+                                            );
+                                        })}
+                                        Πρυτανεία
+                                    </div>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
@@ -139,14 +151,21 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 </IonContent>
             
         )}
-            <IonFooter style={{backgroundColor: "transparent"}}>
-                
-                <div className="join-leave-buttons">
-                    <IonButton shape="round" >
-                        {checkAvailability()}
-                    </IonButton>
-                </div>
-            </IonFooter>
+            <div className="join-leave-buttons">
+                <IonButton shape="round" onClick={() => {setModalIsOpen(true)}} >
+                    {checkAvailability()}
+                </IonButton>
+                <UserSelectStopModal 
+                    isOpen={modalIsOpen} 
+                    onClose={() => setModalIsOpen(false)} 
+                    availableStops={availableStops} 
+                    onSelectStop={(stopId) => {
+                        setSelectedStop(stopId);
+                        setModalIsOpen(false);
+                        handleRequestForJoiningTrip();
+                    }} 
+                />
+            </div>
         </IonPage>
     )
 }
