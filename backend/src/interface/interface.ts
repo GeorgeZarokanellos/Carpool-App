@@ -45,13 +45,26 @@ interface reviewRequestBodyInterface {
     reviewDateTime: Date;
 }
 
+interface notificationInterface {
+    driverId: number;
+    passengerId: number;
+    message: string;
+}
+
+interface updatedNotificationInterface {
+    driverId: number;
+    passengerId: number;
+    status: string;
+}
+
 export type {
     passengerInterface,
     updateDetailsInterface,
     addUserRequestBodyInterface,
     carRegisterRequestBodyInterface,
     reviewRequestBodyInterface,
-    tripInterface
+    tripInterface,
+    notificationInterface,
 }
 
 export { role };

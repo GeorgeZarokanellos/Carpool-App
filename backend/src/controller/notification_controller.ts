@@ -1,6 +1,8 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import sequelize from '../database/connect_to_db';
 import Notification from '../model/notification';
+import { Transaction } from 'sequelize';
+import { notificationInterface } from '../interface/interface';
 
 export const getNotifications = async(req: Request, res: Response, next: NextFunction) => {
     try {
@@ -35,4 +37,30 @@ export const getNotification = async(req: Request, res: Response, next: NextFunc
             res.status(500).send('Error retrieving notification: ' + error.message);
         }
     }
+}
+
+export const createNotification = async(req: Request, res: Response, next: NextFunction) => {
+    await sequelize.transaction(async (transaction: Transaction) => {
+        const {receiverId, message}: notificationInterface = req.body;
+        const notification = await Notification.create({receiverId, message});
+        await notification.save({transaction});
+    }).catch((err) => {
+        console.error(err);
+        if(typeof err === 'string'){
+            console.log("There was an error creating the notification: " + err);
+            res.status(500).send('Error creating notification: ' + err);
+        } else if (err instanceof Error){
+            console.log(err.message); 
+            res.status(500).send('Error creating notification: ' + err.message);
+        }
+    });
+}
+
+export const updateNotification = async(req: Request, res: Response, next: NextFunction) => {
+    await sequelize.transaction(async (transaction: Transaction) => {
+        const notificationId: string = req.params.notificationId;
+        const userId: number = req.body;
+        const notification = await Notification.findByPk(notificationId);
+        const updatedStatus: string = req.body;
+    });
 }
