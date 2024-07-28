@@ -4,7 +4,7 @@ import sequelize from '../database/connect_to_db';
 import multer, { type FileFilterCallback } from 'multer';
 import type { Request, Response, NextFunction } from 'express';
 import { Op } from 'sequelize';
-import { type addUserRequestBodyInterface} from '../interface/trip_interface';
+import { type addUserRequestBodyInterface} from '../interface/interface';
 import fs from 'fs';
 import { promisify } from 'util'; //takes a function and makes it return a promise
 

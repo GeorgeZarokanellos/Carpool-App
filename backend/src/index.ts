@@ -20,6 +20,8 @@ import trip_router from './router/trip_router';
 import profile_router from './router/profile_router';
 import reviews_router from './router/review_router';
 import './controller/authentication_controller';
+import stop_router from './router/stop_router';
+import review_router from './router/review_router';
 // #endregion
 
 // #region SSL certificate
@@ -90,7 +92,8 @@ app.use((req, res, next) => {
 
 app.use(`${basePath}/trips`, trip_router);
 app.use(`${basePath}/profile`, profile_router);
-app.use(`${basePath}/reviews`, reviews_router);
+app.use(`${basePath}/reviews`, review_router);
+app.use(`${basePath}/stops`, stop_router);
 
 // app.get('/', (req:Request,res:Response) => {
 //     res.status(200).send('Home Page');

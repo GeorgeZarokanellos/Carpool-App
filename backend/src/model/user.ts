@@ -1,6 +1,6 @@
 import { DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db';
-import { role } from '../interface/trip_interface';
+import { role } from '../interface/interface';
 
 // user id is not provided when creating a new user since the database will automatically generate it
 // interface UserCreationAttributes extends Optional<UserAttributes, 'userId'> {}  

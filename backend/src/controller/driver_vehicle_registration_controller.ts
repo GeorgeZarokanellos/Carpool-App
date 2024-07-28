@@ -7,7 +7,7 @@ import Driver from '../model/driver';
 import Vehicle from '../model/vehicle';
 import sequelize from '../database/connect_to_db';
 import path from 'path';
-import { carRegisterRequestBodyInterface } from '../interface/trip_interface';
+import { carRegisterRequestBodyInterface } from '../interface/interface';
 
 
 interface MulterFile {

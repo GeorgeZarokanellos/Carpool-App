@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver } from "../model/association";
 import { retrieveUserReviews } from "../util/common_functions";
-import { role } from "../interface/trip_interface";
+import { role } from "../interface/interface";
 
 export const retrieveProfileInfo = (req: Request, res: Response, next: NextFunction): void => {
     async function retrieveProfileInfoAsync(): Promise<void> {
