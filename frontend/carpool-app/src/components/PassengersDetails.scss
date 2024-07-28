@@ -1,9 +1,17 @@
+@import "../global.scss";
+
 .passenger-item{
     width: 100%;
     ion-item{
         width: 100%;
-        *{
-            font-size: 1rem;
+        ion-avatar {
+            width: 35%;
         }
+        .name-rating{
+            @include display-flex-center('both');
+            flex-direction: column;
+            width: 100%;
+            
+            }
     }
 }

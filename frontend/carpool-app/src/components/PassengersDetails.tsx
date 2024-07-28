@@ -17,14 +17,14 @@ export const PassengersDetails: React.FC<PassengersDetailsProps> = ({passengers}
                 const passengerRating = parseFloat(passenger.passenger.overallRating);
                 return (
                     <IonItem key={index} lines="none" >
-                            <IonAvatar style={{marginRight: '1rem'}}>
+                            <IonAvatar >
                                     <img  
                                     src={passenger.passenger.profilePicture? arrayBufferTo64String(passenger.passenger.profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg" }
                                     style={{width: '100%', height: '100%', objectFit: 'cover'}}
                                 />
                             </IonAvatar>
-                            <div style={{display: 'flex', flexDirection: 'column'}}>
-                                <IonLabel >{passenger.passenger.firstName + ' ' + passenger.passenger.lastName}</IonLabel>
+                            <div className="name-rating">
+                                <IonLabel class="ion-text-center">{passenger.passenger.firstName + ' ' + passenger.passenger.lastName} </IonLabel>
                                 <StarRating rating={passengerRating} />
                             </div>
                     </IonItem>
