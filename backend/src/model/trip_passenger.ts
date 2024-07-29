@@ -23,7 +23,7 @@ TripPassenger.init({
 
 }, {
     sequelize,
-    modelName: 'tripPassengers',    // name of the model in the code
+    modelName: 'tripPassenger',    // name of the model in the code
     tableName: 'trip_passengers',    // name of the table in the db
     timestamps: false,
 });
