@@ -1,6 +1,6 @@
 CREATE TYPE user_role AS ENUM ('driver', 'passenger');
 CREATE TYPE start_stop_location AS ENUM ('Πλατεία Γεωργίου', 'Πλατεία Όλγας', 'Πυροσβεστίο', 'Αρέθα');
-CREATE TYPE choice AS ENUM ('accepted', 'declined');
+CREATE TYPE choice AS ENUM ('accepted', 'pending', 'declined');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
 
 CREATE TABLE App_user (
@@ -91,12 +91,15 @@ CREATE TABLE Notifications (
 	notification_id SERIAL,
 	driver_id INT NOT NULL,
     passenger_id INT NOT NULL,
+    trip_id INT NOT NULL,
 	message TEXT NOT NULL,
-	time_sent TIMESTAMP,
-	status choice,
+    stop_id INT NOT NULL,
+	time_sent TIMESTAMP DEFAULT NOW(),
+	status choice default 'pending',
 	PRIMARY KEY (notification_id),
 	FOREIGN KEY (driver_id) REFERENCES Driver (driver_id),
-    FOREIGN KEY (passenger_id) REFERENCES App_user (user_id)
+    FOREIGN KEY (passenger_id) REFERENCES App_user (user_id),
+    FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
 );
 
 -- CREATE TABLE Chat (
