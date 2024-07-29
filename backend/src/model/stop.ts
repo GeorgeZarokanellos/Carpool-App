@@ -6,6 +6,13 @@ class Stop extends Model {
     declare stopLoc: string;
 }
 
+const enum StopLocation {
+    PLATEIA_GEWRGIOU = 'Πλατεία Γεωργίου',
+    PLATEIA_OLGAS = 'Πλατεία Όλγας',
+    PYROSVESTEIO = 'Πυροσβεστίο',
+    ARETHA = 'Αρέθα'
+}
+
 Stop.init({
     stopId: {
         type: DataTypes.INTEGER,
@@ -15,7 +22,7 @@ Stop.init({
     },
     stopLocation: {
         type: DataTypes.ENUM,
-        values: ['Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvesteio', 'Aretha'],
+        values: [StopLocation.PLATEIA_GEWRGIOU, StopLocation.PLATEIA_OLGAS, StopLocation.PYROSVESTEIO, StopLocation.ARETHA],
         allowNull: false,
         field: 'loc'
     },

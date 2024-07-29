@@ -1,6 +1,11 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database/connect_to_db';
 
+const enum Status {
+    PENDING = 'pending',
+    ACCEPTED = 'accepted',
+    REJECTED = 'rejected'
+}
 
 class Notification extends Model {}
 
@@ -13,15 +18,25 @@ Notification.init({
         autoIncrement: true,
         field: 'notification_id'
     },
-    userId:{
+    driverId:{
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'user_id'
+        field: 'driver_id'
+    },
+    passengerId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'passenger_id'
     },
     message: {
         type: DataTypes.STRING,
         allowNull: false,
         field: 'message'
+    },
+    stopId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'stop_id'
     },
     timeSent: {
         type: DataTypes.DATE,
@@ -29,9 +44,10 @@ Notification.init({
         field: 'time_sent'
     },
     status: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM,
+        values: [Status.PENDING, Status.ACCEPTED, Status.REJECTED],
         allowNull: false,
-        field: 'status'
+        field: 'status',
     },
 },
 {
