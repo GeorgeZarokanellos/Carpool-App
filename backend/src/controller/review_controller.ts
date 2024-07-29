@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { retrieveUserReviews } from "../util/common_functions"; 
+import { retrieveUserReviews } from "../controller/user_controller"; 
 import { Review,User, Trip, TripPassenger} from "../model/association";
 import type { reviewRequestBodyInterface } from "../interface/interface";
 import sequelize from '../database/connect_to_db';
