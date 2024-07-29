@@ -9,8 +9,8 @@ import Vehicle from './vehicle';
 
 
 
-TripPassenger.belongsTo(Trip, {foreignKey: 'tripId' , as: 'tripPassenger'});
-Trip.hasMany(TripPassenger, {foreignKey: 'tripId', as: 'tripPassenger'});
+TripPassenger.belongsTo(Trip, {foreignKey: 'tripId' , as: 'tripPassengers'});
+Trip.hasMany(TripPassenger, {foreignKey: 'tripId', as: 'tripPassengers'});
 
 TripPassenger.belongsTo(User, {foreignKey: 'passengerId', as: 'passenger'});
 

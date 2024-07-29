@@ -24,7 +24,7 @@ import './TripInformation.scss';
 import { StarRating } from "../util/common_functions";
 import { TripTitle } from "./TripTitle";
 
-export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, noOfStops, finish, driver, tripCreator}) => {
+export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, finish, driver, tripCreator}) => {
     const itemColor = "";   //TODO change to background color of the app
 
     return (
