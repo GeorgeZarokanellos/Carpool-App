@@ -1,19 +1,17 @@
-import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonFooter, IonGrid, IonHeader, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonText, IonTitle } from "@ionic/react";
+import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop, Trip, TripStops } from "../interfacesAndTypes/Types";
-import { TripTitle } from "./TripTitle";
 import { formatDateTime } from "../util/common_functions";
 import instance from "../AxiosConfig";
 import { TripMapDisplay } from "./TripMapDisplay";
 import './DetailedTripInformation.scss';
 import { PassengersDetails } from "./PassengersDetails";
 import { arrayBufferTo64String, StarRating } from "../util/common_functions";
-
-//icons
+import { UserSelectStopModal } from "./UserSelectStopModal";
 import { calendarOutline, carOutline, peopleOutline, timeOutline } from "ionicons/icons";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import HailIcon from '@mui/icons-material/Hail';
-import { UserSelectStopModal } from "./UserSelectStopModal";
+import { useHistory } from "react-router";
 
 
 interface detailedTripInfoProps {
@@ -25,10 +23,15 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight
     const [tripData, setTripData] = useState<ExtendedTrip>();
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [alertIsOpen, setAlertIsOpen] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
     const [availableStops, setAvailableStops] = useState<Stop[]>([]);
-    const [selectedStop, setSelectedStop] = useState<number>();
+    const [selectedStop, setSelectedStop] = useState<Stop>();
+    const [userIsInTrip, setUserIsInTrip] = useState(false);
+    // const [hasSubmittedRequest, setHasSubmittedRequest] = useState(false);
+    const userId = localStorage.getItem('userId');
+    const userIdNumber = Number(userId);
+    const history = useHistory();
 
     useEffect(() => {
         instance.get(`/trips/${clickedTripId}`)
@@ -55,22 +58,73 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         }
     }, [tripData]);
 
+    useEffect(() => {
+        if(selectedStop){
+            handleRequestForJoiningTrip();
+        } 
+    }, [selectedStop]);
+
     const checkAvailability = () => {
         if(tripData && tripData.driver !== null){
             return tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες';
         } else if (tripData && tripData.driver === null){
             return tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος';
-        }
+        } 
         
     }
 
+    const checkIfUserIsInTrip = () => {
+        if(tripData && tripData.tripPassengers){
+            tripData.tripPassengers.forEach((passenger) => {
+                if(passenger.passengerId === userIdNumber){
+                    setUserIsInTrip(true);
+                }
+            })
+        }
+        if(tripData && tripData.driverId === userIdNumber){
+            setUserIsInTrip(true);
+        }
+    }
+
     const handleRequestForJoiningTrip = () => {
+        console.log('tripData from handle join', tripData);
+        console.log('selectedStop from handle join', selectedStop);
+        checkIfUserIsInTrip();
         
+        if(tripData && tripData.driver && selectedStop){
+            let driverMessage: string = 'Ο χρήστης ' +  + ' ζητά να συμμετάσχει στο ταξίδι σας ';
+
+                tripData.tripStops.forEach((stop) => {
+                    if(stop.stopId === selectedStop.stopId){
+                        driverMessage += 'από την στάση ' + stop.details.stopLocation;
+                    } else {
+                        driverMessage += 'από την νέα στάση ' + stop.details.stopLocation;
+                    }
+                });
+            if(!userIsInTrip){ 
+                instance.post('/notifications', {
+                    driverId: tripData.driverId,
+                    passengerId: Number(userId),
+                    tripId: tripData.tripId,    
+                    message: driverMessage,
+                    stopId: selectedStop.stopId
+                });
+                // setHasSubmittedRequest(true);
+                setShowAlert(true);
+            }
+        } else {
+            console.log('There is no driver or selected stop from handleRequestForJoiningTrip');
+        }
     }
 
     useEffect(() => {
         console.log('tripData', tripData);
     }, [tripData]);
+
+    useEffect(() => {
+        console.log('selectedStop', selectedStop);
+    }, [selectedStop]);
+        
 
     return (
         <IonPage style={{height: `${viewportHeight}`, width: `${viewportWidth}`}}>
@@ -152,18 +206,27 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             
         )}
             <div className="join-leave-buttons">
-                <IonButton shape="round" onClick={() => {setModalIsOpen(true)}} >
+                <IonButton shape="round" onClick={() => {setShowModal(true)}} >
                     {checkAvailability()}
                 </IonButton>
                 <UserSelectStopModal 
-                    isOpen={modalIsOpen} 
-                    onClose={() => setModalIsOpen(false)} 
+                    isOpen={showModal} 
+                    onClose={() => setShowModal(false)} 
                     availableStops={availableStops} 
-                    onSelectStop={(stopId) => {
-                        setSelectedStop(stopId);
-                        setModalIsOpen(false);
-                        handleRequestForJoiningTrip();
+                    onSelectStop={(stop) => {
+                        setSelectedStop(stop);
+                        setShowModal(false);
                     }} 
+                />
+                <IonAlert 
+                    isOpen={showAlert}
+                    onDidDismiss={() => {
+                        setShowAlert(false)
+                        history.push('./');
+                    }} 
+                    message={'Η αίτηση σας στάλθηκε επιτυχώς!'}    
+                    buttons={['OK']}
+                    animated={true}
                 />
             </div>
         </IonPage>
