@@ -28,15 +28,20 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [availableStops, setAvailableStops] = useState<Stop[]>([]);
     const [selectedStop, setSelectedStop] = useState<Stop>();
     const [userIsInTrip, setUserIsInTrip] = useState(false);
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [overallRating, setOverallRating] = useState('');
+    const [requestMade, setRequestMade] = useState(false);
     // const [hasSubmittedRequest, setHasSubmittedRequest] = useState(false);
     const userId = localStorage.getItem('userId');
     const userIdNumber = Number(userId);
     const history = useHistory();
+    
 
     useEffect(() => {
         instance.get(`/trips/${clickedTripId}`)
         .then(response => {
-            // console.log(response.data.tripStops);
+            console.log(response.data);
             setTripData(response.data);
             // console.log('tripData', tripData);
             
@@ -61,8 +66,26 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     useEffect(() => {
         if(selectedStop){
             handleRequestForJoiningTrip();
+            setRequestMade(true);
         } 
     }, [selectedStop]);
+
+    useEffect(() => {
+        const fetchUsersFullName = async () => {
+            try {
+                const response = await instance.get(`/user/${userId}`);
+                // console.log(response.data.firstName);
+                if(response.data){
+                    setFirstName(response.data.firstName);
+                    setLastName(response.data.lastName);
+                    setOverallRating(response.data.overallRating);
+                }
+            } catch (error) {
+                console.log("Error fetching user's full name and rating", error);
+            }
+        }
+        fetchUsersFullName();
+    }, []);
 
     const checkAvailability = () => {
         if(tripData && tripData.driver !== null){
@@ -86,22 +109,28 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         }
     }
 
-    const handleRequestForJoiningTrip = () => {
-        console.log('tripData from handle join', tripData);
-        console.log('selectedStop from handle join', selectedStop);
+    const handleRequestForJoiningTrip = () => {      
         checkIfUserIsInTrip();
         
         if(tripData && tripData.driver && selectedStop){
-            let driverMessage: string = 'Ο χρήστης ' +  + ' ζητά να συμμετάσχει στο ταξίδι σας ';
+            let driverMessage: string = 'Ο/H χρήστης ' + firstName + ' ' + lastName + ' με βαθμολογία ' + overallRating + ' ζητά να συμμετάσχει στο ταξίδι σας ';
+            let stopExists = false;
+            // console.log(selectedStop);
+            // console.log(tripData.tripStops);
+            tripData.tripStops.forEach((stop) => {
+                if(stop.stopId === selectedStop.stopId){
+                    console.log('User selected stop is the same as an existing stop');
+                    stopExists = true;
+                }
+            });
 
-                tripData.tripStops.forEach((stop) => {
-                    if(stop.stopId === selectedStop.stopId){
-                        driverMessage += 'από την στάση ' + stop.details.stopLocation;
-                    } else {
-                        driverMessage += 'από την νέα στάση ' + stop.details.stopLocation;
-                    }
-                });
-            if(!userIsInTrip){ 
+            if(stopExists){
+                driverMessage += 'από την στάση ' + selectedStop.stopLocation;
+            } else {
+                driverMessage += 'από την νέα στάση ' + selectedStop.stopLocation;
+            }
+                
+            if(!userIsInTrip && !requestMade){ 
                 instance.post('/notifications', {
                     driverId: tripData.driverId,
                     passengerId: Number(userId),
@@ -111,6 +140,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 });
                 // setHasSubmittedRequest(true);
                 setShowAlert(true);
+            } else {
+                console.log('User is already in trip');
+                // alert('Είστε ήδη στο ταξίδι');
             }
         } else {
             console.log('There is no driver or selected stop from handleRequestForJoiningTrip');
