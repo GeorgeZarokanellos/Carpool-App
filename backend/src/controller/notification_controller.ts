@@ -10,9 +10,14 @@ export const getNotifications = async(req: Request, res: Response, next: NextFun
         const userId: string = req.params.userId;
         const notifications = await Notification.findAll({
             where: {
-                [Op.or]: [
-                    {driverId: userId},
-                    {passengerId: userId}
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            {driverId: userId},
+                            {passengerId: userId}
+                        ]
+                    },
+                    {status: 'pending'}
                 ]
             }
         });
@@ -77,6 +82,7 @@ export const updateNotification = async(req: Request, res: Response, next: NextF
             if(notification !== null){
                 await notification.update(updateDetails, {transaction});
                 await notification.save({transaction});
+                res.status(200).json(notification);
             } else {
                 res.status(404).send('Notification not found');
             }
@@ -100,6 +106,7 @@ export const deleteNotification = async(req: Request, res: Response, next: NextF
         const notification = await Notification.findByPk(notificationId);
         if(notification !== null){
             await notification.destroy({transaction});
+            res.status(200).send('Notification deleted');
         } else {
             res.status(404).send('Notification not found');
         }
