@@ -1,13 +1,13 @@
 import React from "react";
 import { Stop } from "../interfacesAndTypes/Types";
-import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonModal, IonText, IonTitle } from "@ionic/react";
+import { IonContent, IonItem, IonLabel, IonList, IonModal } from "@ionic/react";
 
 
 interface UserSelectStopModalProps {
     isOpen: boolean;
     onClose: () => void;
     availableStops: Stop[];
-    onSelectStop: (stopId: number) => void;        
+    onSelectStop: (stopId: Stop) => void;        
 }
 
 export const UserSelectStopModal:React.FC<UserSelectStopModalProps> = ({isOpen, onClose, availableStops, onSelectStop}) => {
@@ -21,7 +21,7 @@ export const UserSelectStopModal:React.FC<UserSelectStopModalProps> = ({isOpen, 
                 <IonList>
                     {
                         availableStops.map((stop,index) => (
-                            <IonItem lines="full" button key={index} onClick={() => onSelectStop(stop.stopId)}>
+                            <IonItem lines="full" button key={index} onClick={() => onSelectStop(stop)}>
                                 {stop.stopLocation}
                             </IonItem>
                         ))

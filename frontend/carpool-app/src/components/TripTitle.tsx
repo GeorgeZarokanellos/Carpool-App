@@ -15,7 +15,7 @@ export const TripTitle: React.FC<TripTitleProps> = ({dateOfTrip, tripCreator}) =
                         today.getMonth() === tripDate.getMonth() &&
                         today.getFullYear() === tripDate.getFullYear();
     return (
-        <div className='title'>
+        <div className='title' style={{textAlign: "center", color: 'black'}}>
             {'Διαδρομή του ' + tripCreator.firstName + ' ' + tripCreator.lastName + ' για ' + (isTripToday ? 'σήμερα' : 'της ' + dateOfTrip) }
         </div>
     )
