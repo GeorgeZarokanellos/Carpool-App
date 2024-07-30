@@ -155,7 +155,7 @@ export const retrieveCurrentTrips = async (req: Request, res: Response, next: Ne
                     {
                         [Op.or]: [
                             {driverId: Number(userId)},
-                            {'$tripPassenger.passenger_id$': Number(userId)}
+                            {'$tripPassengers.passenger_id$': Number(userId)}
                         ]
                     },
                     {
@@ -166,8 +166,24 @@ export const retrieveCurrentTrips = async (req: Request, res: Response, next: Ne
             include: [
                 {
                     model: TripPassenger,
-                    as: 'tripPassenger',
+                    as: 'tripPassengers',
                     attributes: ['passengerId'],
+                },
+                {
+                    model: Driver,
+                    as: 'driver',
+                    include: [
+                        {
+                            model: User,
+                            as: 'user',
+                            attributes: ['firstName', 'lastName']
+                        }
+                    ]
+                },
+                {
+                    model :User,
+                    as: 'tripCreator',
+                    attributes: ['firstName', 'lastName']
                 }
             ]
         });
@@ -180,6 +196,30 @@ export const retrieveCurrentTrips = async (req: Request, res: Response, next: Ne
             } else if (err instanceof Error){
                 console.log(err.message); 
                 res.status(500).send('Error retrieving the current trips: ' + err.message);
+            }
+    }
+}
+
+export const retrieveUserNameAndRating = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId: string = req.params.userId;
+
+    try {
+        const userData = await User.findByPk(userId, {
+            attributes: ['firstName', 'lastName', 'overallRating']
+        });
+        if(userData !== null){
+            res.status(200).json(userData);
+        } else {
+            res.status(404).send('User not found');
+        }
+    } catch (err) {
+        console.error(err);
+            if(typeof err === 'string'){
+                console.log("There was an error retrieving the user data: " + err);
+                res.status(500).send('Error retrieving the user data: ' + err);
+            } else if (err instanceof Error){
+                console.log(err.message); 
+                res.status(500).send('Error retrieving the user data: ' + err.message);
             }
     }
 }
