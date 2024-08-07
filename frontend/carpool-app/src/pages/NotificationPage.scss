@@ -1,3 +1,10 @@
-ion-page{
-    
+ion-card {
+    ion-card-content{
+        .trip-display-container{
+            background-color: transparent;
+            *{
+                font-size: 0.95rem;
+            }
+        }
+    }
 }

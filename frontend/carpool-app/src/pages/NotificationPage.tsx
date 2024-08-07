@@ -8,13 +8,22 @@ import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 
 export const NotificationPage:React.FC = () => {
     const [notifications, setNotifications] = React.useState<NotificationInterface[]>([]);
+    const [acceptReject, setAcceptReject] = React.useState<boolean>(false);
     const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('role');
+    let queryParams = new URLSearchParams();
+    if(userId !== null && userRole !== null) {
+        queryParams = new URLSearchParams({
+            userRole
+        });
+    }
 
     useEffect(() => {
         const retrieveNotifications = async () => {
 
             try {
-                const response = await instance.get(`/notifications/${userId}`);
+                console.log(`/notifications/${userId}?${queryParams.toString()}`);
+                const response = await instance.get(`/notifications/${userId}?${queryParams.toString()}`);
                 console.log(response.data);
                 setNotifications(response.data);
             } catch (error) {
@@ -34,7 +43,7 @@ export const NotificationPage:React.FC = () => {
                 {
                     notifications.map((notification, index)=> {
                         return (
-                            <NotificationDisplay key={index} notificationDetails={notification}/>
+                            <NotificationDisplay key={index} notificationDetails={notification} setAcceptReject={setAcceptReject}/>
                         )
                     })
                 }
