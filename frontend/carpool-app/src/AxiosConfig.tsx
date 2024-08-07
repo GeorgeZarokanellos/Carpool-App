@@ -14,7 +14,9 @@ instance.interceptors.response.use(
   response => response,
   error => {
     if(error.response && error.response.status === 401){
-      window.location.href = '/';
+      if(window.location.pathname !== '/'){
+        window.location.href = '/';
+      }
     } 
     return Promise.reject(error);
   }
