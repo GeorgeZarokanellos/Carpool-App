@@ -9,34 +9,41 @@ import { formatDateTime } from "../util/common_functions";
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
+    setAcceptReject?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDetails}) => {
+export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDetails, setAcceptReject}) => {
 
     const [trip, setTrip] = React.useState<ExtendedTrip>();
     const [formattedTime, setFormattedTime] = React.useState<string>('');
     const [formattedDate, setFormattedDate] = React.useState<string>('');
+    const [accepted, setAccepted] = React.useState<boolean>(false);
+    const [rejected, setRejected] = React.useState<boolean>(false);
+    const [displayAcceptReject, setDisplayAcceptReject] = React.useState<boolean>(false);
     const userId = localStorage.getItem('userId');
 
     const handleReject = async () => {
         try {
-            const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του ' + 
-                                        trip?.driver?.user.firstName + trip?.driver?.user.lastName +
+            const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του/της ' + 
+                                        trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
                                         ' στις ' + formattedDate + ' απορρίφθηκε';
-            console.log(passengerMessage);
-            //TODO update notification to rejected
-            instance.put(`/notifications/${notificationDetails.notificationId}`, {
-                status: 'rejected'
+            // console.log(passengerMessage);
+
+            const role: string = await checkIfRecipientIsDriver();
+            //* update notification to rejected
+            await instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                status: 'declined'
             });
             
-            //TODO create notification for the user that requested to join the trip
-            instance.post(`/notifications`, {
+            //* create notification for the user that requested to join the trip
+            await instance.post(`/notifications`, {
                 driverId: notificationDetails.driverId,
                 passengerId: notificationDetails.passengerId,
                 tripId: notificationDetails.tripId,    
                 message: passengerMessage,
                 stopId: notificationDetails.stopId,
-                status: 'declined'
+                status: 'declined',
+                recipient: role
             });
             
         } catch (error) {
@@ -47,28 +54,32 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const handleAccept = async () => {
         try {
             if(Number(userId) === notificationDetails.driverId && trip) {
-                const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του ' + 
-                                            trip?.driver?.user.firstName + trip?.driver?.user.lastName +
-                                            ' στις ' + formattedDate + ' αποδοχθηκε';
-                console.log(passengerMessage);
-                //TODO update notification to accepted
-                instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του/της ' + 
+                                            trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
+                                            ' στις ' + formattedDate + ' εχει γίνει αποδεκτή';
+
+                const role: string = await checkIfRecipientIsDriver();
+
+                //* update notification to accepted
+                await instance.put(`/notifications/${notificationDetails.notificationId}`, {
                     status: 'accepted'
                 });
                 
-                //TODO create notification for the user that requested to join the trip
-                instance.post(`/notifications`, {
+                //* create notification for the user that requested to join the trip
+                await instance.post(`/notifications`, {
                     driverId: notificationDetails.driverId,
                     passengerId: notificationDetails.passengerId,
                     tripId: notificationDetails.tripId,    
                     message: passengerMessage,
                     stopId: notificationDetails.stopId,
-                    status: 'accepted'
+                    status: 'accepted',
+                    recipient: role
                 });
 
                 const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);
 
-                await instance.put(`/trips/${notificationDetails.tripId}`, {
+                //* update trip with new passenger and stop
+                await instance.patch(`/trips/${notificationDetails.tripId}`, {
                     userId: notificationDetails.driverId,
                     addPassengers: [{
                         firstName: passengerName.data.firstName,
@@ -85,6 +96,38 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
         }
     }
 
+    const checkIfRecipientIsDriver = async (): Promise<string> => {
+        try {
+            const recipient = await instance.get(`/user/${notificationDetails.passengerId}`);
+            let role: string;
+            //logic to determine the role of the recipient in order for the notifications to be filtered correctly
+            //when a driver wants to join a trip as a passenger
+            if(recipient.data.role === 'driver' && trip?.driverId !== notificationDetails.passengerId) {
+                role = 'driver';
+            } else {
+                role = 'passenger';
+            }
+            return role;
+        } catch (error) {
+            console.log("Error checking if recipient is driver", error);
+            return ''; // Add a return statement to handle the error case
+        }
+    }
+
+    useEffect(() => {
+        if(accepted) {
+            console.log('Accepted', accepted);
+            handleAccept();
+        }
+    }, [accepted]);
+
+    useEffect(() => {
+        if(rejected) {
+            console.log('Rejected', rejected);
+            handleReject();
+        }
+    }, [rejected]);
+
     useEffect(() => {
         const retrieveTripInfo = async () => {
             try {
@@ -92,7 +135,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 console.log(tripMentioned);
                 setTrip(tripMentioned.data);
 
-                const {formattedDate, formattedTime}  = formatDateTime(tripMentioned.data.startingTime);
+                const {formattedDate, formattedTime} = formatDateTime(tripMentioned.data.startingTime);
                 setFormattedDate(formattedDate);
                 setFormattedTime(formattedTime);
             } catch (error) {
@@ -102,16 +145,25 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
         retrieveTripInfo();
     }, []);
 
+    useEffect(() => {
+        if(trip){
+            if(trip.driverId === Number(userId))
+                setDisplayAcceptReject(true);
+        }
+    }, [trip])
+
     return (
         <IonCard style={{borderRadius: '1rem', color: 'black'}} color="primary">
             <IonCardHeader>
-                <IonCardTitle class="ion-text-center">Αίτηση για συμμετοχή σε διαδρομή σας</IonCardTitle>
+                <IonCardTitle class="ion-text-center">
+                    {displayAcceptReject ? 'Αίτηση για συμμετοχή στη διαδρομή σας' : 'Αίτηση για συμμετοχή σε διαδρομή'}
+                </IonCardTitle>
             </IonCardHeader>
             <IonCardContent style={{padding: '0rem'}}>
                 <div className="notification-message" style={{display: 'flex', textAlign: 'center'}}>
                     {notificationDetails.message}
                 </div>
-                <div style={{width: '100%'}}>
+                <div className="trip-display-container" style={{width: '100%'}}>
                     {
                         
                         trip ? (
@@ -136,10 +188,12 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     }
                 </div>
             </IonCardContent>
-            <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
-                <IonButton color="danger">Απορριψη</IonButton>
-                <IonButton color="success">Αποδοχη</IonButton>
-            </div>
+            { displayAcceptReject &&
+                <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
+                    <IonButton color="danger" onClick={() => setRejected(true)}>Απορριψη</IonButton>
+                    <IonButton color="success" onClick={() => setAccepted(true)}>Αποδοχη</IonButton>
+                </div>
+            }
         </IonCard>
     );
 }
