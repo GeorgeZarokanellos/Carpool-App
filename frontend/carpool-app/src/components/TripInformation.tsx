@@ -89,7 +89,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                 <IonItem lines="none" color={itemColor}>
                                     <div className="position-end">  {/* TODO: Fix the position of this div to the end of the container */}
                                         <IonIcon icon={car} className="car-icon" />
-                                        <p>{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'No driver yet')}</p>
+                                        <IonLabel>{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'No driver yet')}</IonLabel>
                                     </div>
                                 </IonItem>
                                 <IonItem lines="none" color={itemColor}>

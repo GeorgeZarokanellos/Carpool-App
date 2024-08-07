@@ -205,7 +205,7 @@ export const retrieveUserNameAndRating = async (req: Request, res: Response, nex
 
     try {
         const userData = await User.findByPk(userId, {
-            attributes: ['firstName', 'lastName', 'overallRating']
+            attributes: ['firstName', 'lastName', 'overallRating', 'role']
         });
         if(userData !== null){
             res.status(200).json(userData);

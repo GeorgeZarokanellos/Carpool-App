@@ -135,8 +135,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                     driverId: tripData.driverId,
                     passengerId: Number(userId),
                     tripId: tripData.tripId,    
+                    stopId: selectedStop.stopId,
                     message: driverMessage,
-                    stopId: selectedStop.stopId
+                    recipient: 'driver'
                 });
                 // setHasSubmittedRequest(true);
                 setShowAlert(true);

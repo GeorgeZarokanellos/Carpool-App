@@ -46,7 +46,7 @@ app.use(cors({
     origin: 'http://localhost:8100',
     // origin: 'http://192.168.1.22:8100',
     credentials: true,
-    methods: 'GET, POST, PUT, DELETE',
+    methods: 'GET, POST, PUT, PATCH, DELETE',
     AccessControlAllowCredentials: true,
     // allowedHeaders: 'Content-Type, Authorization'
 }));
