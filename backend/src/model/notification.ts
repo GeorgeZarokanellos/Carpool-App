@@ -4,7 +4,7 @@ import sequelize from '../database/connect_to_db';
 const enum Status {
     PENDING = 'pending',
     ACCEPTED = 'accepted',
-    REJECTED = 'rejected'
+    DECLINED = 'declined'
 }
 
 class Notification extends Model {}
@@ -28,32 +28,42 @@ Notification.init({
         allowNull: false,
         field: 'passenger_id'
     },
-    message: {
-        type: DataTypes.STRING,
+    tripId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'message'
+        field: 'trip_id'
     },
     stopId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'stop_id'
     },
+    message: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'message'
+    },
     timeSent: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
         field: 'time_sent'
     },
     status: {
         type: DataTypes.ENUM,
-        values: [Status.PENDING, Status.ACCEPTED, Status.REJECTED],
-        allowNull: false,
+        values: [Status.PENDING, Status.ACCEPTED, Status.DECLINED],
+        allowNull: true,
         field: 'status',
     },
+    recipient: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'recipient'
+    }
 },
 {
     sequelize,
     modelName: 'notification',
-    tableName: 'notification',
+    tableName: 'notifications',
     timestamps: false,
 })
 

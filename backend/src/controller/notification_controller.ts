@@ -4,10 +4,14 @@ import Notification from '../model/notification';
 import { Transaction } from 'sequelize';
 import { notificationInterface, updatedNotificationInterface } from '../interface/interface';
 import { Op } from 'sequelize';
+import { log } from 'winston';
 
 export const getNotifications = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const userId: string = req.params.userId;
+        let userRole: string = req.query.userRole as string; // retrieve user role from query string to filter notifications        
+        
+        log('info', `userId: ${userId}, userRole: ${userRole}`);
         const notifications = await Notification.findAll({
             where: {
                 [Op.and]: [
@@ -17,7 +21,8 @@ export const getNotifications = async(req: Request, res: Response, next: NextFun
                             {passengerId: userId}
                         ]
                     },
-                    {status: 'pending'}
+                    {status: 'pending'},
+                    {recipient: userRole}
                 ]
             }
         });
@@ -56,8 +61,8 @@ export const getNotification = async(req: Request, res: Response, next: NextFunc
 export const createNotification = async(req: Request, res: Response, next: NextFunction) => {
     try {
         await sequelize.transaction(async (transaction: Transaction) => {
-            const {driverId, passengerId, tripId, message, stopId}: notificationInterface = req.body;
-            const notification = await Notification.create({driverId, passengerId, tripId, message, stopId});
+            const {driverId, passengerId, tripId, stopId, message, recipient}: notificationInterface = req.body;
+            const notification = await Notification.create({driverId, passengerId, tripId, stopId, message, recipient});
             await notification.save({transaction}); 
         });
         res.status(201).send('Notification created');  
@@ -87,7 +92,6 @@ export const updateNotification = async(req: Request, res: Response, next: NextF
                 res.status(404).send('Notification not found');
             }
         });
-        res.status(200).send('Notification updated');
     } catch (error) {
         console.error(error);
         if(typeof error === 'string'){
