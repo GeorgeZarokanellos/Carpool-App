@@ -2,15 +2,27 @@ import { type NextFunction, type Request, type Response } from 'express';
 import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../model/association';
 import { type passengerInterface, type updateDetailsInterface, type tripInterface } from '../interface/interface';
 import sequelize from '../database/connect_to_db';
-import { type Transaction } from 'sequelize';
+import { Op, type Transaction } from 'sequelize';
 import logger from '../util/winston';
 import Vehicle from '../model/vehicle';
+import { parse, format } from 'date-fns';
 
 // #region public crud functions
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
     async function returnTripsAsync(): Promise<void> {
+        const userDateTime = req.query.userDate as string;
+        console.log(userDateTime);
+        const parsedDate = parse(userDateTime, 'M/d/yyyy, h:mm:ss a', new Date());
+        console.log(parsedDate);
+        
+        
         try {
             const trips = await Trip.findAll({
+                where: {
+                    startingTime: {
+                        [Op.gt]: parsedDate
+                    }
+                },
                 include: [
                     {
                         model: Driver,
@@ -31,6 +43,7 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                     }
                 ]
             });
+            console.log(trips);
             res.status(200).send(trips);
         } catch (error) {
             console.error(error);
