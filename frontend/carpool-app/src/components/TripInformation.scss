@@ -4,13 +4,15 @@
 .people-icon,
 .pin-icon,
 .location-icon,
-.flag-icon,
-.car-icon, 
-.arrow-icon
+.flag-icon, 
+.arrow-icon,
+.car-icon,
+.start-icon
 {
-  margin-right: 0.5rem;
-  font-size: 1.2rem;
+  margin-right: 0.6rem;
+  font-size: 1.5rem;
 } 
+
 
 .trip-info-container {
   cursor: pointer;
@@ -55,7 +57,13 @@
 
     .position-end{
       @include display-flex-center('both');
+      // flex-direction: column;
       width: 100%;
+
+      ion-label{
+        text-align: center;
+        font-size: 1rem;
+      }
     }
   }
 }
