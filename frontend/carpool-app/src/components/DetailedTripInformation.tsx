@@ -32,6 +32,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [lastName, setLastName] = useState('');
     const [overallRating, setOverallRating] = useState('');
     const [requestMade, setRequestMade] = useState(false);
+    const [availabilityMessage, setAvailabilityMessage] = useState('');
     // const [hasSubmittedRequest, setHasSubmittedRequest] = useState(false);
     const userId = localStorage.getItem('userId');
     const userIdNumber = Number(userId);
@@ -41,9 +42,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     useEffect(() => {
         instance.get(`/trips/${clickedTripId}`)
         .then(response => {
-            console.log(response.data);
+            // console.log(response.data);
             setTripData(response.data);
-            // console.log('tripData', tripData);
             
         })
         .catch(error => {
@@ -59,7 +59,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             })
             .catch(error => {
                 console.log(error);
-            })
+            });
+            checkIfUserIsInTrip();
         }
     }, [tripData]);
 
@@ -71,52 +72,60 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     }, [selectedStop]);
 
     useEffect(() => {
-        const fetchUsersFullName = async () => {
-            try {
-                const response = await instance.get(`/user/${userId}`);
-                // console.log(response.data.firstName);
-                if(response.data){
-                    setFirstName(response.data.firstName);
-                    setLastName(response.data.lastName);
-                    setOverallRating(response.data.overallRating);
-                }
-            } catch (error) {
-                console.log("Error fetching user's full name and rating", error);
-            }
-        }
         fetchUsersFullName();
+        // checkAvailability();
     }, []);
 
+    useEffect(() => {
+        checkAvailability();
+    }, [userIsInTrip, tripData]);
+
+    const fetchUsersFullName = async () => {
+        try {
+            const response = await instance.get(`/user/${userId}`);
+            if(response.data){
+                setFirstName(response.data.firstName);
+                setLastName(response.data.lastName);
+                setOverallRating(response.data.overallRating);
+            }
+        } catch (error) {
+            console.log("Error fetching user's full name and rating", error);
+        }
+    }
+
     const checkAvailability = () => {
-        if(tripData && tripData.driver !== null){
-            return tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες';
+        
+        if(tripData && tripData.driver !== null && !userIsInTrip){
+            setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες');
         } else if (tripData && tripData.driver === null){
-            return tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος';
-        } 
+            setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος');
+        } else if (userIsInTrip){
+            setAvailabilityMessage('Συμμετέχετε ηδη στο ταξιδι');
+        }
         
     }
 
     const checkIfUserIsInTrip = () => {
+        
         if(tripData && tripData.tripPassengers){
             tripData.tripPassengers.forEach((passenger) => {
+                
                 if(passenger.passengerId === userIdNumber){
                     setUserIsInTrip(true);
                 }
             })
         }
+        
         if(tripData && tripData.driverId === userIdNumber){
             setUserIsInTrip(true);
         }
     }
 
     const handleRequestForJoiningTrip = () => {      
-        checkIfUserIsInTrip();
         
         if(tripData && tripData.driver && selectedStop){
             let driverMessage: string = 'Ο/H χρήστης ' + firstName + ' ' + lastName + ' με βαθμολογία ' + overallRating + ' ζητά να συμμετάσχει στο ταξίδι σας ';
             let stopExists = false;
-            // console.log(selectedStop);
-            // console.log(tripData.tripStops);
             tripData.tripStops.forEach((stop) => {
                 if(stop.stopId === selectedStop.stopId){
                     console.log('User selected stop is the same as an existing stop');
@@ -150,19 +159,10 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         }
     }
 
-    useEffect(() => {
-        console.log('tripData', tripData);
-    }, [tripData]);
-
-    useEffect(() => {
-        console.log('selectedStop', selectedStop);
-    }, [selectedStop]);
-        
-
     return (
         <IonPage style={{height: `${viewportHeight}`, width: `${viewportWidth}`}}>
         { tripData && (
-                <IonContent>
+                <IonContent >
                     <TripMapDisplay tripStops={tripData.tripStops}/>
                     <IonTitle class="ion-text-center">Πληροφορίες ταξιδιού</IonTitle>
                     <div className="grid-contents">
@@ -239,8 +239,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             
         )}
             <div className="join-leave-buttons">
-                <IonButton shape="round" onClick={() => {setShowModal(true)}} >
-                    {checkAvailability()}
+                <IonButton disabled={userIsInTrip} shape="round" onClick={() => {setShowModal(true)}} >
+                    {availabilityMessage}
                 </IonButton>
                 <UserSelectStopModal 
                     isOpen={showModal} 
@@ -255,7 +255,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                     isOpen={showAlert}
                     onDidDismiss={() => {
                         setShowAlert(false)
-                        history.push('./');
+                        history.goBack();
                     }} 
                     message={'Η αίτηση σας στάλθηκε επιτυχώς!'}    
                     buttons={['OK']}

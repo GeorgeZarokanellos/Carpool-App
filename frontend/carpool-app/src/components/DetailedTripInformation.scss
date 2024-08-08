@@ -4,6 +4,7 @@ ion-content{
 
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 
     ion-title{
         text-decoration: underline;
