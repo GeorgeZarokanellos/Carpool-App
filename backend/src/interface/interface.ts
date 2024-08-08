@@ -11,9 +11,10 @@ interface tripInterface {
 }
 
 interface updateDetailsInterface {
+    addPassengers?: passengerInterface[];
     removePassengers?: passengerInterface[];
-    addStops?: string[];
-    removeStops?: string[];
+    addStops?: number[];
+    removeStops?: number[];
     updateStartingTime?: Date;
 }
 
@@ -45,16 +46,17 @@ interface reviewRequestBodyInterface {
     reviewDateTime: Date;
 }
 
-interface notificationInterface {
-    driverId: number;
-    passengerId: number;
-    message: string;
-}
-
 interface updatedNotificationInterface {
     driverId: number;
     passengerId: number;
+    tripId: number;
     status: string;
+}
+
+interface notificationInterface extends updatedNotificationInterface {
+    message: string;
+    stopId: number;
+    recipient: string;
 }
 
 export type {
@@ -65,6 +67,7 @@ export type {
     reviewRequestBodyInterface,
     tripInterface,
     notificationInterface,
+    updatedNotificationInterface
 }
 
 export { role };

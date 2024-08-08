@@ -4,11 +4,11 @@ import sequelize from '../database/connect_to_db'; // import the connection inst
 class Trip extends Model {
     declare tripId: number;
     declare tripCreatorId: number;
-    declare driverId: number;
+    declare driverId: number | null;
     declare startLocation: string;
+    declare startingTime: Date;
     declare noOfPassengers: number;
     declare noOfStops: number;
-    declare tripDate: Date;
     declare status: string;
 }
 
