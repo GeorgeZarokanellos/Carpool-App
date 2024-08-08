@@ -1,5 +1,11 @@
 import { TextFieldTypes } from '../interfacesAndTypes/Types';
 
+enum Status {
+    Pending = 'Pending',
+    Accepted = 'Accepted',
+    Rejected = 'Rejected',
+}
+
 export interface TripProps {
     startingTime: string;
     dateOfTrip: string;
@@ -31,4 +37,15 @@ export interface LabelInputProps<T extends string | number > {
 export interface ProfilePictureBuffer {
     type: 'Buffer';
     data: number[];
+}
+
+export interface NotificationInterface {
+        notificationId: number;
+        driverId: number;
+        passengerId: number;
+        tripId: number;
+        message: string;
+        stopId: number;
+        timeSent: string;
+        status: Status;
 }
