@@ -1,6 +1,33 @@
 import { Op } from "sequelize";
 import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver } from "../model/association";
 import { Request, Response, NextFunction } from "express";
+import { Transaction } from "sequelize";
+import sequelize from '../database/connect_to_db';
+import { updatedUserInterface } from "../interface/interface";
+
+export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    await sequelize.transaction(async (transaction: Transaction) => {
+        const userId: string = req.params.userId;
+        const updateDetails: updatedUserInterface = req.body;
+        const user = await User.findByPk(userId, {transaction});
+        if(user !== null){
+            await user.update(updateDetails, {transaction});
+            res.status(200).json({ message: 'User updated successfully', user });
+        } else {
+            res.status(404).send('User not found');
+        }
+    })
+    .catch((err) => {
+        console.error(err);
+        if(typeof err === 'string'){
+            console.log("There was an error updating the user: " + err);
+            res.status(500).send('Error updating user: ' + err);
+        } else if (err instanceof Error){
+            console.log(err.message); 
+            res.status(500).send('Error updating user: ' + err.message);
+        }
+    });
+};
 
 export const retrieveUserReviews = async (userId: string) : Promise<Review[]> => {
     // console.log(user);
@@ -205,7 +232,7 @@ export const retrieveUserNameAndRating = async (req: Request, res: Response, nex
 
     try {
         const userData = await User.findByPk(userId, {
-            attributes: ['firstName', 'lastName', 'overallRating', 'role']
+            attributes: ['firstName', 'lastName', 'overallRating', 'role', 'currentTripId']
         });
         if(userData !== null){
             res.status(200).json(userData);
