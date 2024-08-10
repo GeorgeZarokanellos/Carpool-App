@@ -5,29 +5,29 @@ import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.scss';
 import instance from '../AxiosConfig';
 import { Link, useHistory } from 'react-router-dom';
+import { formatDateTime } from '../util/common_functions';
 
 interface searchTripProps {
   refreshKey: number;
 }
 
-const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
+const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
   const history = useHistory();
-  let formattedDate;
-  let formattedTime;
+
 
   //screen dimensions
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
   useEffect(() => {
+    console.log("refresh key", refreshKey);
+    
+
     const queryParams = new URLSearchParams({
       userDate: new Date().toLocaleString()
     });
-
-    console.log(queryParams.toString());
-    
 
     instance.get(`/trips?${queryParams.toString()}`)
     .then(response => {
@@ -35,14 +35,14 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
       
       setTrips(response.data);
       setFilteredResults(response.data);
-      console.log("filtered data from response", filteredResults);
+      // console.log("filtered data from response", filteredResults);
       
     })
     .catch(error => {
       console.log(error);
     });
   
-  },[refreshKey])
+  },[refreshKey]);
 
   const handleSearch = (event: CustomEvent) => {
     if(event.detail && event.detail.value === ""){
@@ -65,6 +65,10 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
     history.push("/main/create-trip")
   }
 
+  useEffect(() => {
+    console.log("filtered results", filteredResults);
+  }, [filteredResults]);
+
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
       <IonHeader className='ion-no-border'>
@@ -80,12 +84,6 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
           <div className='trips-list-container'>
             {
             filteredResults.map((trip) => {
-              const date = new Date(trip.startingTime);
-                  formattedDate = date.toLocaleDateString();
-                  const timeParts = date.toLocaleTimeString().split(':');              
-                  const amPm = timeParts[2].split(' ');
-                  formattedTime = `${timeParts[0]}:${timeParts[1]} ${amPm[1]}`;
-                  // console.log(formattedTime);
                   if(trip.driver === null || trip.driver === undefined){  //if there is no driver assigned to the trip
                     trip.driver = {
                       user: {
@@ -99,11 +97,11 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
                     }
                   }
               return(
-                <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId} style={{textDecoration: "none"}}>
-                  <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem'}}>
+                <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
+                  <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '1.5rem 0rem'}} >
                       <TripInformation 
-                        startingTime={formattedTime} 
-                        dateOfTrip={formattedDate} 
+                        startingTime={formatDateTime(trip.startingTime).formattedTime} 
+                        dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
                         origin={trip.startLocation}
                         noOfPassengers={trip.noOfPassengers}
                         noOfStops={trip.noOfStops}
