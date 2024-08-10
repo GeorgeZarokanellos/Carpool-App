@@ -9,8 +9,6 @@ interface PassengersDetailsProps{
 }
 
 export const PassengersDetails: React.FC<PassengersDetailsProps> = ({passengers}) => {
-    console.log("Passengers: ", passengers);
-    // console.log("Passenger profile picture: ", arrayBufferTo64String(passengers[0].passenger.profilePicture));
     return (
         <div className="passenger-item">
             {passengers.map((passenger,index) => {

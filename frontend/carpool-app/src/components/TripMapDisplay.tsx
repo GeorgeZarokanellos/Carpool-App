@@ -9,11 +9,9 @@ interface TripMapDisplayProps {
 }
 
 export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops}) => { 
-    console.log(tripStops);
     const startPosition: LatLngExpression = [38.24368476508384, 21.73212381808353]; 
     const endPosition: LatLngExpression = [38.28623463741879, 21.785996514033958]; //prutaneia    
     const stops: LatLngExpression[] = tripStops.map(stop => [stop.details.lat, stop.details.lng]);
-    // console.log(stops);
     
     return (
         <MapContainer center={[38.24368476508384, 21.73212381808353]} zoom={14} className='map'>

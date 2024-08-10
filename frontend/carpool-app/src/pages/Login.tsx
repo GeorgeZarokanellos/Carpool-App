@@ -10,6 +10,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const history = useHistory();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent the form from refreshing the page
@@ -42,7 +44,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
       <IonHeader>
         <IonToolbar>
           <IonTitle class='ion-text-center'>Login</IonTitle>

@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../model/association';
-import { type passengerInterface, type updateDetailsInterface, type tripInterface } from '../interface/interface';
+import { type passengerInterface, type updatedTripInterface , type tripInterface } from '../interface/interface';
 import sequelize from '../database/connect_to_db';
 import { Op, type Transaction } from 'sequelize';
 import logger from '../util/winston';
@@ -12,7 +12,9 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
     async function returnTripsAsync(): Promise<void> {
         const userDateTime = req.query.userDate as string;
         console.log(userDateTime);
-        const parsedDate = parse(userDateTime, 'M/d/yyyy, h:mm:ss a', new Date());
+        const modifiedDateTime = userDateTime.replace('μ.μ.', 'PM');
+        console.log(modifiedDateTime);
+        const parsedDate = parse(modifiedDateTime, 'M/d/yyyy, h:mm:ss a', new Date());
         console.log(parsedDate);
         
         
@@ -43,7 +45,7 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                     }
                 ]
             });
-            console.log(trips);
+            // console.log(trips);
             res.status(200).send(trips);
         } catch (error) {
             console.error(error);
@@ -168,7 +170,7 @@ export const createTrip = async(req: Request,res: Response, next: NextFunction):
 export const updateTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
         const tripId: string = req.params.id;  
-        const updateDetails: updateDetailsInterface = req.body;   
+        const updateDetails: updatedTripInterface = req.body;   
         const trip = await Trip.findByPk(tripId);
         if(trip === null)
             throw new Error(`Trip with id ${tripId} not found!`);

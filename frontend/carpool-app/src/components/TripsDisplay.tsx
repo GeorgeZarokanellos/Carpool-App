@@ -13,8 +13,8 @@ export const TripsDisplay: React.FC<TripsDisplayProps> = ({tripsCreated, tripsPa
     const [selectedList, setSelectedList] = useState<string>("created");
     const [createdTripsButtonColor, setCreateTripsButtonColor] = useState<string>('secondary');
     const [participatedTripsButtonColor, setParticipatedTripsButtonColor] = useState<string>('primary');
-    console.log("Trips participated: ", tripsParticipated);
-    console.log("Trips created; ", tripsCreated);
+    // console.log("Trips participated: ", tripsParticipated);
+    // console.log("Trips created; ", tripsCreated);
         
     return (
         <div className="trip-display-container">
