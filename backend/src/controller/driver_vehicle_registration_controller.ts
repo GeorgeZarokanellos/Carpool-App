@@ -9,6 +9,7 @@ import sequelize from '../database/connect_to_db';
 import path from 'path';
 import { carRegisterRequestBodyInterface } from '../interface/interface';
 
+//TODO decide what to do with license id
 
 interface MulterFile {
     mimetype: string;
@@ -128,27 +129,32 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
     async function addDriverAndVehicleAsync(): Promise<void> {
         try {
             const driverId = Number(req.params.id);
+            
             // const bodyFromMulter: carRegisterRequestBodyInterface =  await findUsernameAndInitializeUpload(req, res, next, driverId);
             const {plateNumber, maker, model, noOfSeats}: carRegisterRequestBodyInterface = req.body;
             // console.log('body from multer', bodyFromMulter);
 
             // create a new driver and vehicle in a transaction
-            
             await sequelize.transaction(async (transaction) => {
-                const newDriver = await Driver.create({ // create a new driver
-                    // fields
+                const newDriver = await Driver.create({ 
                     driverId,
-                    licenseId: 90341, // temporary value
+                    licenseId: 90342, // temporary value
                 }, {transaction});
 
-                const newVehicle = await Vehicle.create({   // create a new vehicle
-                    // fields   
+                const newVehicle = await Vehicle.create({
                     plateNumber,
                     ownerId: driverId,  
                     maker,
                     model,
                     noOfSeats
                 }, {transaction});
+
+                const user = await User.findByPk(driverId, {transaction});
+                if(user !== null)
+                    await user.update({role: 'driver'}, {transaction}); // update the role of the user to driver
+                else {
+                    console.error('User not found');
+                }
 
                 res.status(200).send({driver: newDriver, vehicle: newVehicle, files: req.files});
             });
