@@ -89,6 +89,11 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         notificationDetails.stopId
                     ]
                 });
+
+                //* update user's current trip 
+                await instance.put(`${notificationDetails.passengerId}`, {
+                    currentTripId: notificationDetails.tripId
+                })
             }
             
         } catch (error) {
