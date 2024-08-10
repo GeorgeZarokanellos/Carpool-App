@@ -38,10 +38,10 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
             </IonCardHeader>
             <IonCardContent className="ion-justify-content-center ion-align-items-center custom-content">
                 <IonGrid>
-                    <IonRow>
-                        {/* <div className="start-finish"> */}
+                    <IonRow >
+                        <div className="start-finish">
                             <IonCol size="5">
-                                <div className="column-contents">
+                                <div className="start-location">
                                     <IonItem lines="none" color={itemColor} >
                                         <IonIcon icon={locationOutline} slot="start" className="location-icon" />
                                         <IonLabel >
@@ -50,24 +50,22 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                     </IonItem>
                                 </div>
                             </IonCol>
-                            <IonCol size="2">
-                                {/* <div className="arrow-container"> */}
-                                        {/* <svg xmlns="http://www.w3.org/2000/svg" width="100px" height="30px" viewBox="0 0 16 16"><path fill="black" fillRule="evenodd" d="M10.159 10.72a.75.75 0 1 0 1.06 1.06l3.25-3.25L15 8l-.53-.53l-3.25-3.25a.75.75 0 0 0-1.061 1.06l1.97 1.97H1.75a.75.75 0 1 0 0 1.5h10.379z" clipRule="evenodd"></path></svg> */}
-                                {/* </div> */}
+                            <IonCol size="1">
+                                <div className="arrow-container">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="100px" height="30px" viewBox="0 0 16 16"><path fill="black" fillRule="evenodd" d="M10.159 10.72a.75.75 0 1 0 1.06 1.06l3.25-3.25L15 8l-.53-.53l-3.25-3.25a.75.75 0 0 0-1.061 1.06l1.97 1.97H1.75a.75.75 0 1 0 0 1.5h10.379z" clipRule="evenodd"></path></svg>
+                                </div>
                             </IonCol>
-                            <IonCol size="5">
-                                <div className="column-contents">
-                                    <IonItem lines="none" color={itemColor}>
-                                        <div className="destination">
-                                            <IonIcon icon={flagOutline} slot="start" className="flag-icon" />
+                            <IonCol size="6">
+                                <div className="end-location">
+                                    <IonItem lines="none" color={itemColor} >
                                             <IonText>
                                                 {finish}
                                             </IonText>
-                                        </div>
+                                            <IonIcon icon={flagOutline} slot="end" className="flag-icon" />
                                     </IonItem>
                                 </div>
                             </IonCol>
-                        {/* </div> */}
+                        </div>
                     </IonRow>
                     <IonRow>
                         <IonCol size="6" >
@@ -78,22 +76,18 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                 </IonItem>
                                 <IonItem lines="none" color={itemColor}>
                                     <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
-                                    {noOfPassengers}
+                                    {noOfPassengers + ' Συνεπιβ.'}
                                 </IonItem>
                             </div>
                         </IonCol>
                         <IonCol size="6" className="">
                             <div className="driver-info-container">
-                                <IonItem lines="none" color={itemColor}>
-                                    <div className="position-end">  
+                                <IonItem lines="none" color={itemColor} >
                                         <IonLabel >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'No driver yet')}</IonLabel>
-                                    </div>
+                                        {/* <IonIcon icon={carOutline} className="car-icon" slot="end"/> */}
                                 </IonItem>
-                                <IonItem lines="none" color={itemColor}>
-                                    <div className="position-end">
-                                        <IonIcon icon={carOutline} className="car-icon" />
-                                        < StarRating rating={Number(driver.user.overallRating)}/>
-                                    </div>
+                                <IonItem lines="none" color={itemColor} >
+                                    < StarRating rating={Number(driver.user.overallRating)}/>
                                 </IonItem>
                             </div>
                         </IonCol>

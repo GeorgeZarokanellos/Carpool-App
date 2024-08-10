@@ -4,15 +4,18 @@
 .people-icon,
 .pin-icon,
 .location-icon,
-.flag-icon, 
 .arrow-icon,
-.car-icon,
 .start-icon
 {
   margin-right: 0.6rem;
   font-size: 1.5rem;
 } 
 
+.flag-icon,
+.car-icon {
+  font-size: 1.5rem;
+  margin-left: 0.6rem;
+}
 
 .trip-info-container {
   cursor: pointer;
@@ -29,9 +32,16 @@
     padding: 0;
   }
 
-  .column-contents{
+  .start-location,
+  .end-location,
+  .time-people-container,
+  .driver-info-container {
     width: 100%;
-    max-width: 10rem; //TODO: change it to adjust the space from the arrow
+  }
+
+  .end-location {
+    display: flex;
+    justify-content: center;
   }
 
   .arrow-container{
@@ -45,27 +55,7 @@
     flex-direction: row;
   }
 
-  .time-people-container{
-    width: 100%;
-  }
-  
-  .driver-info-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 
-    .position-end{
-      @include display-flex-center('both');
-      // flex-direction: column;
-      width: 100%;
-
-      ion-label{
-        text-align: center;
-        font-size: 1rem;
-      }
-    }
-  }
 }
 
 .start-finish {
