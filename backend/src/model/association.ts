@@ -25,7 +25,7 @@ Trip.belongsTo(User, {foreignKey: 'tripCreatorId', targetKey: 'userId', as: 'tri
 Driver.belongsTo(User, {foreignKey: 'driverId', as: 'user'});
 
 Driver.hasOne(Vehicle, {foreignKey: 'ownerId', as: 'vehicle'});
-Vehicle.belongsTo(Driver, {foreignKey: 'driverId', as: 'driver'});
+Vehicle.belongsTo(Driver, {foreignKey: 'ownerId', as: 'driver'});
 
 Review.belongsTo(User, {foreignKey: 'reviewerId', targetKey: 'userId', as: 'reviewer'});
 User.hasMany(Review, {foreignKey: 'reviewerId', as: 'reviewer'});
