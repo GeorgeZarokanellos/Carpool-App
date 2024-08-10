@@ -19,9 +19,6 @@ interface detailedTripInfoProps {
 }
 
 export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ clickedTripId }) => {
-
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight
     const [tripData, setTripData] = useState<ExtendedTrip>();
     const [showModal, setShowModal] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
@@ -159,109 +156,112 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         }
     }
 
-    return (
-        <IonPage style={{height: `${viewportHeight}`, width: `${viewportWidth}`}}>
-        { tripData && (
+    if(tripData){
+
+        return (
+            <>
                 <IonContent >
-                    <TripMapDisplay tripStops={tripData.tripStops}/>
-                    <IonTitle class="ion-text-center">Πληροφορίες ταξιδιού</IonTitle>
-                    <div className="grid-contents">
-                        <IonGrid>    
-                            <IonRow>
-                                <IonCol size="7" className="custom-col">
-                                    <div className="passenger-time-info">
-                                        <IonItem lines="none" >
-                                            <IonIcon icon={timeOutline} slot="start" className="time-icon" />
-                                            <IonLabel>{formatDateTime(tripData.startingTime).formattedTime}</IonLabel>
-                                            <IonIcon icon={calendarOutline} className="calendar-icon" style={{marginRight: '0.5rem'}} />
-                                            <IonLabel>{formatDateTime(tripData.startingTime).formattedDate}</IonLabel>
-                                        </IonItem>
-                                        <IonItem lines="none">
-                                            <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
-                                            <IonLabel>{(tripData.driver? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' συνεπιβάτες'} </IonLabel>
-                                        </IonItem>
-                                        <div className="passengers-details">
-                                            <PassengersDetails passengers={tripData.tripPassengers}/>
-                                        </div>
-                                        <div className="driver-details">
-                                            <IonItem lines="none" >
-                                                <IonIcon icon={carOutline} slot="start" className="car-icon" />
-                                                <IonLabel>Οδηγός</IonLabel>
-                                            </IonItem>
-                                            <IonItem lines="none">
-                                                <IonAvatar style={{marginRight: '1rem', width: "50%"}}>
-                                                    <img  
-                                                        src={tripData.driver? arrayBufferTo64String(tripData.driver.user.profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg" }
-                                                        style={{width: '100%', height: '100%', objectFit: 'cover'}}
-                                                    />
-                                                </IonAvatar>
-                                                <div style={{display: "flex", flexDirection: "column"}}>
-                                                    <IonLabel>{tripData.driver?.user.firstName + ' ' + tripData.driver?.user.lastName}</IonLabel>
-                                                    <StarRating rating={Number(tripData.driver?.user.overallRating) } />
-                                                </div>
-                                            </IonItem>
-                                        </div>
-                                    </div>
-                                </IonCol>
-                                <IonCol size="5" className="custom-col">
-                                    <div className="stops-display" style={{ overflowY: 'auto', maxHeight: '100%' }}>
-                                        <div className="stop">
-                                            <LocationOnIcon />
-                                            {tripData.startLocation}
-                                        </div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                                            <g transform="scale(1.4)">{/* used to scale only the arrow and not the rectangle around it */}
-                                                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2"/>
-                                            </g>
-                                        </svg>
-                                        {tripData.tripStops.map((stop, index) => {
-                                            return (
-                                                <>
-                                                    <div key={index} className="stop">
-                                                        <HailIcon />
-                                                        {stop.details.stopLocation}
-                                                    </div>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                                                        <g transform="scale(1.4)">{/* used to scale only the arrow and not the rectangle around it */}
-                                                            <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2"/>
-                                                        </g>
-                                                    </svg>
-                                                </>
-                                            );
-                                        })}
-                                        Πρυτανεία
-                                    </div>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                    </div>
+                  <TripMapDisplay tripStops={tripData.tripStops} />
+                  <IonTitle class="ion-text-center">Πληροφορίες ταξιδιού</IonTitle>
+                  <div className="grid-contents">
+                    <IonGrid>
+                      <IonRow>
+                        <IonCol size="7" className="custom-col">
+                          <div className="passenger-time-info">
+                            <IonItem lines="none">
+                              <IonIcon icon={timeOutline} slot="start" className="time-icon" />
+                              <IonLabel>{formatDateTime(tripData.startingTime).formattedTime}</IonLabel>
+                              <IonIcon icon={calendarOutline} className="calendar-icon" style={{ marginRight: '0.5rem' }} />
+                              <IonLabel>{formatDateTime(tripData.startingTime).formattedDate}</IonLabel>
+                            </IonItem>
+                            <IonItem lines="none">
+                              <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
+                              <IonLabel>
+                                {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' συνεπιβάτες'}
+                              </IonLabel>
+                            </IonItem>
+                            <div className="passengers-details">
+                              <PassengersDetails passengers={tripData.tripPassengers} />
+                            </div>
+                            <div className="driver-details">
+                              <IonItem lines="none">
+                                <IonIcon icon={carOutline} slot="start" className="car-icon" />
+                                <IonLabel>Οδηγός</IonLabel>
+                              </IonItem>
+                              <IonItem lines="none">
+                                <IonAvatar style={{ marginRight: '1rem', width: "50%" }}>
+                                  <img
+                                    src={tripData.driver ? arrayBufferTo64String(tripData.driver.user.profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg"}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  />
+                                </IonAvatar>
+                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                  <IonLabel>{tripData.driver?.user.firstName + ' ' + tripData.driver?.user.lastName}</IonLabel>
+                                  <StarRating rating={Number(tripData.driver?.user.overallRating)} />
+                                </div>
+                              </IonItem>
+                            </div>
+                          </div>
+                        </IonCol>
+                        <IonCol size="5" className="custom-col">
+                          <div className="stops-display" style={{ overflowY: 'auto', maxHeight: '100%' }}>
+                            <div className="stop">
+                              <LocationOnIcon />
+                              {tripData.startLocation}
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
+                              <g transform="scale(1.4)">
+                                {/* used to scale only the arrow and not the rectangle around it */}
+                                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
+                              </g>
+                            </svg>
+                            {tripData.tripStops.map((stop, index) => (
+                              <div key={index} className="stop">
+                                <HailIcon />
+                                {stop.details.stopLocation}
+                              </div>
+                            ))}
+                            Πρυτανεία
+                          </div>
+                        </IonCol>
+                      </IonRow>
+                    </IonGrid>
+                  </div>
                 </IonContent>
-            
-        )}
-            <div className="join-leave-buttons">
-                <IonButton disabled={userIsInTrip} shape="round" onClick={() => {setShowModal(true)}} >
-                    {availabilityMessage}
-                </IonButton>
-                <UserSelectStopModal 
-                    isOpen={showModal} 
-                    onClose={() => setShowModal(false)} 
-                    availableStops={availableStops} 
-                    onSelectStop={(stop) => {
+                <div className="join-leave-buttons">
+                    <IonButton disabled={userIsInTrip} shape="round" onClick={() => { setShowModal(true) }}>
+                        {availabilityMessage}
+                    </IonButton>
+                    <UserSelectStopModal
+                        isOpen={showModal}
+                        onClose={() => setShowModal(false)}
+                        availableStops={availableStops}
+                        onSelectStop={(stop) => {
                         setSelectedStop(stop);
                         setShowModal(false);
-                    }} 
-                />
-                <IonAlert 
-                    isOpen={showAlert}
-                    onDidDismiss={() => {
-                        setShowAlert(false)
+                        }}
+                    />
+                    <IonAlert
+                        isOpen={showAlert}
+                        onDidDismiss={() => {
+                        setShowAlert(false);
                         history.goBack();
-                    }} 
-                    message={'Η αίτηση σας στάλθηκε επιτυχώς!'}    
-                    buttons={['OK']}
-                    animated={true}
-                />
-            </div>
-        </IonPage>
-    )
+                        }}
+                        message={'Η αίτηση σας στάλθηκε επιτυχώς!'}
+                        buttons={['OK']}
+                        animated={true}
+                    />
+                </div>
+            </>  
+        )
+    } else {
+        return (
+            <IonPage>
+                <IonContent>
+                    <IonTitle>Δεν υπάρχουν πληροφορίες για το ταξίδι</IonTitle>
+                </IonContent>
+            </IonPage>
+        )
+    }
+
 }
