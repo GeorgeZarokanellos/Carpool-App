@@ -19,6 +19,7 @@ class User extends Model {
     declare overallPoints: number;
     declare noOfReviews: number;
     declare profilePicture: Blob;
+    declare currentTripId: number;
 }
 
 User.init({ 
@@ -85,6 +86,11 @@ User.init({
     profilePicture: {
         type: DataTypes.BLOB,
         field: 'profile_picture'
+    },
+    currentTripId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'current_trip_id'
     }
 
 }, 
