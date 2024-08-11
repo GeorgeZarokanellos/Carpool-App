@@ -11,6 +11,7 @@ import { UserSelectStopModal } from "./UserSelectStopModal";
 import { calendarOutline, carOutline, peopleOutline, timeOutline } from "ionicons/icons";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import HailIcon from '@mui/icons-material/Hail';
+import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import { useHistory } from "react-router";
 
 
@@ -28,6 +29,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [overallRating, setOverallRating] = useState('');
+    const [currentTripId, setCurrentTripId] = useState(null);
     const [requestMade, setRequestMade] = useState(false);
     const [availabilityMessage, setAvailabilityMessage] = useState('');
     // const [hasSubmittedRequest, setHasSubmittedRequest] = useState(false);
@@ -64,7 +66,6 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     useEffect(() => {
         if(selectedStop){
             handleRequestForJoiningTrip();
-            setRequestMade(true);
         } 
     }, [selectedStop]);
 
@@ -84,6 +85,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 setFirstName(response.data.firstName);
                 setLastName(response.data.lastName);
                 setOverallRating(response.data.overallRating);
+                setCurrentTripId(response.data.currentTripId);
             }
         } catch (error) {
             console.log("Error fetching user's full name and rating", error);
@@ -96,14 +98,18 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες');
         } else if (tripData && tripData.driver === null){
             setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος');
-        } else if (userIsInTrip){
-            setAvailabilityMessage('Συμμετέχετε ηδη στο ταξιδι');
+        } else if (tripData && userIsInTrip){
+            if(currentTripId !== null && currentTripId === tripData.tripId){
+                setAvailabilityMessage('Συμμετέχετε ηδη στο ταξιδι');
+            } else {
+                setAvailabilityMessage('Συμμετέχετε ηδη σε αλλο ταξιδι');
+            }
         }
         
     }
 
     const checkIfUserIsInTrip = () => {
-        
+        //user is in trip passengers
         if(tripData && tripData.tripPassengers){
             tripData.tripPassengers.forEach((passenger) => {
                 
@@ -112,8 +118,12 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 }
             })
         }
-        
+        //user is driver
         if(tripData && tripData.driverId === userIdNumber){
+            setUserIsInTrip(true);
+        }
+        //user is in another trip
+        if(currentTripId !== null ){
             setUserIsInTrip(true);
         }
     }
@@ -137,6 +147,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             }
                 
             if(!userIsInTrip && !requestMade){ 
+                console.log('Notification created', userIsInTrip, requestMade);
+                
                 instance.post('/notifications', {
                     driverId: tripData.driverId,
                     passengerId: Number(userId),
@@ -145,7 +157,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                     message: driverMessage,
                     recipient: 'driver'
                 });
-                // setHasSubmittedRequest(true);
+                setRequestMade(true);
                 setShowAlert(true);
             } else {
                 console.log('User is already in trip');
@@ -219,8 +231,15 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                               <div key={index} className="stop">
                                 <HailIcon />
                                 {stop.details.stopLocation}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
+                                  <g transform="scale(1.4)">
+                                    {/* used to scale only the arrow and not the rectangle around it */}
+                                    <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
+                                  </g>
+                                </svg>
                               </div>
                             ))}
+                            <SportsScoreIcon />
                             Πρυτανεία
                           </div>
                         </IonCol>
