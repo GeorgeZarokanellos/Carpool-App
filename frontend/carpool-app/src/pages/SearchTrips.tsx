@@ -29,6 +29,8 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
       userDate: new Date().toLocaleString()
     });
 
+    console.log("query params", queryParams.toString());
+    
     instance.get(`/trips?${queryParams.toString()}`)
     .then(response => {
       console.log("response from server", response.data);

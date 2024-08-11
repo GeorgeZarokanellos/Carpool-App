@@ -77,7 +77,8 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 });
 
                 const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);
-
+                console.log("Notification details", notificationDetails);
+                
                 //* update trip with new passenger and stop
                 await instance.patch(`/trips/${notificationDetails.tripId}`, {
                     userId: notificationDetails.driverId,
@@ -91,7 +92,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 });
 
                 //* update user's current trip 
-                await instance.put(`${notificationDetails.passengerId}`, {
+                await instance.put(`/user/${notificationDetails.passengerId}`, {
                     currentTripId: notificationDetails.tripId
                 })
             }

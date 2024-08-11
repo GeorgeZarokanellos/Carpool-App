@@ -38,6 +38,9 @@ export const UserRegistration: React.FC = () => {
       profilePicture 
     }
 
+    console.log("user registration request body", userRegistrationRequestBody);
+    
+
     //loop through the string/number entries of the object and append the the formData var
     Object.entries(userRegistrationRequestBody).forEach(([key, value])=>{
       if(value !== undefined && key !== 'profilePicture'){

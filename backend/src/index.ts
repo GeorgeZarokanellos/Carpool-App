@@ -2,14 +2,12 @@
 import express, {type Request, type Response, type NextFunction} from 'express';
 
 import dotenv from 'dotenv';
-dotenv.config({path: '/home/george/Desktop/Carpool App/backend/env'});
+dotenv.config({path: '/home/george/Desktop/CarpoolApp/backend/env'});
 import { env } from './config';
-
 import http, { METHODS } from 'http';
 import https from 'https';
 import fs from 'fs'; // to read ssl certificate
 import bodyParser from 'body-parser';
-
 import passport, { use } from 'passport'; // import passport
 import session from 'express-session';
 // #endregion

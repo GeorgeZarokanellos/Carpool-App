@@ -17,6 +17,7 @@ CREATE TABLE App_user (
 	overall_points INT DEFAULT 0,
     no_of_reviews INT DEFAULT 0,
     profile_picture bytea,
+    current_trip_id INT,
 	PRIMARY KEY (user_id)
 );
 
