@@ -36,14 +36,13 @@ export const TripsDisplay: React.FC<TripsDisplayProps> = ({tripsCreated, tripsPa
             <div className="trips-list">
                 {selectedList === "created" ? (
                     <IonList >
-                        {tripsCreated.map((trip) => {
+                        {tripsCreated.map((trip, index) => {
                             console.log(trip);
-                            
                             // console.log(review.reviewDateTime);
                             // console.log(review);
                             
                             return (
-                                <IonItem lines='none' key={trip.tripId} className="trip-container" color='primary'>
+                                <IonItem lines='none' key={`${trip.tripId}-${index}`} className="trip-container" color='primary'>
                                     <div className="item-contents">
                                         <IonText>
                                             {"Completed at " + formatDateTime(trip.startingTime).formattedDate + 
