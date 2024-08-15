@@ -22,7 +22,6 @@ const Login: React.FC = () => {
       password: password    
     })
     .then((response) => {
-      console.log("response",response);
       
       if(response.data.message === 'Login successful'){
         history.push('/main/search-trips');

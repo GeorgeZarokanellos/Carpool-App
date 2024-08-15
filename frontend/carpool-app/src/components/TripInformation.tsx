@@ -76,18 +76,18 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                 </IonItem>
                                 <IonItem lines="none" color={itemColor}>
                                     <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
-                                    {noOfPassengers + ' Συνεπιβ.'}
+                                    {noOfPassengers + (driver? + 1 : + 0) + ( driver ? '/' + driver.vehicle.noOfSeats + ' Συνεπιβ.' : ' Συνεπιβ.')}
                                 </IonItem>
                             </div>
                         </IonCol>
                         <IonCol size="6" className="">
                             <div className="driver-info-container">
                                 <IonItem lines="none" color={itemColor} >
-                                        <IonLabel >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'No driver yet')}</IonLabel>
+                                        <IonLabel >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'Δεν υπάρχει οδηγός ακόμα')}</IonLabel>
                                         {/* <IonIcon icon={carOutline} className="car-icon" slot="end"/> */}
                                 </IonItem>
                                 <IonItem lines="none" color={itemColor} >
-                                    < StarRating rating={Number(driver.user.overallRating)}/>
+                                    < StarRating rating={Number(driver?.user.overallRating)}/>
                                 </IonItem>
                             </div>
                         </IonCol>

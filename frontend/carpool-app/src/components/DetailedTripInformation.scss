@@ -75,10 +75,8 @@ ion-content{
     }
 
 }
-.join-leave-buttons{
+.join-button{
     width: 100%;
     @include display-flex-center('justify');
     background-color: white;
-    
-
 }

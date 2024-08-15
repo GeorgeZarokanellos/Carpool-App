@@ -4,14 +4,15 @@ import Notification from '../model/notification';
 import { Transaction } from 'sequelize';
 import { notificationInterface, updatedNotificationInterface } from '../interface/interface';
 import { Op } from 'sequelize';
-import { log } from 'winston';
 
 export const getNotifications = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const userId: string = req.params.userId;
         let userRole: string = req.query.userRole as string; // retrieve user role from query string to filter notifications        
         
-        log('info', `userId: ${userId}, userRole: ${userRole}`);
+        
+
+        console.log('info', `userId: ${userId}, userRole: ${userRole}`);
         const notifications = await Notification.findAll({
             where: {
                 [Op.and]: [
