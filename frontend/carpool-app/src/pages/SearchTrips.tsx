@@ -22,14 +22,12 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const viewportHeight = window.innerHeight;
 
   useEffect(() => {
-    console.log("refresh key", refreshKey);
-    
-
+    // console.log("refresh key", refreshKey);
     const queryParams = new URLSearchParams({
       userDate: new Date().toLocaleString()
     });
 
-    console.log("query params", queryParams.toString());
+    // console.log("query params", queryParams.toString());
     
     instance.get(`/trips?${queryParams.toString()}`)
     .then(response => {
@@ -67,9 +65,9 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
     history.push("/main/create-trip")
   }
 
-  useEffect(() => {
-    console.log("filtered results", filteredResults);
-  }, [filteredResults]);
+  // useEffect(() => {
+  //   console.log("filtered results", filteredResults);
+  // }, [filteredResults]);
 
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
@@ -86,18 +84,6 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
           <div className='trips-list-container'>
             {
             filteredResults.map((trip) => {
-                  if(trip.driver === null || trip.driver === undefined){  //if there is no driver assigned to the trip
-                    trip.driver = {
-                      user: {
-                        firstName: 'No driver yet',
-                        lastName: '',
-                        overallRating: '0'
-                      },
-                      vehicle: {
-                        noOfSeats: 0
-                      }
-                    }
-                  }
               return(
                 <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
                   <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '1.5rem 0rem'}} >
@@ -108,7 +94,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
                         noOfPassengers={trip.noOfPassengers}
                         noOfStops={trip.noOfStops}
                         finish='Πρυτανεία'
-                        driver={{user: trip.driver.user}}
+                        driver={trip.driver? {user: trip.driver.user, vehicle: trip.driver.vehicle} : undefined}
                         tripCreator ={trip.tripCreator}
                         />
                       

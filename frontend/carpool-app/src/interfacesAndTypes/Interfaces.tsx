@@ -13,13 +13,18 @@ export interface TripProps {
     noOfPassengers: number;
     noOfStops: number;
     finish: string;
-    driver: {
+    driver?: {
         user: {
             firstName: string,
             lastName: string,
             overallRating: string,
             profilePicture?: ProfilePictureBuffer
         };
+        vehicle: {
+            noOfSeats: number;
+            maker: string;
+            model: string;
+        }
     };
     tripCreator:{
         firstName: string,
@@ -48,4 +53,5 @@ export interface NotificationInterface {
         stopId: number;
         timeSent: string;
         status: Status;
+        recipient: string;
 }
