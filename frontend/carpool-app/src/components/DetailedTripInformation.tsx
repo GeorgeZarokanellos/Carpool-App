@@ -17,9 +17,10 @@ import { useHistory } from "react-router";
 
 interface detailedTripInfoProps {
     clickedTripId: number;
+    page: string;
 }
 
-export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ clickedTripId }) => {
+export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ clickedTripId, page }) => {
     const [tripData, setTripData] = useState<ExtendedTrip>();
     const [showModal, setShowModal] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
@@ -32,8 +33,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [currentTripId, setCurrentTripId] = useState(null);
     const [requestMade, setRequestMade] = useState(false);
     const [availabilityMessage, setAvailabilityMessage] = useState('');
-    // const [hasSubmittedRequest, setHasSubmittedRequest] = useState(false);
+    const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
     const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('role');
     const userIdNumber = Number(userId);
     const history = useHistory();
     
@@ -41,7 +43,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     useEffect(() => {
         instance.get(`/trips/${clickedTripId}`)
         .then(response => {
-            // console.log(response.data);
+            console.log(response.data);
             setTripData(response.data);
             
         })
@@ -93,17 +95,23 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     }
 
     const checkAvailability = () => {
-        
-        if(tripData && tripData.driver !== null && !userIsInTrip){
-            setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες');
-        } else if (tripData && tripData.driver === null){
-            setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος');
-        } else if (tripData && userIsInTrip){
-            if(currentTripId !== null && currentTripId === tripData.tripId){
-                setAvailabilityMessage('Συμμετέχετε ηδη στο ταξιδι');
+        if(tripData && page === 'detailedInfo'){
+          if(tripData.driver !== null && !userIsInTrip){
+              setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες');
+          } else if (tripData.driver === null && !userIsInTrip){
+            if(userRole === 'passenger'){
+              setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος');
             } else {
-                setAvailabilityMessage('Συμμετέχετε ηδη σε αλλο ταξιδι');
+              setAvailabilityMessage('Αίτηση για συμμετοχή ως οδηγός');
             }
+          } else if (userIsInTrip){
+              if(currentTripId !== null && currentTripId === tripData.tripId){
+                  setAvailabilityMessage('Συμμετέχετε ηδη στο ταξιδι');
+              } else {
+                  setAvailabilityMessage('Συμμετέχετε ηδη σε αλλο ταξιδι');
+              }
+          }
+
         }
         
     }
@@ -121,6 +129,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         //user is driver
         if(tripData && tripData.driverId === userIdNumber){
             setUserIsInTrip(true);
+            setTripDriverCurrentUser(true); //current user is the driver of the trip
         }
         //user is in another trip
         if(currentTripId !== null ){
@@ -168,6 +177,18 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         }
     }
 
+    const tripIsInProgress = () => {
+      //add logic to check if trip is in progress
+      //display button to end trip
+      return (
+        <div className="join-button">
+          <IonButton shape="round" >
+            Τερματισμος ταξιδιου
+          </IonButton>
+        </div>
+      )
+    }
+
     if(tripData){
 
         return (
@@ -208,7 +229,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                                   />
                                 </IonAvatar>
                                 <div style={{ display: "flex", flexDirection: "column" }}>
-                                  <IonLabel>{tripData.driver?.user.firstName + ' ' + tripData.driver?.user.lastName}</IonLabel>
+                                  <IonLabel>{tripData.driver? tripData.driver.user.firstName + ' ' + tripData.driver.user.lastName : 'Δεν υπαρχει οδηγός ακόμα'}</IonLabel>
                                   <StarRating rating={Number(tripData.driver?.user.overallRating)} />
                                 </div>
                               </IonItem>
@@ -247,30 +268,36 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                     </IonGrid>
                   </div>
                 </IonContent>
-                <div className="join-leave-buttons">
-                    <IonButton disabled={userIsInTrip} shape="round" onClick={() => { setShowModal(true) }}>
-                        {availabilityMessage}
-                    </IonButton>
-                    <UserSelectStopModal
-                        isOpen={showModal}
-                        onClose={() => setShowModal(false)}
-                        availableStops={availableStops}
-                        onSelectStop={(stop) => {
-                        setSelectedStop(stop);
-                        setShowModal(false);
-                        }}
-                    />
-                    <IonAlert
-                        isOpen={showAlert}
-                        onDidDismiss={() => {
-                        setShowAlert(false);
-                        history.goBack();
-                        }}
-                        message={'Η αίτηση σας στάλθηκε επιτυχώς!'}
-                        buttons={['OK']}
-                        animated={true}
-                    />
-                </div>
+                {
+                  page === "detailedInfo" && 
+                    <div className="join-button">
+                      <IonButton disabled={userIsInTrip} shape="round" onClick={() => { setShowModal(true) }}>
+                          {availabilityMessage}
+                      </IonButton>
+                      <UserSelectStopModal
+                          isOpen={showModal}
+                          onClose={() => setShowModal(false)}
+                          availableStops={availableStops}
+                          onSelectStop={(stop) => {
+                          setSelectedStop(stop);
+                          setShowModal(false);
+                          }}
+                      />
+                      <IonAlert
+                          isOpen={showAlert}
+                          onDidDismiss={() => {
+                          setShowAlert(false);
+                          history.goBack();
+                          }}
+                          message={'Η αίτηση σας στάλθηκε επιτυχώς!'}
+                          buttons={['OK']}
+                          animated={true}
+                      />
+                    </div>
+                } 
+                {
+                  page === "currentTrip" && tripDriverCurrentUser && tripIsInProgress() 
+                }
             </>  
         )
     } else {

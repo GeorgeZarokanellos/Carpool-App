@@ -11,7 +11,7 @@ export const DetailedTripInformationPage: React.FC = () => {
     const viewportHeight = window.innerHeight;
     return (
         <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
-            <DetailedTripInformation clickedTripId={tripIdNumber} />
+            <DetailedTripInformation clickedTripId={tripIdNumber} page="detailedInfo"/>
         </IonPage>
     )
 }

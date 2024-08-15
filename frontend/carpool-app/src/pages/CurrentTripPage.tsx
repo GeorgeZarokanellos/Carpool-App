@@ -42,7 +42,7 @@ export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) =>
     // }
     return (
         <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
-            <DetailedTripInformation clickedTripId={Number(currentTripId)} />    
+            <DetailedTripInformation clickedTripId={Number(currentTripId)} page="currentTrip"/>    
         </IonPage>
     )
 }
