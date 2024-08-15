@@ -5,7 +5,7 @@ import sequelize from '../database/connect_to_db';
 import { Op, type Transaction } from 'sequelize';
 import logger from '../util/winston';
 import Vehicle from '../model/vehicle';
-import { parse, format } from 'date-fns';
+import { parse } from 'date-fns';
 
 // #region public crud functions
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
@@ -34,6 +34,11 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                                 model: User,
                                 as: 'user',
                                 attributes: ['firstName', 'lastName', 'overallRating']
+                            },
+                            {
+                                model: Vehicle,
+                                as: 'vehicle',
+                                attributes: ['noOfSeats', 'maker', 'model']
                             }
                         ]
                     },

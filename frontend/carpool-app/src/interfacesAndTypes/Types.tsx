@@ -39,6 +39,8 @@ export type Trip = {
         };
         vehicle: {
             noOfSeats: number;
+            maker: string;
+            model: string;
         }
     } | null;
     tripCreator: {

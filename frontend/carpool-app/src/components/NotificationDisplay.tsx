@@ -9,10 +9,9 @@ import { formatDateTime } from "../util/common_functions";
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
-    setAcceptReject?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDetails, setAcceptReject}) => {
+export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDetails}) => {
 
     const [trip, setTrip] = React.useState<ExtendedTrip>();
     const [formattedTime, setFormattedTime] = React.useState<string>('');
@@ -179,12 +178,17 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                 origin={trip.startLocation}
                                 noOfPassengers={trip.noOfPassengers}
                                 noOfStops={trip.noOfStops}
-                                finish='Πρητανεία'
+                                finish='Πρυτανεία'
                                 driver={{
                                         user: trip.driver? trip.driver.user : {
-                                            firstName: 'No driver yet',
+                                            firstName: 'Δεν υπάρχει οδηγός ακόμα',
                                             lastName: '',
                                             overallRating: '0'
+                                        },
+                                        vehicle: trip.driver? trip.driver.vehicle : {
+                                            noOfSeats: 0,
+                                            maker: '',
+                                            model: ''
                                         }
                                     }
                                 }
