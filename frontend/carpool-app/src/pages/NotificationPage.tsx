@@ -1,5 +1,5 @@
 import { IonContent, IonHeader, IonPage, IonTitle } from "@ionic/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import './NotificationPage.scss';
 import { NotificationDisplay } from "../components/NotificationDisplay";
@@ -7,8 +7,9 @@ import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 
 
 export const NotificationPage:React.FC = () => {
-    const [notifications, setNotifications] = React.useState<NotificationInterface[]>([]);
-    const [acceptReject, setAcceptReject] = React.useState<boolean>(false);
+    const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
+    const [filteredNotifications, setFilteredNotifications] = useState<NotificationInterface[]>([]);
+
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
     let queryParams = new URLSearchParams();
@@ -34,6 +35,22 @@ export const NotificationPage:React.FC = () => {
         retrieveNotifications();
     }, []);
 
+    useEffect(() => {
+        notifications.forEach( (notification) => {
+            
+            if(notification.driverId === Number(userId) && notification.recipient === 'driver') {
+                setFilteredNotifications([...filteredNotifications, notification]);
+            } else if(notification.passengerId === Number(userId) && notification.recipient === 'passenger') {
+                setFilteredNotifications([...filteredNotifications, notification]);
+            }
+        });
+    }, [notifications]);
+
+    useEffect(() => {
+        if(filteredNotifications)
+            console.log("Filtered Notifications", filteredNotifications);
+    }, [filteredNotifications]);
+
     return (
         <IonPage>
             <IonHeader>
@@ -41,9 +58,9 @@ export const NotificationPage:React.FC = () => {
             </IonHeader>
             <IonContent>
                 {
-                    notifications.map((notification, index)=> {
+                    filteredNotifications && filteredNotifications.map((notification, index)=> {
                         return (
-                            <NotificationDisplay key={index} notificationDetails={notification} setAcceptReject={setAcceptReject}/>
+                            <NotificationDisplay key={index} notificationDetails={notification}/>
                         )
                     })
                 }
