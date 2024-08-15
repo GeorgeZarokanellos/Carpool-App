@@ -27,6 +27,8 @@ export const NewTrip: React.FC = () => {
     const [showAlert] = useState(role === 'driver');
     const [startingLocations, setStartingLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
+    const [firstPassengerId, setFirstPassengerId] = useState<number | null>(null);
+    const [firstPassengerCredentials, setFirstPassengerCredentials] = useState<{firstName: string, lastName: string} | null>(null);
     //starting location picker
     const [showStartingLocationPicker, setShowStartingLocationPicker] = useState(false);
     const [startLocationPickerKey, setStartLocationPickerKey] = useState<number>(0);
@@ -105,6 +107,36 @@ export const NewTrip: React.FC = () => {
         setPassengerCredentials([...passengerCredentials, {firstName: firstName, lastName: lastName}]);
     }
 
+    const retrieveCurrentUsersCredentials = async () => {
+        try {
+            await instance.get(`/user/${userIdInt}`)
+            .then(response => {
+                console.log(response.data);
+                setFirstPassengerCredentials({
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName
+                });
+            });
+        } catch (error) {
+            console.log("Error retrieving user's credentials", error);
+        }
+    }
+
+    useEffect(() => {   //retrieve the first passenger's credentials
+        if(firstPassengerId){
+            retrieveCurrentUsersCredentials();
+        }
+
+    },[firstPassengerId]);
+
+    useEffect(() => {   //add the first passenger's credentials to the passengerCredentials array
+        if(firstPassengerCredentials && passengerCredentials.length === 0){
+            setPassengerCredentials([firstPassengerCredentials]);
+        } else if(firstPassengerCredentials){
+            setPassengerCredentials([...passengerCredentials, firstPassengerCredentials]);
+        }
+    }, [firstPassengerCredentials]);
+
     useEffect(() => {
         console.log("Request Body: ", requestBody);
     }, [passengerCredentials]);
@@ -134,7 +166,8 @@ export const NewTrip: React.FC = () => {
                                 text: 'no',
                                 role: 'cancel',
                                 handler: () => {
-                                    console.log("The user is a passenger");
+                                    //if the driver wants to be passenger 
+                                    setFirstPassengerId(userIdInt);
                                 }
                             }
                         ]}
