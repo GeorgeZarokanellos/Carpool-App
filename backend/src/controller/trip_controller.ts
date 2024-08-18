@@ -125,6 +125,8 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
             });
             if(trip === null)
                 throw new Error(`Trip with id ${TripId} not found!`);
+            console.log(trip);  
+            
             res.status(200).send(trip);
         } catch (error) {
             console.error(error);
@@ -258,28 +260,34 @@ const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, 
         logger.info("passengers: ", passengers, "from addPassengersToTrip");
         const firstNames = passengers.map(passenger => passenger.firstName);    // returns an array of first names of the passengers to be added
         const lastNames = passengers.map(passenger => passenger.lastName);      // returns an array of last names of the passengers to be added
-        const tripPassengersNames = await User.findAll({    // returns an array of user objects
+        const usersToBeAdded = await User.findAll({    // returns an array of user objects
             where:
             {
                 firstName: firstNames,
                 lastName: lastNames
             }
         });
-        logger.info("trip passengers names: ", tripPassengersNames);
-        if(tripPassengersNames.length !== passengers.length)
+        logger.info("trip passengers names: ", usersToBeAdded);
+        if(usersToBeAdded.length !== passengers.length)
             throw new Error('One or more passengers were not found!');
-        const tripPassengersIds = tripPassengersNames.map(passenger => passenger.userId);   // returns an array of the users ids to be added as passengers
-        logger.info("trip passengers ids: ", tripPassengersIds);        
-        const tripPassengersAddPromises = tripPassengersIds.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
+        const userIdsToAdd = usersToBeAdded.map(passenger => passenger.userId);   // returns an array of the users ids to be added as passengers
+        logger.info("trip passengers ids: ", userIdsToAdd);        
+        const tripPassengersAddPromises = userIdsToAdd.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
             return await TripPassenger.create({
                 tripId: Trip.tripId,
                 passengerId
             },{transaction});
         });
-        await Promise.all(tripPassengersAddPromises);    // wait for all the promises to be resolved
-        logger.debug("trip: " , Trip, "tripPassengersIds: ", tripPassengersIds);
-        logger.debug("trip passengers: ", Trip.noOfPassengers, "tripPassengersIds.length: ", tripPassengersIds.length);
-        Trip.noOfPassengers += tripPassengersIds.length;
+        const updateCurrentTripIdPromises = userIdsToAdd.map(async passengerId => {
+            return await User.update({
+                currentTripId: Trip.tripId
+            },{where: {userId: passengerId}, transaction});
+        });
+        const allPromises = [...tripPassengersAddPromises, ...updateCurrentTripIdPromises];
+        await Promise.all(allPromises);    // wait for all the promises to be resolved
+        logger.debug("trip: " , Trip, "tripPassengersIds: ", userIdsToAdd);
+        logger.debug("trip passengers: ", Trip.noOfPassengers, "tripPassengersIds.length: ", userIdsToAdd.length);
+        Trip.noOfPassengers += userIdsToAdd.length;
         logger.debug("trip passengers: ", Trip.noOfPassengers);
         await Trip.save({transaction});  // save the updated trip
     } 
