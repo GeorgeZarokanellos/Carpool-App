@@ -2,14 +2,12 @@
 import express, {type Request, type Response, type NextFunction} from 'express';
 
 import dotenv from 'dotenv';
-dotenv.config({path: '/home/george/Desktop/Carpool App/backend/env'});
+dotenv.config({path: '/home/george/Desktop/CarpoolApp/backend/env'});
 import { env } from './config';
-
 import http, { METHODS } from 'http';
 import https from 'https';
 import fs from 'fs'; // to read ssl certificate
 import bodyParser from 'body-parser';
-
 import passport, { use } from 'passport'; // import passport
 import session from 'express-session';
 // #endregion
@@ -20,6 +18,10 @@ import trip_router from './router/trip_router';
 import profile_router from './router/profile_router';
 import reviews_router from './router/review_router';
 import './controller/authentication_controller';
+import stop_router from './router/stop_router';
+import review_router from './router/review_router';
+import notification_router from './router/notification_router';
+import user_router from './router/user_router';
 // #endregion
 
 // #region SSL certificate
@@ -42,7 +44,7 @@ app.use(cors({
     origin: 'http://localhost:8100',
     // origin: 'http://192.168.1.22:8100',
     credentials: true,
-    methods: 'GET, POST, PUT, DELETE',
+    methods: 'GET, POST, PUT, PATCH, DELETE',
     AccessControlAllowCredentials: true,
     // allowedHeaders: 'Content-Type, Authorization'
 }));
@@ -90,7 +92,10 @@ app.use((req, res, next) => {
 
 app.use(`${basePath}/trips`, trip_router);
 app.use(`${basePath}/profile`, profile_router);
-app.use(`${basePath}/reviews`, reviews_router);
+app.use(`${basePath}/reviews`, review_router);
+app.use(`${basePath}/stops`, stop_router);
+app.use(`${basePath}/notifications`, notification_router);
+app.use(`${basePath}/user`, user_router);
 
 // app.get('/', (req:Request,res:Response) => {
 //     res.status(200).send('Home Page');

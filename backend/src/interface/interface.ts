@@ -10,11 +10,16 @@ interface tripInterface {
     startingTime: Date;
 }
 
-interface updateDetailsInterface {
+interface updatedTripInterface {
+    addPassengers?: passengerInterface[];
     removePassengers?: passengerInterface[];
-    addStops?: string[];
-    removeStops?: string[];
+    addStops?: number[];
+    removeStops?: number[];
     updateStartingTime?: Date;
+}
+
+interface updatedUserInterface {
+    currentTripId: number;
 }
 
 enum role {
@@ -45,13 +50,29 @@ interface reviewRequestBodyInterface {
     reviewDateTime: Date;
 }
 
+interface updatedNotificationInterface {
+    driverId: number;
+    passengerId: number;
+    tripId: number;
+    status: string;
+}
+
+interface notificationInterface extends updatedNotificationInterface {
+    message: string;
+    stopId: number;
+    recipient: string;
+}
+
 export type {
     passengerInterface,
-    updateDetailsInterface,
+    updatedTripInterface ,
     addUserRequestBodyInterface,
     carRegisterRequestBodyInterface,
     reviewRequestBodyInterface,
-    tripInterface
+    tripInterface,
+    notificationInterface,
+    updatedNotificationInterface,
+    updatedUserInterface
 }
 
 export { role };

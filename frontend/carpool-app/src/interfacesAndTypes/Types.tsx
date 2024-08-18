@@ -6,9 +6,9 @@ enum Role {
 }
 
 enum Status {
-    PLANNING = "Planning",
-    IN_PROGRESS = "In Progress",
-    COMPLETED = "Completed",
+    PLANNING = "planning",
+    IN_PROGRESS = "in_progress",
+    COMPLETED = "completed",
 }
 
 
@@ -22,24 +22,58 @@ export type User = {
 
 export type Trip = {
     tripId: number;
-    driverId: number;
+    tripCreatorId: number;
+    driverId: number | null;
     startLocation: string;
     startingTime: string;
     noOfPassengers: number;
     noOfStops: number;
-    status: Status;
-    driver?: {
+    status: string;
+    driver: {
+        licenseId?: number;
         user: {
             firstName: string;
             lastName: string;
             overallRating: string;
+            profilePicture?: ProfilePictureBuffer;
+        };
+        vehicle: {
+            noOfSeats: number;
+            maker: string;
+            model: string;
         }
-    };
+    } | null;
     tripCreator: {
         firstName: string;
         lastName: string;
     }
 }
+
+export type ExtendedTrip = Trip & {
+    tripPassengers: tripPassenger[];
+    tripStops: TripStops
+}
+
+export type tripPassenger = {
+    passengerId: number;
+    //TODO change passenger to details
+    passenger: {
+        firstName: string;
+        lastName: string;
+        overallRating: string;
+        profilePicture?: ProfilePictureBuffer;
+    }
+}
+
+export type TripStops = {
+    stopId: number;
+    details: {
+        stopLocation: string;
+        lat: number;
+        lng: number;
+    }
+}[];
+
 
 export type TextFieldTypes = 'date' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url' | 'time';
 
@@ -84,4 +118,6 @@ export type autoMaker = {
 export type Stop = {
     stopId: number;
     stopLocation: string;
+    lat: number;
+    lng: number;
 }

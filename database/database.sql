@@ -1,6 +1,6 @@
 CREATE TYPE user_role AS ENUM ('driver', 'passenger');
-CREATE TYPE start_stop_location AS ENUM ('Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvestio', 'Aretha');
-CREATE TYPE choice AS ENUM ('accept', 'decline');
+CREATE TYPE start_stop_location AS ENUM ('Πλατεία Γεωργίου', 'Πλατεία Όλγας', 'Πυροσβεστίο', 'Αρέθα');
+CREATE TYPE choice AS ENUM ('accepted', 'pending', 'declined');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
 
 CREATE TABLE App_user (
@@ -17,6 +17,7 @@ CREATE TABLE App_user (
 	overall_points INT DEFAULT 0,
     no_of_reviews INT DEFAULT 0,
     profile_picture bytea,
+    current_trip_id INT,
 	PRIMARY KEY (user_id)
 );
 
@@ -89,13 +90,18 @@ CREATE TABLE Reviews (
 
 CREATE TABLE Notifications (
 	notification_id SERIAL,
-	user_id INT NOT NULL,
-	mess_cont TEXT NOT NULL,
-	time_sent TIMESTAMP,
-	is_read BOOLEAN DEFAULT FALSE,
-	accept_decline choice,
+	driver_id INT NOT NULL,
+    passenger_id INT NOT NULL,
+    trip_id INT NOT NULL,
+    stop_id INT NOT NULL,
+	message TEXT NOT NULL,
+	time_sent TIMESTAMP DEFAULT NOW(),
+	status choice default 'pending',
+    recipient user_role NOT NULL,
 	PRIMARY KEY (notification_id),
-	FOREIGN KEY (user_id) REFERENCES App_user (user_id)
+	FOREIGN KEY (driver_id) REFERENCES Driver (driver_id),
+    FOREIGN KEY (passenger_id) REFERENCES App_user (user_id),
+    FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
 );
 
 -- CREATE TABLE Chat (

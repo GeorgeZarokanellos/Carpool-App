@@ -1,55 +1,58 @@
 import React, { useEffect, useState} from 'react';
-import { IonButton, IonContent, IonFooter, IonGrid, IonHeader, IonItem, IonPage, IonRow, IonSearchbar } from '@ionic/react';
+import { IonButton, IonContent, IonGrid, IonHeader, IonPage, IonRow, IonSearchbar } from '@ionic/react';
 import { TripInformation } from '../components/TripInformation';
 import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.scss';
 import instance from '../AxiosConfig';
 import { Link, useHistory } from 'react-router-dom';
+import { formatDateTime } from '../util/common_functions';
 
 interface searchTripProps {
   refreshKey: number;
 }
 
-const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
+const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
   const history = useHistory();
-  let formattedDate;
-  let formattedTime;
+
 
   //screen dimensions
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
   useEffect(() => {
-    instance.get('/trips')
+    // console.log("refresh key", refreshKey);
+    const queryParams = new URLSearchParams({
+      userDate: new Date().toLocaleString()
+    });
+
+    // console.log("query params", queryParams.toString());
+    
+    instance.get(`/trips?${queryParams.toString()}`)
     .then(response => {
-      console.log('response',response);
+      console.log("response from server", response.data);
+      
       setTrips(response.data);
       setFilteredResults(response.data);
-      console.log("filtered data from response", filteredResults);
+      // console.log("filtered data from response", filteredResults);
       
     })
     .catch(error => {
       console.log(error);
     });
   
-  },[refreshKey])
+  },[refreshKey]);
 
   const handleSearch = (event: CustomEvent) => {
-    console.log(event.detail.value);
     if(event.detail && event.detail.value === ""){
       console.log("Event content empty", event.detail.value);
       setFilteredResults(trips);
-      console.log("Filtered results", filteredResults);
-      
+      // console.log("Filtered results", filteredResults);
     }
     else {
-      console.log(filteredResults.map((trip)=> trip.startLocation));
-      
-      console.log(filteredResults.filter(trip => trip.startLocation.toLowerCase().includes(event.detail.value.toLowerCase())));
       setFilteredResults(trips.filter(trip => trip.startLocation.toLowerCase().includes(event.detail.value.toLowerCase())));
-      console.log("filtered results", filteredResults);
+      // console.log("filtered results", filteredResults);
       
     }
   }
@@ -61,6 +64,10 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
   const transferToNewTripPage = () => {
     history.push("/main/create-trip")
   }
+
+  // useEffect(() => {
+  //   console.log("filtered results", filteredResults);
+  // }, [filteredResults]);
 
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
@@ -74,43 +81,28 @@ const SearchTrips: React.FC<searchTripProps> = (refreshKey) => {
       </IonHeader>
       <IonContent >
         <IonGrid >
-          <IonRow className='ion-justify-content-center ion-align-items-center'>
-            {filteredResults.map((trip) => {
-              // console.log(trip);
-              // console.log(trip.driver.user);
-              
-              const date = new Date(trip.startingTime);
-              formattedDate = date.toLocaleDateString();
-              const timeParts = date.toLocaleTimeString().split(':');              
-              const amPm = timeParts[2].split(' ');
-              formattedTime = `${timeParts[0]}:${timeParts[1]} ${amPm[1]}`;
-              // console.log(formattedTime);
-              if(trip.driver === null || trip.driver === undefined){  //if there is no driver assigned to the trip
-                trip.driver = {
-                  user: {
-                    firstName: 'No driver yet',
-                    lastName: '',
-                    overallRating: '0'
-                  }
-                }
-              }
+          <div className='trips-list-container'>
+            {
+            filteredResults.map((trip) => {
               return(
-                <Link to={{pathname: `/${trip.tripId}`, state: {tripId: trip.tripId}}} key={trip.tripId} style={{textDecoration: "none"}}>
-                  <TripInformation 
-                    startingTime={formattedTime} 
-                    dateOfTrip={formattedDate} 
-                    origin={trip.startLocation}
-                    noOfPassengers={trip.noOfPassengers}
-                    noOfStops={trip.noOfStops}
-                    finish='Πρητανεία'
-                    driver={{user: trip.driver.user}}
-                    tripCreator ={trip.tripCreator}
-                    />
+                <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
+                  <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '1.5rem 0rem'}} >
+                      <TripInformation 
+                        startingTime={formatDateTime(trip.startingTime).formattedTime} 
+                        dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
+                        origin={trip.startLocation}
+                        noOfPassengers={trip.noOfPassengers}
+                        noOfStops={trip.noOfStops}
+                        finish='Πρυτανεία'
+                        driver={trip.driver? {user: trip.driver.user, vehicle: trip.driver.vehicle} : undefined}
+                        tripCreator ={trip.tripCreator}
+                        />
+                      
+                  </IonRow>
                 </Link>
-                  
               )
             })}
-          </IonRow>
+          </div>
         </IonGrid>
       </IonContent>
       <div className='create-trip-button-container'>

@@ -27,6 +27,8 @@ export const NewTrip: React.FC = () => {
     const [showAlert] = useState(role === 'driver');
     const [startingLocations, setStartingLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
+    const [firstPassengerId, setFirstPassengerId] = useState<number | null>(null);
+    const [firstPassengerCredentials, setFirstPassengerCredentials] = useState<{firstName: string, lastName: string} | null>(null);
     //starting location picker
     const [showStartingLocationPicker, setShowStartingLocationPicker] = useState(false);
     const [startLocationPickerKey, setStartLocationPickerKey] = useState<number>(0);
@@ -57,36 +59,83 @@ export const NewTrip: React.FC = () => {
         })
     },[]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        requestBody = {
-            tripCreatorId: userIdInt,
-            driverId: tripDriverId,
-            startLocation: selectedStartingLocation,
-            startingTime: selectedDate.toISOString(),
-            stops: stops,
-            passengers: passengerCredentials
-        }
+        try {
+            requestBody = {
+                tripCreatorId: userIdInt,
+                driverId: tripDriverId,
+                startLocation: selectedStartingLocation,
+                startingTime: selectedDate.toISOString(),
+                stops: stops,
+                passengers: passengerCredentials
+            }
 
-        instance.post('/trips', requestBody)
-        .then(response => {
-            console.log(response.data);
-            alert("Trip created successfully");
+            const response = await instance.post('/trips', requestBody);
+            if(response){
+                console.log(response.data);
+                const newTripId = response.data.tripId;
+                alert("Trip created successfully");
+
+                //update the current trip of the user to the newly created one
+                await instance.put(`/user/${userIdInt}`, {
+                    currentTripId: newTripId
+                }).
+                then((response) => {
+                    console.log(response.data);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+            } else {
+                console.log("Trip creation failed");
+                setPassengerCredentials([]);
+                alert("Trip creation failed");
+            }
+
             history.push('/main/search-trips');
-        })
-        .catch(error => {
-            console.log(error);
-            //reset the passenger credentials
-            setPassengerCredentials([]);
-            alert("Trip creation failed");
-        });
+        } catch (error) {
+            console.log("Error creating trip or updating user", error);
+            
+        }
 
     }
     
     const updatePassengerCredentials = (firstName: string, lastName: string) => {
         setPassengerCredentials([...passengerCredentials, {firstName: firstName, lastName: lastName}]);
     }
+
+    const retrieveCurrentUsersCredentials = async () => {
+        try {
+            await instance.get(`/user/${userIdInt}`)
+            .then(response => {
+                console.log(response.data);
+                setFirstPassengerCredentials({
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName
+                });
+            });
+        } catch (error) {
+            console.log("Error retrieving user's credentials", error);
+        }
+    }
+
+    useEffect(() => {   //retrieve the first passenger's credentials
+        if(firstPassengerId){
+            retrieveCurrentUsersCredentials();
+        }
+
+    },[firstPassengerId]);
+
+    useEffect(() => {   //add the first passenger's credentials to the passengerCredentials array
+        if(firstPassengerCredentials && passengerCredentials.length === 0){
+            setPassengerCredentials([firstPassengerCredentials]);
+        } else if(firstPassengerCredentials){
+            setPassengerCredentials([...passengerCredentials, firstPassengerCredentials]);
+        }
+    }, [firstPassengerCredentials]);
 
     useEffect(() => {
         console.log("Request Body: ", requestBody);
@@ -117,7 +166,8 @@ export const NewTrip: React.FC = () => {
                                 text: 'no',
                                 role: 'cancel',
                                 handler: () => {
-                                    console.log("The user is a passenger");
+                                    //if the driver wants to be passenger 
+                                    setFirstPassengerId(userIdInt);
                                 }
                             }
                         ]}
@@ -251,6 +301,7 @@ export const NewTrip: React.FC = () => {
                                     showDefaultButtons={true}
                                     //minimum date is the day after the current
                                     min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()}
+                                    hourCycle="h23"
                                     onIonChange={(e) => {
                                         console.log(e.detail.value);
                                         if(typeof e.detail.value === 'string'){                                                                                        

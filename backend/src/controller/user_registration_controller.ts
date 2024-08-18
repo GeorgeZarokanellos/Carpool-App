@@ -4,7 +4,7 @@ import sequelize from '../database/connect_to_db';
 import multer, { type FileFilterCallback } from 'multer';
 import type { Request, Response, NextFunction } from 'express';
 import { Op } from 'sequelize';
-import { type addUserRequestBodyInterface} from '../interface/trip_interface';
+import { type addUserRequestBodyInterface} from '../interface/interface';
 import fs from 'fs';
 import { promisify } from 'util'; //takes a function and makes it return a promise
 
@@ -19,7 +19,7 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
     //multer uses memory storage
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, '/home/george/Desktop/Carpool App/backend/static/uploads');
+            cb(null, '/home/george/Desktop/CarpoolApp/backend/static');
         },
         filename: (req, file, cb) => {
             cb(null, Date.now() + '-' + file.originalname);
@@ -132,9 +132,9 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             });
         } catch (err) {
             if (err instanceof Error)
-                console.error('Error: ' + err.message);
+                console.log('Error: ' + err.message);
             else if (typeof err === 'string')
-                console.error('Error: ' + err);
+                console.log('Error: ' + err);
             res.status(500).send(err);
         }
     }
