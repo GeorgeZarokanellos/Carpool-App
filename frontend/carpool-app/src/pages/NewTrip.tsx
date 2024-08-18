@@ -24,6 +24,8 @@ export const NewTrip: React.FC = () => {
 
     const role: string | null = localStorage.getItem('role');
     const userIdString = localStorage.getItem('userId');
+    const userIdInt = parseInt(userIdString as string, 10);
+
     const [showAlert] = useState(role === 'driver');
     const [startingLocations, setStartingLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
@@ -46,11 +48,6 @@ export const NewTrip: React.FC = () => {
     //additional stops
     const [stops, setStops] = useState<Stop[]>([]);
 
-    let userIdInt: number;
-    if(userIdString){
-        userIdInt = parseInt(userIdString, 10);
-    }
-
     useEffect(() => {
         instance.get('/trips/starting-locations')
         .then(response => {
@@ -58,6 +55,12 @@ export const NewTrip: React.FC = () => {
             setStartingLocations(response.data);
         })
     },[]);
+
+    useEffect(() => {
+        //the user creating the trip will be the first passenger
+        if(userIdString)
+            setFirstPassengerId(parseInt(userIdString, 10));
+    }, [userIdString]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
