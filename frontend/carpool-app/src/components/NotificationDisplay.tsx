@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText } from "@ionic/react";
 import instance from "../AxiosConfig";
@@ -13,12 +13,12 @@ interface NotificationProps {
 
 export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDetails}) => {
 
-    const [trip, setTrip] = React.useState<ExtendedTrip>();
-    const [formattedTime, setFormattedTime] = React.useState<string>('');
-    const [formattedDate, setFormattedDate] = React.useState<string>('');
-    const [accepted, setAccepted] = React.useState<boolean>(false);
-    const [rejected, setRejected] = React.useState<boolean>(false);
-    const [displayAcceptReject, setDisplayAcceptReject] = React.useState<boolean>(false);
+    const [trip, setTrip] = useState<ExtendedTrip>();
+    const [formattedTime, setFormattedTime] = useState<string>('');
+    const [formattedDate, setFormattedDate] = useState<string>('');
+    const [accepted, setAccepted] = useState<boolean>(false);
+    const [rejected, setRejected] = useState<boolean>(false);
+    const [displayAcceptReject, setDisplayAcceptReject] = useState<boolean>(false);
     const userId = localStorage.getItem('userId');
 
     const handleReject = async () => {
@@ -42,7 +42,8 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 message: passengerMessage,
                 stopId: notificationDetails.stopId,
                 status: 'declined',
-                recipient: role
+                recipient: role,
+                type: 'request'
             });
             
         } catch (error) {
@@ -72,7 +73,8 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     message: passengerMessage,
                     stopId: notificationDetails.stopId,
                     status: 'accepted',
-                    recipient: role
+                    recipient: role,
+                    type: 'request'
                 });
 
                 const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);

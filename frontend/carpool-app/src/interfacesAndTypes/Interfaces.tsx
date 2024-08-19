@@ -6,6 +6,11 @@ enum Status {
     Rejected = 'Rejected',
 }
 
+enum NotificationType {
+    Request = 'request',
+    Review = 'review',
+}
+
 export interface TripProps {
     startingTime: string;
     dateOfTrip: string;
@@ -54,4 +59,5 @@ export interface NotificationInterface {
         timeSent: string;
         status: Status;
         recipient: string;
+        type: NotificationType;
 }

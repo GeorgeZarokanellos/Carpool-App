@@ -2,6 +2,7 @@ CREATE TYPE user_role AS ENUM ('driver', 'passenger');
 CREATE TYPE start_stop_location AS ENUM ('Πλατεία Γεωργίου', 'Πλατεία Όλγας', 'Πυροσβεστίο', 'Αρέθα');
 CREATE TYPE choice AS ENUM ('accepted', 'pending', 'declined');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
+CREATE TYPE notification_type AS ENUM ('request', 'review');
 
 CREATE TABLE App_user (
 	user_id SERIAL,

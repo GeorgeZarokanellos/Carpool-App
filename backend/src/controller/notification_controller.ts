@@ -62,8 +62,8 @@ export const getNotification = async(req: Request, res: Response, next: NextFunc
 export const createNotification = async(req: Request, res: Response, next: NextFunction) => {
     try {
         await sequelize.transaction(async (transaction: Transaction) => {
-            const {driverId, passengerId, tripId, stopId, message, recipient}: notificationInterface = req.body;
-            const notification = await Notification.create({driverId, passengerId, tripId, stopId, message, recipient});
+            const {driverId, passengerId, tripId, stopId, message, recipient, type}: notificationInterface = req.body;
+            const notification = await Notification.create({driverId, passengerId, tripId, stopId, message, recipient, type});
             await notification.save({transaction}); 
         });
         res.status(201).send('Notification created');  

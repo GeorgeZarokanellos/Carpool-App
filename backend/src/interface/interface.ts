@@ -27,6 +27,11 @@ enum role {
     passenger = 'passenger'
 }
 
+enum NotificationType {
+    REQUEST = 'request',
+    REVIEW = 'review'
+}
+
 interface addUserRequestBodyInterface {
     universityId: number;
     firstName: string;
@@ -61,6 +66,7 @@ interface notificationInterface extends updatedNotificationInterface {
     message: string;
     stopId: number;
     recipient: string;
+    type: NotificationType;
 }
 
 export type {
