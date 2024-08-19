@@ -41,6 +41,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [availabilityMessage, setAvailabilityMessage] = useState('');
     const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
     const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
+    const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
     const [tripEnded, setTripEnded] = useState(false); 
 
     const userId = localStorage.getItem('userId');
@@ -93,13 +94,87 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
       if(driverWantsToEndTrip){
         const userConfirmed = window.confirm('Είστε σίγουρος ότι θέλετε να τερματίσετε το ταξίδι;');
         if(userConfirmed){
-          console.log('User wants to end trip');
-          
+          handleTripCompletion(userConfirmed);
         } else {
           setDriverWantsToEndTrip(false);
         }
       }
     }, [driverWantsToEndTrip])
+
+    const handleTripCompletion = async (userConfirmed: boolean) => {
+      if(tripData && !reviewNotificationsSent){
+        if(userConfirmed){
+          //update trip status to completed
+          await instance.patch(`/trips/${tripData.tripId}`, {
+            status: 'completed'
+          }).then(response => {
+            console.log('Trip ended', response);
+          }).catch(error => {
+            console.log('Error ending trip', error);
+          });
+        }
+
+        //update current trip id of all passengers and driver to null
+        //send review notification to all passengers  
+        const reviewMessagePassenger = 'Το ταξίδι ολοκληρώθηκε. Θα θέλατε να αξιολογήσετε τον/την οδηγό της διαδρομής;';
+        const reviewMessageDriver = 'Το ταξίδι ολοκληρώθηκε. Θα θέλατε να αξιολογήσετε τους επιβάτες της διαδρομής;';
+        tripData.tripPassengers.forEach(async (passenger) => {
+
+          await instance.put(`/user/${passenger.passengerId}`, {
+            currentTripId: null
+          }).then(response => {
+            console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`, response);
+          }).catch(error => {
+            console.log(`Error updating current trip id of passenger ${passenger.passengerId} to null`, error);
+          })
+
+          await instance.post('/notifications', {
+              driverId: tripData.driverId,
+              passengerId: passenger.passengerId,
+              tripId: tripData.tripId,    
+              stopId: null,
+              message: reviewMessagePassenger,
+              recipient: 'passenger',
+              type: 'review'
+          })
+          .then(response => {
+            console.log(`Review notification sent to passenger ${passenger.passengerId}`, response);
+          })
+          .catch(error => {
+            console.log(`Error sending review notification to passenger ${passenger.passengerId}`, error);
+          })
+        });
+        
+        //update current trip id of driver to null
+        await instance.put(`/user/${tripData.driverId}`, {
+          currentTripId: null
+        }).then(response => {
+          console.log(`Current trip id of driver ${tripData.driverId} updated to null`, response);
+        }).catch(error => {
+          console.log(`Error updating current trip id of driver ${tripData.driverId} to null`, error);
+        })
+        //send review notification to driver
+        await instance.post('/notifications', {
+          driverId: tripData.driverId,
+          passengerId: null,
+          tripId: tripData.tripId,    
+          stopId: null,
+          message: reviewMessageDriver,
+          recipient: 'driver',
+          type: 'review'
+        })
+        .then(response => {
+          console.log(`Review notification sent to driver ${tripData.driverId}`, response);
+        })
+        .catch(error => {
+          console.log(`Error sending review notification to driver ${tripData.driverId}`, error);
+        });
+
+        setReviewNotificationsSent(true);
+      } else {
+        console.log('Review notifications already sent');
+      }
+    }
 
     const fetchUsersFullName = async () => {
         try {
@@ -185,7 +260,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                     tripId: tripData.tripId,    
                     stopId: selectedStop.stopId,
                     message: driverMessage,
-                    recipient: 'driver'
+                    recipient: 'driver',
+                    type: 'request'
                 });
                 setRequestMade(true);
                 setJoinRequestSentAlert(true);
@@ -308,6 +384,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 {
                   page === "currentTrip" && 
                     <TripInProgress 
+                      tripId={tripData.tripId}
                       startingTime={tripData.startingTime} 
                       tripDriverCurrentUser={tripDriverCurrentUser}
                       setDriverWantsToEndTrip={setDriverWantsToEndTrip}/> 
