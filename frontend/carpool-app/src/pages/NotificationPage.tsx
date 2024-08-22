@@ -24,14 +24,18 @@ export const NotificationPage:React.FC = () => {
     }, []);
 
     useEffect(() => {
+        const tempFilteredNotifications: NotificationInterface[] = [];
+
+        //filter notifications based on user role
         notifications.forEach( (notification) => {
-            
             if(notification.driverId === Number(userId) && notification.recipient === 'driver') {
-                setFilteredNotifications([...filteredNotifications, notification]);
+                tempFilteredNotifications.push(notification);                
             } else if(notification.passengerId === Number(userId) && notification.recipient === 'passenger') {
-                setFilteredNotifications([...filteredNotifications, notification]);
+                tempFilteredNotifications.push(notification);
             }
         });
+
+        setFilteredNotifications(tempFilteredNotifications);
     }, [notifications]);
 
     useEffect(() => {
