@@ -20,18 +20,6 @@ export const NotificationPage:React.FC = () => {
     }
 
     useEffect(() => {
-        const retrieveNotifications = async () => {
-
-            try {
-                console.log(`/notifications/${userId}?${queryParams.toString()}`);
-                const response = await instance.get(`/notifications/${userId}?${queryParams.toString()}`);
-                console.log(response.data);
-                setNotifications(response.data);
-            } catch (error) {
-                console.log("Error retrieving notifications", error);
-            }
-
-        }
         retrieveNotifications();
     }, []);
 
@@ -50,6 +38,19 @@ export const NotificationPage:React.FC = () => {
         if(filteredNotifications)
             console.log("Filtered Notifications", filteredNotifications);
     }, [filteredNotifications]);
+
+    const retrieveNotifications = async () => {
+
+        try {
+            console.log(`/notifications/${userId}?${queryParams.toString()}`);
+            const response = await instance.get(`/notifications/${userId}?${queryParams.toString()}`);
+            console.log(response.data);
+            setNotifications(response.data);
+        } catch (error) {
+            console.log("Error retrieving notifications", error);
+        }
+
+    }
 
     return (
         <IonPage>
