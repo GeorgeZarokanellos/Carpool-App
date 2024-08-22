@@ -25,7 +25,8 @@ Review.init({
     },
     reviewDateTime: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
+        // defaultValue: DataTypes.NOW,
         field: 'date'
     },
     tripId: {

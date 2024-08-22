@@ -16,7 +16,6 @@ import session from 'express-session';
 import registration_router from './router/registration_router';
 import trip_router from './router/trip_router';
 import profile_router from './router/profile_router';
-import reviews_router from './router/review_router';
 import './controller/authentication_controller';
 import stop_router from './router/stop_router';
 import review_router from './router/review_router';
