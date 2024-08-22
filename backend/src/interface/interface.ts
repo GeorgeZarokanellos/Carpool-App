@@ -52,7 +52,8 @@ interface carRegisterRequestBodyInterface {
 
 interface reviewRequestBodyInterface {
     reviewRating: number;
-    reviewDateTime: Date;
+    reviewerId: number;
+    reviewedUserId: number;
 }
 
 interface updatedNotificationInterface {

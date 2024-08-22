@@ -34,14 +34,10 @@ export const getReviews =  (req: Request, res: Response): void => {
  */
 export const createReview = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         await sequelize.transaction(async (transaction: Transaction) => {
-            const { reviewRating }: reviewRequestBodyInterface = req.body;
-            logger.info("Review rating from request body: " + reviewRating);
-            const reviewedUserId = Number(req.params.reviewedPersonId);
+            const { reviewRating, reviewerId, reviewedUserId }: reviewRequestBodyInterface = req.body;
             const tripId = Number(req.params.tripId);
+            logger.info("Review rating from request body: " + reviewRating);
             logger.info("reviewed user id: " + reviewedUserId + " " + "trip id: " + tripId);
-            // const reviewerId  = req.session.id;
-            const reviewerId = 4; // TODO: change this to the logged in user's id
-            const reviewDateTime = new Date().toISOString();
             let fromTrip: boolean = false;
             await checkIfUsersAreInTrip(tripId, reviewerId, reviewedUserId)
             .then((returnValue) => {
@@ -51,14 +47,11 @@ export const createReview = async (req: Request, res: Response, next: NextFuncti
                 
             }).catch((err) => {
                 console.log("Error from checkIfUsers: ", err);
-                
             });
-            console.log("fromTrip before if: ", fromTrip);
             
             if (fromTrip) { //if the reviewer is the driver or a passenger allow them to review someone that was on the trip
                 const createdReview = await Review.create({
                         reviewRating,
-                        reviewDateTime,
                         tripId,
                         reviewedUserId,
                         reviewerId
