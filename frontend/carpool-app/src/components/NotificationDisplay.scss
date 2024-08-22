@@ -1,0 +1,12 @@
+.rating-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    
+    .rating {
+        font-size: 1.7rem;
+    }
+
+}

@@ -5,7 +5,9 @@ import instance from "../AxiosConfig";
 import { ExtendedTrip, Trip } from "../interfacesAndTypes/Types";
 import { TripInformation } from "./TripInformation";
 import { formatDateTime } from "../util/common_functions";
-
+import Rating from "@mui/material/Rating";
+import './NotificationDisplay.scss';
+import { Swiper, SwiperSlide } from "swiper/react";
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
@@ -19,6 +21,8 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const [accepted, setAccepted] = useState<boolean>(false);
     const [rejected, setRejected] = useState<boolean>(false);
     const [displayAcceptReject, setDisplayAcceptReject] = useState<boolean>(false);
+    const [userRating, setUserRating] = useState<number>(0);
+    const [tripParticipants, setTripParticipants] = useState<{firstName: string, lastName: string}[]>([]);
     const userId = localStorage.getItem('userId');
 
     const handleReject = async () => {
@@ -121,6 +125,31 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
         }
     }
 
+    const displayAppropriateTitle = () => {
+        if(notificationDetails.type === 'request'){
+            if(displayAcceptReject){
+                return 'Αίτηση συμμετοχής σε διαδρομή σας';
+            } else 
+                return 'Αίτηση συμμετοχής σε διαδρομή';
+        } else if (notificationDetails.type === 'review'){
+            return 'Αξιολόγηση Συνεπιβατών';
+        }
+    }
+
+    const retrieveTripInfo = async () => {
+        try {
+            const tripMentioned = await instance.get(`/trips/${notificationDetails.tripId}`);
+            console.log(tripMentioned);
+            setTrip(tripMentioned.data);
+
+            const {formattedDate, formattedTime} = formatDateTime(tripMentioned.data.startingTime);
+            setFormattedDate(formattedDate);
+            setFormattedTime(formattedTime);
+        } catch (error) {
+            console.log("Error retrieving trip info", error);
+        }
+    }
+
     useEffect(() => {
         if(accepted) {
             console.log('Accepted', accepted);
@@ -136,34 +165,30 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     }, [rejected]);
 
     useEffect(() => {
-        const retrieveTripInfo = async () => {
-            try {
-                const tripMentioned = await instance.get(`/trips/${notificationDetails.tripId}`);
-                console.log(tripMentioned);
-                setTrip(tripMentioned.data);
-
-                const {formattedDate, formattedTime} = formatDateTime(tripMentioned.data.startingTime);
-                setFormattedDate(formattedDate);
-                setFormattedTime(formattedTime);
-            } catch (error) {
-                console.log("Error retrieving trip info", error);
-            }
-        }
         retrieveTripInfo();
     }, []);
 
     useEffect(() => {
         if(trip){
+            const tripParticipantsTemp: {firstName: string, lastName:string}[] = [];
             if(trip.driverId === Number(userId))
                 setDisplayAcceptReject(true);
+            if(trip.driver)
+                setTripParticipants([...tripParticipants, { firstName: trip.driver?.user.firstName, lastName: trip.driver?.user.lastName }]);
+            trip.tripPassengers.forEach( (tripPassenger) => {
+                tripParticipantsTemp.push({firstName: tripPassenger.passenger.firstName, lastName: tripPassenger.passenger.lastName});
+            });
+            setTripParticipants([...tripParticipants, ...tripParticipantsTemp]);
         }
-    }, [trip])
+    }, [trip]);
 
     return (
         <IonCard style={{borderRadius: '1rem', color: 'black'}} color="primary">
             <IonCardHeader>
                 <IonCardTitle class="ion-text-center">
-                    {displayAcceptReject ? 'Αίτηση για συμμετοχή στη διαδρομή σας' : 'Αίτηση για συμμετοχή σε διαδρομή'}
+                    {
+                        displayAppropriateTitle()
+                    }
                 </IonCardTitle>
             </IonCardHeader>
             <IonCardContent style={{padding: '0rem'}}>
@@ -200,11 +225,44 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     }
                 </div>
             </IonCardContent>
-            { displayAcceptReject &&
-                <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
-                    <IonButton color="danger" onClick={() => setRejected(true)}>Απορριψη</IonButton>
-                    <IonButton color="success" onClick={() => setAccepted(true)}>Αποδοχη</IonButton>
-                </div>
+            { 
+                displayAcceptReject && notificationDetails.type === 'request' &&
+                    <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
+                        <IonButton color="danger" onClick={() => setRejected(true)}>Απορριψη</IonButton>
+                        <IonButton color="success" onClick={() => setAccepted(true)}>Αποδοχη</IonButton>
+                    </div>
+            }
+            {
+                notificationDetails.type === 'review' &&
+                    <div className="rating-container">
+                        <IonText>Πως σας φάνηκε ο/η </IonText>
+                        <Swiper
+                            navigation
+                            pagination={{ clickable: true }}
+                            style={{width: '100%'}}
+                        >
+                        {
+                            tripParticipants.map((participant, index) => (
+                                <SwiperSlide key={index} >
+                                    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                        <IonText>{participant.firstName} {participant.lastName}</IonText>
+                                        <Rating
+                                            name="half-rating"
+                                            className="rating"
+                                            precision={0.5}
+                                            value={userRating}
+                                            onChange={(event, newValue) => {
+                                                if (newValue !== null)
+                                                    setUserRating(newValue); 
+                                            }}
+                                        />
+                                    </div>
+                                </SwiperSlide>
+                            ))
+                        }
+                        </Swiper>                      
+                        <IonButton color="success">Υποβολη</IonButton>
+                    </div>  
             }
         </IonCard>
     );
