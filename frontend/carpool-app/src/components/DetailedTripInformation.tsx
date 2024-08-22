@@ -171,6 +171,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         });
 
         setReviewNotificationsSent(true);
+        alert('Η διαδρομή ολοκληρώθηκε με επιτυχία!');
+        history.push('/main/search-trips');
+        
       } else {
         console.log('Review notifications already sent');
       }
