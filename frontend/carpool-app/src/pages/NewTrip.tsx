@@ -57,10 +57,14 @@ export const NewTrip: React.FC = () => {
     },[]);
 
     useEffect(() => {
-        //the user creating the trip will be the first passenger
-        if(userIdString)
-            setFirstPassengerId(parseInt(userIdString, 10));
-    }, [userIdString]);
+        //the user creating the trip will be the first passenger except if he is the driver
+        if(tripDriverId){
+            if(userIdString && tripDriverId !== userIdInt){
+                console.log("First passenger id: ", userIdString);
+                setFirstPassengerId(parseInt(userIdString, 10));
+            }
+        }
+    }, [tripDriverId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -143,6 +147,11 @@ export const NewTrip: React.FC = () => {
     useEffect(() => {
         console.log("Request Body: ", requestBody);
     }, [passengerCredentials]);
+
+    useEffect(() => {
+        console.log("first passenger id", firstPassengerId);
+    }, [firstPassengerId]);
+        
 
     return (
         <div>
