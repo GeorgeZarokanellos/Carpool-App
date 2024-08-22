@@ -8,6 +8,10 @@ import { formatDateTime } from "../util/common_functions";
 import Rating from "@mui/material/Rating";
 import './NotificationDisplay.scss';
 import { Swiper, SwiperSlide } from "swiper/react";
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Pagination} from 'swiper/modules';
+import { useHistory } from "react-router";
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
@@ -21,9 +25,11 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const [accepted, setAccepted] = useState<boolean>(false);
     const [rejected, setRejected] = useState<boolean>(false);
     const [displayAcceptReject, setDisplayAcceptReject] = useState<boolean>(false);
-    const [userRating, setUserRating] = useState<number>(0);
-    const [tripParticipants, setTripParticipants] = useState<{firstName: string, lastName: string}[]>([]);
+    const [usersRating, setUsersRating] = useState<{participantId: number, rating: number}[]>([]);
+    const [tripParticipants, setTripParticipants] = useState<{firstName: string, lastName: string, participantId: number}[]>([]);
+    const [tripParticipantsSet, setTripParticipantsSet] = useState<boolean>(false);
     const userId = localStorage.getItem('userId');
+    const history = useHistory();
 
     const handleReject = async () => {
         try {
@@ -150,6 +156,47 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
         }
     }
 
+    const handleReviewSubmission = () => {
+        try {
+            if(usersRating){
+                const promises = usersRating.map( async (usersRating) => {
+                    await instance.post(`/reviews/${notificationDetails.tripId}`, {
+                        reviewRating: usersRating.rating,
+                        reviewerId: Number(userId),
+                        reviewedUserId: usersRating.participantId
+                    })
+                    .then( (response) => {
+                        console.log(`Review submitted for user ${usersRating.participantId}`, response);
+                        return response;
+                    })
+                    .catch( (error) => {
+                        console.log(`Error submitting review for user ${usersRating.participantId}`, error);
+                        throw error;
+                    })
+                })
+                
+                Promise.all(promises)
+                .then(async (response) => {
+                    console.log("All reviews submitted", response);
+                    alert("Οι αξιολογήσεις υποβλήθηκαν επιτυχώς");
+                    await instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                        status: 'reviewed'
+                    });
+                    window.location.reload();
+                    
+                })
+                .catch((error) => {
+                    console.log("Error submitting reviews", error);
+                })
+            } else {
+                console.log("No users to rate");
+            }
+        } catch (error) {
+            console.log("Error handling reviews", error);
+            
+        }
+    }
+
     useEffect(() => {
         if(accepted) {
             console.log('Accepted', accepted);
@@ -169,21 +216,38 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     }, []);
 
     useEffect(() => {
-        if(trip){
-            const tripParticipantsTemp: {firstName: string, lastName:string}[] = [];
+        if(trip && !tripParticipantsSet) {
+            const tripParticipantsTemp: {firstName: string, lastName:string, participantId: number}[] = [];
             if(trip.driverId === Number(userId))
                 setDisplayAcceptReject(true);
-            if(trip.driver)
-                setTripParticipants([...tripParticipants, { firstName: trip.driver?.user.firstName, lastName: trip.driver?.user.lastName }]);
+            if(trip.driver && trip.driverId)
+                setTripParticipants([...tripParticipants, 
+                            { 
+                                firstName: trip.driver?.user.firstName, 
+                                lastName: trip.driver?.user.lastName,
+                                participantId: trip.driverId
+                            }]);
             trip.tripPassengers.forEach( (tripPassenger) => {
-                tripParticipantsTemp.push({firstName: tripPassenger.passenger.firstName, lastName: tripPassenger.passenger.lastName});
+                tripParticipantsTemp.push(
+                    {
+                        firstName: tripPassenger.passenger.firstName, 
+                        lastName: tripPassenger.passenger.lastName,
+                        participantId: tripPassenger.passengerId
+                    });
             });
             setTripParticipants([...tripParticipants, ...tripParticipantsTemp]);
+            setTripParticipantsSet(true);
         }
+
     }, [trip]);
 
+    useEffect(() => {
+        console.log("Users rating", usersRating);
+    }, [usersRating]);
+        
+
     return (
-        <IonCard style={{borderRadius: '1rem', color: 'black'}} color="primary">
+        <IonCard color="primary">
             <IonCardHeader>
                 <IonCardTitle class="ion-text-center">
                     {
@@ -191,11 +255,11 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     }
                 </IonCardTitle>
             </IonCardHeader>
-            <IonCardContent style={{padding: '0rem'}}>
-                <div className="notification-message" style={{display: 'flex', textAlign: 'center'}}>
+            <IonCardContent className="card-content">
+                <div className="notification-message">
                     {notificationDetails.message}
                 </div>
-                <div className="trip-display-container" style={{width: '100%'}}>
+                <div className="trip-display-container">
                     {
                         
                         trip ? (
@@ -224,46 +288,67 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         ) : ''
                     }
                 </div>
+                { 
+                    displayAcceptReject && notificationDetails.type === 'request' &&
+                        <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
+                            <IonButton color="danger" onClick={() => setRejected(true)}>Απορριψη</IonButton>
+                            <IonButton color="success" onClick={() => setAccepted(true)}>Αποδοχη</IonButton>
+                        </div>
+                }
+                {
+                    notificationDetails.type === 'review' &&
+                        <div className="rating-container">
+                            <IonText>Πως σας φάνηκε ο/η </IonText>
+                            <Swiper
+                                pagination={true}
+                                className="my-swiper"
+                                modules={[Pagination]}
+                            >
+                            {
+                                tripParticipants.map((participant, index) => (
+                                    <SwiperSlide key={index} style={{height: '4rem'}}>
+                                        <div
+                                            style={
+                                                {
+                                                    display: 'flex', 
+                                                    flexDirection: 'column', 
+                                                    alignItems: 'center',
+                                                    height: '100%',
+                                                }
+                                            }>
+                                            <IonText>{participant.firstName} {participant.lastName}</IonText>
+                                            <Rating
+                                                name="half-rating"
+                                                className="rating"
+                                                precision={0.5}
+                                                defaultValue={0}
+                                                value={usersRating.find((userRating) => userRating.participantId === participant.participantId)?.rating || 0}
+                                                onChange={(event, newValue) => {
+                                                    if(newValue !== null ){
+                                                        const index = usersRating.findIndex((userRating) => userRating.participantId === participant.participantId); 
+                                                        if(index !== -1){
+                                                            //updated version of the usersRating array
+                                                            const updatedUsersRating = [...usersRating];
+                                                            //update the rating of the user whose id is the same as the id of the user that was rated
+                                                            updatedUsersRating[index].rating = newValue;
+                                                            //update the state with the updated array
+                                                            setUsersRating(updatedUsersRating);
+                                                        } else {
+                                                            setUsersRating([...usersRating, {participantId: participant.participantId, rating: newValue}]); 
+                                                        }
+                                                    }
+                                                }}
+                                                
+                                            />
+                                        </div>
+                                    </SwiperSlide>
+                                ))
+                            }
+                            </Swiper>                      
+                            <IonButton color="success" onClick={handleReviewSubmission}>Υποβολη Αξιολογησης</IonButton>
+                        </div>  
+                }
             </IonCardContent>
-            { 
-                displayAcceptReject && notificationDetails.type === 'request' &&
-                    <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
-                        <IonButton color="danger" onClick={() => setRejected(true)}>Απορριψη</IonButton>
-                        <IonButton color="success" onClick={() => setAccepted(true)}>Αποδοχη</IonButton>
-                    </div>
-            }
-            {
-                notificationDetails.type === 'review' &&
-                    <div className="rating-container">
-                        <IonText>Πως σας φάνηκε ο/η </IonText>
-                        <Swiper
-                            navigation
-                            pagination={{ clickable: true }}
-                            style={{width: '100%'}}
-                        >
-                        {
-                            tripParticipants.map((participant, index) => (
-                                <SwiperSlide key={index} >
-                                    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                                        <IonText>{participant.firstName} {participant.lastName}</IonText>
-                                        <Rating
-                                            name="half-rating"
-                                            className="rating"
-                                            precision={0.5}
-                                            value={userRating}
-                                            onChange={(event, newValue) => {
-                                                if (newValue !== null)
-                                                    setUserRating(newValue); 
-                                            }}
-                                        />
-                                    </div>
-                                </SwiperSlide>
-                            ))
-                        }
-                        </Swiper>                      
-                        <IonButton color="success">Υποβολη</IonButton>
-                    </div>  
-            }
         </IonCard>
     );
 }
