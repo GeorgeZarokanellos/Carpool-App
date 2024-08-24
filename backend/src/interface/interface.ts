@@ -19,7 +19,8 @@ interface updatedTripInterface {
 }
 
 interface updatedUserInterface {
-    currentTripId: number;
+    currentTripId?: number;
+    overallPoints?: number;
 }
 
 enum role {

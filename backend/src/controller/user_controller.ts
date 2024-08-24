@@ -9,8 +9,13 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     await sequelize.transaction(async (transaction: Transaction) => {
         const userId: string = req.params.userId;
         const updateDetails: updatedUserInterface = req.body;
+        const type = req.query.type;
         const user = await User.findByPk(userId, {transaction});
-        if(user !== null){
+        if(user !== null ){
+            if (type === 'points' && updateDetails.overallPoints !== undefined){
+                const newOverallPoints = user.overallPoints + updateDetails.overallPoints;
+                updateDetails.overallPoints = newOverallPoints;
+            }
             await user.update(updateDetails, {transaction});
             res.status(200).json({ message: 'User updated successfully', user });
         } else {

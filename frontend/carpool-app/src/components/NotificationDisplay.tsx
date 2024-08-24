@@ -105,7 +105,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 //* update user's current trip 
                 await instance.put(`/user/${notificationDetails.passengerId}`, {
                     currentTripId: notificationDetails.tripId
-                })
+                });
+
+                alert("You have accepted the request");
+                window.location.reload();
             }
             
         } catch (error) {
@@ -178,6 +181,12 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 Promise.all(promises)
                 .then(async (response) => {
                     console.log("All reviews submitted", response);
+                    console.log("Promises", promises.length);
+                    
+                    //add 1 point to the user's overall points for each review submitted
+                    await instance.put(`/user/${userId}?type=points`,{
+                        overallPoints: promises.length
+                    });
                     alert("Οι αξιολογήσεις υποβλήθηκαν επιτυχώς");
                     await instance.put(`/notifications/${notificationDetails.notificationId}`, {
                         status: 'reviewed'

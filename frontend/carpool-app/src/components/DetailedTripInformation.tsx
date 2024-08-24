@@ -146,8 +146,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         });
         
         //update current trip id of driver to null
-        await instance.put(`/user/${tripData.driverId}`, {
-          currentTripId: null
+        await instance.put(`/user/${tripData.driverId}?type=points`, {
+          currentTripId: null,
+          overallPoints: 5
         }).then(response => {
           console.log(`Current trip id of driver ${tripData.driverId} updated to null`, response);
         }).catch(error => {
