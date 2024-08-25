@@ -5,8 +5,11 @@ import './NotificationPage.scss';
 import { NotificationDisplay } from "../components/NotificationDisplay";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 
+interface NotificationPageProps {
+    refreshKey: number;
+}
 
-export const NotificationPage:React.FC = () => {
+export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) => {
     const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
     const [filteredNotifications, setFilteredNotifications] = useState<NotificationInterface[]>([]);
 
@@ -19,9 +22,27 @@ export const NotificationPage:React.FC = () => {
         });
     }
 
+    const retrieveNotifications = async () => {
+
+        try {
+            console.log(`/notifications/${userId}?${queryParams.toString()}`);
+            await instance.get(`/notifications/${userId}?${queryParams.toString()}`)
+            .then(response => {
+                console.log(response.data);
+                setNotifications(response.data);
+            })
+            .catch(error => {
+                console.log("Error retrieving notifications", error);
+            });
+        } catch (error) {
+            console.log("Error retrieving notifications", error);
+        }
+
+    }
+
     useEffect(() => {
         retrieveNotifications();
-    }, []);
+    }, [refreshKey]);
 
     useEffect(() => {
         const tempFilteredNotifications: NotificationInterface[] = [];
@@ -39,22 +60,15 @@ export const NotificationPage:React.FC = () => {
     }, [notifications]);
 
     useEffect(() => {
-        if(filteredNotifications)
+        if(filteredNotifications){
+            // window.location.reload();
             console.log("Filtered Notifications", filteredNotifications);
+        }
     }, [filteredNotifications]);
 
-    const retrieveNotifications = async () => {
-
-        try {
-            console.log(`/notifications/${userId}?${queryParams.toString()}`);
-            const response = await instance.get(`/notifications/${userId}?${queryParams.toString()}`);
-            console.log(response.data);
-            setNotifications(response.data);
-        } catch (error) {
-            console.log("Error retrieving notifications", error);
-        }
-
-    }
+    useEffect(() => {
+        console.log("Notifications refresh key", refreshKey);
+    }, [refreshKey]);
 
     return (
         <IonPage>

@@ -7,7 +7,11 @@ import { SubmittedReceivedReviewsDisplay } from '../components/ReviewsDisplay';
 import { TripsDisplay } from '../components/TripsDisplay';
 import { arrayBufferTo64String } from '../util/common_functions';
 
-const Profile: React.FC = () => {
+interface profileProps {
+  refreshKey: number;
+}
+
+const Profile: React.FC<profileProps> = ({refreshKey}) => {
   const [profileData, setProfileData] = useState<ProfileData>();
   const [imageSrc, setImageSrc] = useState<string>('');
   // let rating:number;
@@ -28,15 +32,12 @@ const Profile: React.FC = () => {
       console.log(error);
       
     })
-  }, []);
-
-  useEffect(() => {
-    console.log("imageSrc: ", imageSrc);
-  }, [imageSrc]);
+  }, [refreshKey]);
 
   // useEffect(() => {
-  //   console.log("Profile data: ", profileData);
-  // }, [profileData]);
+  //   console.log("imageSrc: ", imageSrc);
+  // }, [imageSrc]);
+
     
   return (
     <IonPage>
@@ -68,10 +69,10 @@ const Profile: React.FC = () => {
                 </IonItem>
               </div>
             </div>
-          ): ''
-          // (
-            // <IonLoading isOpen={true} message={"Retrieving profile information.."} />
-          // )
+          ): 
+          (
+            <IonLoading isOpen={true} message={"Retrieving profile information.."} />
+          )
           }
         </IonContent>
       </IonContent>
