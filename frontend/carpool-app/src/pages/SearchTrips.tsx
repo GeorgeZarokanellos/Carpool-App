@@ -23,8 +23,9 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
 
   useEffect(() => {
     // console.log("refresh key", refreshKey);
+    //TODO this doesnt work when the user is from mobile
     const queryParams = new URLSearchParams({
-      userDate: new Date().toLocaleString()
+    userDate: new Date().toISOString(),
     });
 
     // console.log("query params", queryParams.toString());
@@ -84,6 +85,8 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
           <div className='trips-list-container'>
             {
             filteredResults.map((trip) => {
+              // console.log(trip.startingTime);
+              
               return(
                 <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
                   <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '1.5rem 0rem'}} >

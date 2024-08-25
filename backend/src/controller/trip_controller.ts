@@ -11,10 +11,7 @@ import { parse } from 'date-fns';
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
     async function returnTripsAsync(): Promise<void> {
         const userDateTime = req.query.userDate as string;
-        console.log(userDateTime);
-        const modifiedDateTime = userDateTime.replace('μ.μ.', 'PM');
-        console.log(modifiedDateTime);
-        const parsedDate = parse(modifiedDateTime, 'M/d/yyyy, h:mm:ss a', new Date());
+        const parsedDate = new Date(userDateTime);
         console.log(parsedDate);
         
         
