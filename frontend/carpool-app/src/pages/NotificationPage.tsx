@@ -20,36 +20,41 @@ export const NotificationPage:React.FC = () => {
     }
 
     useEffect(() => {
-        const retrieveNotifications = async () => {
-
-            try {
-                console.log(`/notifications/${userId}?${queryParams.toString()}`);
-                const response = await instance.get(`/notifications/${userId}?${queryParams.toString()}`);
-                console.log(response.data);
-                setNotifications(response.data);
-            } catch (error) {
-                console.log("Error retrieving notifications", error);
-            }
-
-        }
         retrieveNotifications();
     }, []);
 
     useEffect(() => {
+        const tempFilteredNotifications: NotificationInterface[] = [];
+
+        //filter notifications based on user role
         notifications.forEach( (notification) => {
-            
             if(notification.driverId === Number(userId) && notification.recipient === 'driver') {
-                setFilteredNotifications([...filteredNotifications, notification]);
+                tempFilteredNotifications.push(notification);                
             } else if(notification.passengerId === Number(userId) && notification.recipient === 'passenger') {
-                setFilteredNotifications([...filteredNotifications, notification]);
+                tempFilteredNotifications.push(notification);
             }
         });
+
+        setFilteredNotifications(tempFilteredNotifications);
     }, [notifications]);
 
     useEffect(() => {
         if(filteredNotifications)
             console.log("Filtered Notifications", filteredNotifications);
     }, [filteredNotifications]);
+
+    const retrieveNotifications = async () => {
+
+        try {
+            console.log(`/notifications/${userId}?${queryParams.toString()}`);
+            const response = await instance.get(`/notifications/${userId}?${queryParams.toString()}`);
+            console.log(response.data);
+            setNotifications(response.data);
+        } catch (error) {
+            console.log("Error retrieving notifications", error);
+        }
+
+    }
 
     return (
         <IonPage>

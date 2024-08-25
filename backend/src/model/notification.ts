@@ -7,6 +7,11 @@ const enum Status {
     DECLINED = 'declined'
 }
 
+const enum NotificationType {
+    REQUEST = 'request',
+    REVIEW = 'review',
+}
+
 class Notification extends Model {}
 
 Notification.init({
@@ -25,7 +30,7 @@ Notification.init({
     },
     passengerId:{
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         field: 'passenger_id'
     },
     tripId: {
@@ -35,7 +40,7 @@ Notification.init({
     },
     stopId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         field: 'stop_id'
     },
     message: {
@@ -58,6 +63,12 @@ Notification.init({
         type: DataTypes.STRING,
         allowNull: false,
         field: 'recipient'
+    },
+    type: {
+        type: DataTypes.ENUM,
+        values: [NotificationType.REQUEST, NotificationType.REVIEW],
+        allowNull: false,
+        field: 'type'
     }
 },
 {

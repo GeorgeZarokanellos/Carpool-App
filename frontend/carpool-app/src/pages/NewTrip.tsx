@@ -24,6 +24,8 @@ export const NewTrip: React.FC = () => {
 
     const role: string | null = localStorage.getItem('role');
     const userIdString = localStorage.getItem('userId');
+    const userIdInt = parseInt(userIdString as string, 10);
+
     const [showAlert] = useState(role === 'driver');
     const [startingLocations, setStartingLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
@@ -46,11 +48,6 @@ export const NewTrip: React.FC = () => {
     //additional stops
     const [stops, setStops] = useState<Stop[]>([]);
 
-    let userIdInt: number;
-    if(userIdString){
-        userIdInt = parseInt(userIdString, 10);
-    }
-
     useEffect(() => {
         instance.get('/trips/starting-locations')
         .then(response => {
@@ -58,6 +55,16 @@ export const NewTrip: React.FC = () => {
             setStartingLocations(response.data);
         })
     },[]);
+
+    useEffect(() => {
+        //the user creating the trip will be the first passenger except if he is the driver
+        if(tripDriverId){
+            if(userIdString && tripDriverId !== userIdInt){
+                console.log("First passenger id: ", userIdString);
+                setFirstPassengerId(parseInt(userIdString, 10));
+            }
+        }
+    }, [tripDriverId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -96,6 +103,7 @@ export const NewTrip: React.FC = () => {
             }
 
             history.push('/main/search-trips');
+            window.location.reload();
         } catch (error) {
             console.log("Error creating trip or updating user", error);
             
@@ -140,6 +148,11 @@ export const NewTrip: React.FC = () => {
     useEffect(() => {
         console.log("Request Body: ", requestBody);
     }, [passengerCredentials]);
+
+    useEffect(() => {
+        console.log("first passenger id", firstPassengerId);
+    }, [firstPassengerId]);
+        
 
     return (
         <div>

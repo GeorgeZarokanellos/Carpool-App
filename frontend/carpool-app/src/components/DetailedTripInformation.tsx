@@ -13,6 +13,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import HailIcon from '@mui/icons-material/Hail';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import { useHistory } from "react-router";
+import { TripInProgress } from "./TripInProgress";
 
 
 interface detailedTripInfoProps {
@@ -22,18 +23,26 @@ interface detailedTripInfoProps {
 
 export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ clickedTripId, page }) => {
     const [tripData, setTripData] = useState<ExtendedTrip>();
-    const [showModal, setShowModal] = useState(false);
-    const [showAlert, setShowAlert] = useState(false);
-    const [availableStops, setAvailableStops] = useState<Stop[]>([]);
+
+    //join request modal
+    const [stopSelectModal, setStopSelectModal] = useState(false);
     const [selectedStop, setSelectedStop] = useState<Stop>();
-    const [userIsInTrip, setUserIsInTrip] = useState(false);
+    const [joinRequestSentAlert, setJoinRequestSentAlert] = useState(false);
+    const [availableStops, setAvailableStops] = useState<Stop[]>([]);
+    //notification message details
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [overallRating, setOverallRating] = useState('');
-    const [currentTripId, setCurrentTripId] = useState(null);
+    //notification request checks
+    const [userIsInTrip, setUserIsInTrip] = useState(false);
     const [requestMade, setRequestMade] = useState(false);
+    //bottom section buttons and messages
+    const [currentTripId, setCurrentTripId] = useState(null);
     const [availabilityMessage, setAvailabilityMessage] = useState('');
     const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
+    const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
+    const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
+
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
     const userIdNumber = Number(userId);
@@ -79,6 +88,96 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     useEffect(() => {
         checkAvailability();
     }, [userIsInTrip, tripData]);
+
+    useEffect(() => {
+      if(driverWantsToEndTrip){
+        const userConfirmed = window.confirm('Are you sure you want to end the trip;');
+        if(userConfirmed){
+          handleTripCompletion(userConfirmed);
+        } else {
+          setDriverWantsToEndTrip(false);
+        }
+      }
+    }, [driverWantsToEndTrip])
+
+    const handleTripCompletion = async (userConfirmed: boolean) => {
+      if(tripData && !reviewNotificationsSent){
+        if(userConfirmed){
+          //update trip status to completed
+          await instance.patch(`/trips/${tripData.tripId}`, {
+            status: 'completed'
+          }).then(response => {
+            console.log('Trip ended', response);
+          }).catch(error => {
+            console.log('Error ending trip', error);
+          });
+        }
+
+        //update current trip id of all passengers and driver to null
+        //send review notification to all passengers  
+        const reviewMessage = 'The trip has been completed successfully. Would you like to review the participants of the trip?';
+        tripData.tripPassengers.forEach(async (passenger) => {
+
+          await instance.put(`/user/${passenger.passengerId}`, {
+            currentTripId: null
+          }).then(response => {
+            console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`, response);
+          }).catch(error => {
+            console.log(`Error updating current trip id of passenger ${passenger.passengerId} to null`, error);
+          })
+
+          await instance.post('/notifications', {
+              driverId: tripData.driverId,
+              passengerId: passenger.passengerId,
+              tripId: tripData.tripId,    
+              stopId: null,
+              message: reviewMessage,
+              recipient: 'passenger',
+              type: 'review'
+          })
+          .then(response => {
+            console.log(`Review notification sent to passenger ${passenger.passengerId}`, response);
+          })
+          .catch(error => {
+            console.log(`Error sending review notification to passenger ${passenger.passengerId}`, error);
+          })
+        });
+        
+        //update current trip id of driver to null
+        await instance.put(`/user/${tripData.driverId}?type=points`, {
+          currentTripId: null,
+          overallPoints: 5
+        }).then(response => {
+          console.log(`Current trip id of driver ${tripData.driverId} updated to null`, response);
+        }).catch(error => {
+          console.log(`Error updating current trip id of driver ${tripData.driverId} to null`, error);
+        })
+        //send review notification to driver
+        await instance.post('/notifications', {
+          driverId: tripData.driverId,
+          passengerId: null,
+          tripId: tripData.tripId,    
+          stopId: null,
+          message: reviewMessage,
+          recipient: 'driver',
+          type: 'review'
+        })
+        .then(response => {
+          console.log(`Review notification sent to driver ${tripData.driverId}`, response);
+        })
+        .catch(error => {
+          console.log(`Error sending review notification to driver ${tripData.driverId}`, error);
+        });
+
+        setReviewNotificationsSent(true);
+        alert('The trip has been completed successfully!');
+        history.push('/main/search-trips');
+        window.location.reload();
+        
+      } else {
+        console.log('Review notifications already sent');
+      }
+    }
 
     const fetchUsersFullName = async () => {
         try {
@@ -140,7 +239,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const handleRequestForJoiningTrip = () => {      
         
         if(tripData && tripData.driver && selectedStop){
-            let driverMessage: string = 'Ο/H χρήστης ' + firstName + ' ' + lastName + ' με βαθμολογία ' + overallRating + ' ζητά να συμμετάσχει στο ταξίδι σας ';
+            let driverMessage: string =  firstName + ' ' + lastName + ' with a rating of ' + overallRating + ' wants to join your trip ';
             let stopExists = false;
             tripData.tripStops.forEach((stop) => {
                 if(stop.stopId === selectedStop.stopId){
@@ -150,9 +249,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             });
 
             if(stopExists){
-                driverMessage += 'από την στάση ' + selectedStop.stopLocation;
+                driverMessage += 'from the ' + selectedStop.stopLocation + ' stop';
             } else {
-                driverMessage += 'από την νέα στάση ' + selectedStop.stopLocation;
+                driverMessage += 'from the new ' + selectedStop.stopLocation + ' stop';
             }
                 
             if(!userIsInTrip && !requestMade){ 
@@ -164,33 +263,22 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                     tripId: tripData.tripId,    
                     stopId: selectedStop.stopId,
                     message: driverMessage,
-                    recipient: 'driver'
+                    recipient: 'driver',
+                    type: 'request'
                 });
                 setRequestMade(true);
-                setShowAlert(true);
+                setJoinRequestSentAlert(true);
             } else {
                 console.log('User is already in trip');
-                // alert('Είστε ήδη στο ταξίδι');
             }
         } else {
             console.log('There is no driver or selected stop from handleRequestForJoiningTrip');
         }
     }
 
-    const tripIsInProgress = () => {
-      //add logic to check if trip is in progress
-      //display button to end trip
-      return (
-        <div className="join-button">
-          <IonButton shape="round" >
-            Τερματισμος ταξιδιου
-          </IonButton>
-        </div>
-      )
-    }
-
     if(tripData){
-
+      // console.log('Trip data', tripData);
+      
         return (
             <>
                 <IonContent >
@@ -271,32 +359,37 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 {
                   page === "detailedInfo" && 
                     <div className="join-button">
-                      <IonButton disabled={userIsInTrip} shape="round" onClick={() => { setShowModal(true) }}>
+                      <IonButton disabled={userIsInTrip} shape="round" onClick={() => { setStopSelectModal(true) }}>
                           {availabilityMessage}
                       </IonButton>
                       <UserSelectStopModal
-                          isOpen={showModal}
-                          onClose={() => setShowModal(false)}
+                          isOpen={stopSelectModal}
+                          onClose={() => setStopSelectModal(false)}
                           availableStops={availableStops}
                           onSelectStop={(stop) => {
                           setSelectedStop(stop);
-                          setShowModal(false);
+                          setStopSelectModal(false);
                           }}
                       />
                       <IonAlert
-                          isOpen={showAlert}
+                          isOpen={joinRequestSentAlert}
                           onDidDismiss={() => {
-                          setShowAlert(false);
+                          setJoinRequestSentAlert(false);
                           history.goBack();
                           }}
-                          message={'Η αίτηση σας στάλθηκε επιτυχώς!'}
+                          message={'Your request has been sent to the driver!'}
                           buttons={['OK']}
                           animated={true}
                       />
                     </div>
                 } 
                 {
-                  page === "currentTrip" && tripDriverCurrentUser && tripIsInProgress() 
+                  page === "currentTrip" && 
+                    <TripInProgress 
+                      tripId={tripData.tripId}
+                      startingTime={tripData.startingTime} 
+                      tripDriverCurrentUser={tripDriverCurrentUser}
+                      setDriverWantsToEndTrip={setDriverWantsToEndTrip}/> 
                 }
             </>  
         )

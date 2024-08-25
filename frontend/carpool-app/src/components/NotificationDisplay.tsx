@@ -1,11 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText } from "@ionic/react";
 import instance from "../AxiosConfig";
-import { ExtendedTrip, Trip } from "../interfacesAndTypes/Types";
+import { ExtendedTrip} from "../interfacesAndTypes/Types";
 import { TripInformation } from "./TripInformation";
 import { formatDateTime } from "../util/common_functions";
-
+import Rating from "@mui/material/Rating";
+import './NotificationDisplay.scss';
+import { Swiper, SwiperSlide } from "swiper/react";
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Pagination} from 'swiper/modules';
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
@@ -13,19 +18,22 @@ interface NotificationProps {
 
 export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDetails}) => {
 
-    const [trip, setTrip] = React.useState<ExtendedTrip>();
-    const [formattedTime, setFormattedTime] = React.useState<string>('');
-    const [formattedDate, setFormattedDate] = React.useState<string>('');
-    const [accepted, setAccepted] = React.useState<boolean>(false);
-    const [rejected, setRejected] = React.useState<boolean>(false);
-    const [displayAcceptReject, setDisplayAcceptReject] = React.useState<boolean>(false);
+    const [trip, setTrip] = useState<ExtendedTrip>();
+    const [formattedTime, setFormattedTime] = useState<string>('');
+    const [formattedDate, setFormattedDate] = useState<string>('');
+    const [accepted, setAccepted] = useState<boolean>(false);
+    const [rejected, setRejected] = useState<boolean>(false);
+    const [displayAcceptReject, setDisplayAcceptReject] = useState<boolean>(false);
+    const [usersRating, setUsersRating] = useState<{participantId: number, rating: number}[]>([]);
+    const [tripParticipants, setTripParticipants] = useState<{firstName: string, lastName: string, participantId: number, role: string}[]>([]);
+    const [tripParticipantsSet, setTripParticipantsSet] = useState<boolean>(false);
     const userId = localStorage.getItem('userId');
 
     const handleReject = async () => {
         try {
-            const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του/της ' + 
+            const passengerMessage = 'Your request to join the trip of ' + 
                                         trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
-                                        ' στις ' + formattedDate + ' απορρίφθηκε';
+                                        ' at ' + formattedDate + ' has been rejected.';
             // console.log(passengerMessage);
 
             const role: string = await checkIfRecipientIsDriver();
@@ -42,9 +50,13 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 message: passengerMessage,
                 stopId: notificationDetails.stopId,
                 status: 'declined',
-                recipient: role
+                recipient: role,
+                type: 'request'
             });
             
+            alert("You have rejected the request");
+            window.location.reload();
+
         } catch (error) {
             console.log("Error rejecting notification", error);
         }
@@ -53,9 +65,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const handleAccept = async () => {
         try {
             if(Number(userId) === notificationDetails.driverId && trip) {
-                const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του/της ' + 
+                const passengerMessage = 'Your request to join the trip of ' + 
                                             trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
-                                            ' στις ' + formattedDate + ' εχει γίνει αποδεκτή';
+                                            ' at ' + formattedDate + ' has been accepted!';
 
                 const role: string = await checkIfRecipientIsDriver();
 
@@ -72,7 +84,8 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     message: passengerMessage,
                     stopId: notificationDetails.stopId,
                     status: 'accepted',
-                    recipient: role
+                    recipient: role,
+                    type: 'request'
                 });
 
                 const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);
@@ -93,7 +106,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 //* update user's current trip 
                 await instance.put(`/user/${notificationDetails.passengerId}`, {
                     currentTripId: notificationDetails.tripId
-                })
+                });
+
+                alert("You have accepted the request");
+                window.location.reload();
             }
             
         } catch (error) {
@@ -119,6 +135,78 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
         }
     }
 
+    const displayAppropriateTitle = () => {
+        if(notificationDetails.type === 'request'){
+            if(displayAcceptReject){
+                return 'Request to join your trip';
+            } else 
+                return 'Request to join a trip';
+        } else if (notificationDetails.type === 'review'){
+            return 'Trip participants review';
+        }
+    }
+
+    const retrieveTripInfo = async () => {
+        try {
+            const tripMentioned = await instance.get(`/trips/${notificationDetails.tripId}`);
+            console.log(tripMentioned);
+            setTrip(tripMentioned.data);
+
+            const {formattedDate, formattedTime} = formatDateTime(tripMentioned.data.startingTime);
+            setFormattedDate(formattedDate);
+            setFormattedTime(formattedTime);
+        } catch (error) {
+            console.log("Error retrieving trip info", error);
+        }
+    }
+
+    const handleReviewSubmission = () => {
+        try {
+            if(usersRating){
+                const promises = usersRating.map( async (usersRating) => {
+                    await instance.post(`/reviews/${notificationDetails.tripId}`, {
+                        reviewRating: usersRating.rating,
+                        reviewerId: Number(userId),
+                        reviewedUserId: usersRating.participantId
+                    })
+                    .then( (response) => {
+                        console.log(`Review submitted for user ${usersRating.participantId}`, response);
+                        return response;
+                    })
+                    .catch( (error) => {
+                        console.log(`Error submitting review for user ${usersRating.participantId}`, error);
+                        throw error;
+                    })
+                })
+                
+                Promise.all(promises)
+                .then(async (response) => {
+                    console.log("All reviews submitted", response);
+                    console.log("Promises", promises.length);
+                    
+                    //add 1 point to the user's overall points for each review submitted
+                    await instance.put(`/user/${userId}?type=points`,{
+                        overallPoints: promises.length
+                    });
+                    alert(`Your reviews have been submitted and you have been awarded ${promises.length} points!`);
+                    await instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                        status: 'reviewed'
+                    });
+                    window.location.reload();
+                    
+                })
+                .catch((error) => {
+                    console.log("Error submitting reviews", error);
+                })
+            } else {
+                console.log("No users to rate");
+            }
+        } catch (error) {
+            console.log("Error handling reviews", error);
+            
+        }
+    }
+
     useEffect(() => {
         if(accepted) {
             console.log('Accepted', accepted);
@@ -134,41 +222,54 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     }, [rejected]);
 
     useEffect(() => {
-        const retrieveTripInfo = async () => {
-            try {
-                const tripMentioned = await instance.get(`/trips/${notificationDetails.tripId}`);
-                console.log(tripMentioned);
-                setTrip(tripMentioned.data);
-
-                const {formattedDate, formattedTime} = formatDateTime(tripMentioned.data.startingTime);
-                setFormattedDate(formattedDate);
-                setFormattedTime(formattedTime);
-            } catch (error) {
-                console.log("Error retrieving trip info", error);
-            }
-        }
         retrieveTripInfo();
     }, []);
 
     useEffect(() => {
-        if(trip){
+        if(trip && !tripParticipantsSet) {
+            const tripParticipantsTemp: {firstName: string, lastName:string, participantId: number, role: string}[] = [];
             if(trip.driverId === Number(userId))
                 setDisplayAcceptReject(true);
+            if(trip.driver && trip.driverId && trip.driverId !== Number(userId)){
+                tripParticipantsTemp.push(
+                    {
+                        firstName: trip.driver.user.firstName, 
+                        lastName: trip.driver.user.lastName,
+                        participantId: trip.driverId,
+                        role: 'driver'
+                    });
+            }
+            trip.tripPassengers.forEach( (tripPassenger) => {
+                if(tripPassenger.passengerId !== Number(userId)){
+                    tripParticipantsTemp.push(
+                        {
+                            firstName: tripPassenger.passenger.firstName, 
+                            lastName: tripPassenger.passenger.lastName,
+                            participantId: tripPassenger.passengerId,
+                            role: 'passenger'
+                        });
+                }
+            });
+            setTripParticipants(tripParticipantsTemp);
+            setTripParticipantsSet(true);
         }
-    }, [trip])
+
+    }, [trip]);
 
     return (
-        <IonCard style={{borderRadius: '1rem', color: 'black'}} color="primary">
+        <IonCard color="primary">
             <IonCardHeader>
                 <IonCardTitle class="ion-text-center">
-                    {displayAcceptReject ? 'Αίτηση για συμμετοχή στη διαδρομή σας' : 'Αίτηση για συμμετοχή σε διαδρομή'}
+                    {
+                        displayAppropriateTitle()
+                    }
                 </IonCardTitle>
             </IonCardHeader>
-            <IonCardContent style={{padding: '0rem'}}>
-                <div className="notification-message" style={{display: 'flex', textAlign: 'center'}}>
+            <IonCardContent className="card-content">
+                <div className="notification-message">
                     {notificationDetails.message}
                 </div>
-                <div className="trip-display-container" style={{width: '100%'}}>
+                <div className="trip-display-container">
                     {
                         
                         trip ? (
@@ -181,7 +282,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                 finish='Πρυτανεία'
                                 driver={{
                                         user: trip.driver? trip.driver.user : {
-                                            firstName: 'Δεν υπάρχει οδηγός ακόμα',
+                                            firstName: 'There is no driver yet',
                                             lastName: '',
                                             overallRating: '0'
                                         },
@@ -197,13 +298,67 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         ) : ''
                     }
                 </div>
+                { 
+                    displayAcceptReject && notificationDetails.type === 'request' &&
+                        <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
+                            <IonButton color="success" onClick={() => setAccepted(true)}>Accept</IonButton>
+                            <IonButton color="danger" onClick={() => setRejected(true)}>Reject</IonButton>
+                        </div>
+                }
+                {
+                    notificationDetails.type === 'review' &&
+                        <div className="rating-container">
+                            <IonText>How would you rate </IonText>
+                            <Swiper
+                                pagination={true}
+                                className="my-swiper"
+                                modules={[Pagination]}
+                            >
+                            {
+                                tripParticipants.map((participant, index) => (
+                                    <SwiperSlide key={index} style={{height: '4rem'}}>
+                                        <div
+                                            style={
+                                                {
+                                                    display: 'flex', 
+                                                    flexDirection: 'column', 
+                                                    alignItems: 'center',
+                                                    height: '100%',
+                                                }
+                                            }>
+                                            <IonText>{participant.firstName} {participant.lastName} {" (" + participant.role + ")"}</IonText>
+                                            <Rating
+                                                name="half-rating"
+                                                className="rating"
+                                                precision={0.5}
+                                                defaultValue={0}
+                                                value={usersRating.find((userRating) => userRating.participantId === participant.participantId)?.rating || 0}
+                                                onChange={(event, newValue) => {
+                                                    if(newValue !== null ){
+                                                        const index = usersRating.findIndex((userRating) => userRating.participantId === participant.participantId); 
+                                                        if(index !== -1){
+                                                            //updated version of the usersRating array
+                                                            const updatedUsersRating = [...usersRating];
+                                                            //update the rating of the user whose id is the same as the id of the user that was rated
+                                                            updatedUsersRating[index].rating = newValue;
+                                                            //update the state with the updated array
+                                                            setUsersRating(updatedUsersRating);
+                                                        } else {
+                                                            setUsersRating([...usersRating, {participantId: participant.participantId, rating: newValue}]); 
+                                                        }
+                                                    }
+                                                }}
+                                                
+                                            />
+                                        </div>
+                                    </SwiperSlide>
+                                ))
+                            }
+                            </Swiper>                      
+                            <IonButton color="success" onClick={handleReviewSubmission}>Submit Review</IonButton>
+                        </div>  
+                }
             </IonCardContent>
-            { displayAcceptReject &&
-                <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
-                    <IonButton color="danger" onClick={() => setRejected(true)}>Απορριψη</IonButton>
-                    <IonButton color="success" onClick={() => setAccepted(true)}>Αποδοχη</IonButton>
-                </div>
-            }
         </IonCard>
     );
 }

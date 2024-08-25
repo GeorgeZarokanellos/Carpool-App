@@ -16,7 +16,6 @@ import session from 'express-session';
 import registration_router from './router/registration_router';
 import trip_router from './router/trip_router';
 import profile_router from './router/profile_router';
-import reviews_router from './router/review_router';
 import './controller/authentication_controller';
 import stop_router from './router/stop_router';
 import review_router from './router/review_router';
@@ -41,8 +40,8 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cors({
-    origin: 'http://localhost:8100',
-    // origin: 'http://192.168.1.22:8100',
+    // origin: 'http://localhost:8100',
+    origin: 'http://192.168.1.24:8100',
     credentials: true,
     methods: 'GET, POST, PUT, PATCH, DELETE',
     AccessControlAllowCredentials: true,

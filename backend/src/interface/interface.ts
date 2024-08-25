@@ -19,12 +19,18 @@ interface updatedTripInterface {
 }
 
 interface updatedUserInterface {
-    currentTripId: number;
+    currentTripId?: number;
+    overallPoints?: number;
 }
 
 enum role {
     driver = 'driver',
     passenger = 'passenger'
+}
+
+enum NotificationType {
+    REQUEST = 'request',
+    REVIEW = 'review'
 }
 
 interface addUserRequestBodyInterface {
@@ -47,7 +53,8 @@ interface carRegisterRequestBodyInterface {
 
 interface reviewRequestBodyInterface {
     reviewRating: number;
-    reviewDateTime: Date;
+    reviewerId: number;
+    reviewedUserId: number;
 }
 
 interface updatedNotificationInterface {
@@ -61,6 +68,7 @@ interface notificationInterface extends updatedNotificationInterface {
     message: string;
     stopId: number;
     recipient: string;
+    type: NotificationType;
 }
 
 export type {
