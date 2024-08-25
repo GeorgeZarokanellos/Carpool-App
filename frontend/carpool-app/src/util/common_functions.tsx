@@ -26,11 +26,16 @@ export const formatDate = (dateString: string | Date): string => {
     }
 }
 
+
 export const formatDateTime = (dateString: string): {formattedDate: string, formattedTime: string} => {
     let formattedDate: string;
     let formattedTime: string;
-
-    const dateTimeParts = dateString.split('T');
+    const date = new Date(dateString);  
+    const offset = date.getTimezoneOffset();    //take the offset of local from UTC in minutes
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));  //convert to local time
+    console.log("Local Date", localDate);
+    
+    const dateTimeParts = localDate.toISOString().split('T');
     const timeParts = `${dateTimeParts[1]}`.split(':');
     if(dateTimeParts[0] && timeParts.length >= 2){
         formattedDate = formatDate(dateTimeParts[0]);
@@ -50,8 +55,15 @@ export const formatDateTime = (dateString: string): {formattedDate: string, form
 }
 
 export const arrayBufferTo64String = (buffer: ProfilePictureBuffer | undefined): string => {
-    if(buffer){
-        return `data:image/jpeg;base64,${btoa(String.fromCharCode(...buffer.data))}`;
-    } else 
+    if (buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer.data);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return `data:image/jpeg;base64,${btoa(binary)}`;
+    } else {
         return "Buffer is empty and cannot be converted!";
+    }
 }
