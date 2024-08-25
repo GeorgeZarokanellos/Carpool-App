@@ -10,8 +10,6 @@ export const getNotifications = async(req: Request, res: Response, next: NextFun
         const userId: string = req.params.userId;
         let userRole: string = req.query.userRole as string; // retrieve user role from query string to filter notifications        
         
-        
-
         console.log('info', `userId: ${userId}, userRole: ${userRole}`);
         const notifications = await Notification.findAll({
             where: {

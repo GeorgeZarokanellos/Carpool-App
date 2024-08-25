@@ -103,6 +103,7 @@ export const NewTrip: React.FC = () => {
             }
 
             history.push('/main/search-trips');
+            window.location.reload();
         } catch (error) {
             console.log("Error creating trip or updating user", error);
             
