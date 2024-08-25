@@ -42,7 +42,6 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
     const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
     const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
-    const [tripEnded, setTripEnded] = useState(false); 
 
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
@@ -92,7 +91,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
 
     useEffect(() => {
       if(driverWantsToEndTrip){
-        const userConfirmed = window.confirm('Είστε σίγουρος ότι θέλετε να τερματίσετε το ταξίδι;');
+        const userConfirmed = window.confirm('Are you sure you want to end the trip;');
         if(userConfirmed){
           handleTripCompletion(userConfirmed);
         } else {
@@ -116,8 +115,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
 
         //update current trip id of all passengers and driver to null
         //send review notification to all passengers  
-        const reviewMessagePassenger = 'Το ταξίδι ολοκληρώθηκε. Θα θέλατε να αξιολογήσετε τον/την οδηγό της διαδρομής;';
-        const reviewMessageDriver = 'Το ταξίδι ολοκληρώθηκε. Θα θέλατε να αξιολογήσετε τους επιβάτες της διαδρομής;';
+        const reviewMessage = 'The trip has been completed successfully. Would you like to review the participants of the trip?';
         tripData.tripPassengers.forEach(async (passenger) => {
 
           await instance.put(`/user/${passenger.passengerId}`, {
@@ -133,7 +131,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
               passengerId: passenger.passengerId,
               tripId: tripData.tripId,    
               stopId: null,
-              message: reviewMessagePassenger,
+              message: reviewMessage,
               recipient: 'passenger',
               type: 'review'
           })
@@ -160,7 +158,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
           passengerId: null,
           tripId: tripData.tripId,    
           stopId: null,
-          message: reviewMessageDriver,
+          message: reviewMessage,
           recipient: 'driver',
           type: 'review'
         })
@@ -172,8 +170,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         });
 
         setReviewNotificationsSent(true);
-        alert('Η διαδρομή ολοκληρώθηκε με επιτυχία!');
+        alert('The trip has been completed successfully!');
         history.push('/main/search-trips');
+        window.location.reload();
         
       } else {
         console.log('Review notifications already sent');
@@ -240,7 +239,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const handleRequestForJoiningTrip = () => {      
         
         if(tripData && tripData.driver && selectedStop){
-            let driverMessage: string = 'Ο/H χρήστης ' + firstName + ' ' + lastName + ' με βαθμολογία ' + overallRating + ' ζητά να συμμετάσχει στο ταξίδι σας ';
+            let driverMessage: string =  firstName + ' ' + lastName + ' with a rating of ' + overallRating + ' wants to join your trip ';
             let stopExists = false;
             tripData.tripStops.forEach((stop) => {
                 if(stop.stopId === selectedStop.stopId){
@@ -250,9 +249,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             });
 
             if(stopExists){
-                driverMessage += 'από την στάση ' + selectedStop.stopLocation;
+                driverMessage += 'from the ' + selectedStop.stopLocation + ' stop';
             } else {
-                driverMessage += 'από την νέα στάση ' + selectedStop.stopLocation;
+                driverMessage += 'from the new ' + selectedStop.stopLocation + ' stop';
             }
                 
             if(!userIsInTrip && !requestMade){ 
@@ -271,7 +270,6 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 setJoinRequestSentAlert(true);
             } else {
                 console.log('User is already in trip');
-                // alert('Είστε ήδη στο ταξίδι');
             }
         } else {
             console.log('There is no driver or selected stop from handleRequestForJoiningTrip');
@@ -379,7 +377,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                           setJoinRequestSentAlert(false);
                           history.goBack();
                           }}
-                          message={'Η αίτηση σας στάλθηκε επιτυχώς!'}
+                          message={'Your request has been sent to the driver!'}
                           buttons={['OK']}
                           animated={true}
                       />

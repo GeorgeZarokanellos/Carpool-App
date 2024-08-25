@@ -35,20 +35,20 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({tripId, startingT
         tripInProgress ? (
             <div className="trip-in-progress">
                 <IonText>
-                    Το ταξίδι είναι σε εξέλιξη!
+                    The trip is in progress!
                     
                 </IonText>
                 {
                     tripDriverCurrentUser &&
                     <IonButton  color="danger" onClick={() => setDriverWantsToEndTrip(true)}>
-                        Τερματισμος ταξιδιου
+                        End Trip
                     </IonButton>
                 }
             </div>
         ) : (
             <div className="trip-not-in-progress">
                 <IonText>
-                    Το ταξίδι δεν έχει ξεκινήσει ακόμα
+                    The trip hasn&apos;t started yet.
                 </IonText>
             </div>
         )
