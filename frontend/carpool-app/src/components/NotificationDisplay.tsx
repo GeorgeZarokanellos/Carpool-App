@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText } from "@ionic/react";
 import instance from "../AxiosConfig";
-import { ExtendedTrip, Trip } from "../interfacesAndTypes/Types";
+import { ExtendedTrip} from "../interfacesAndTypes/Types";
 import { TripInformation } from "./TripInformation";
 import { formatDateTime } from "../util/common_functions";
 import Rating from "@mui/material/Rating";
@@ -11,7 +11,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination} from 'swiper/modules';
-import { useHistory } from "react-router";
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
@@ -26,16 +25,15 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const [rejected, setRejected] = useState<boolean>(false);
     const [displayAcceptReject, setDisplayAcceptReject] = useState<boolean>(false);
     const [usersRating, setUsersRating] = useState<{participantId: number, rating: number}[]>([]);
-    const [tripParticipants, setTripParticipants] = useState<{firstName: string, lastName: string, participantId: number}[]>([]);
+    const [tripParticipants, setTripParticipants] = useState<{firstName: string, lastName: string, participantId: number, role: string}[]>([]);
     const [tripParticipantsSet, setTripParticipantsSet] = useState<boolean>(false);
     const userId = localStorage.getItem('userId');
-    const history = useHistory();
 
     const handleReject = async () => {
         try {
-            const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του/της ' + 
+            const passengerMessage = 'Your request to join the trip of ' + 
                                         trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
-                                        ' στις ' + formattedDate + ' απορρίφθηκε';
+                                        ' at ' + formattedDate + ' has been rejected.';
             // console.log(passengerMessage);
 
             const role: string = await checkIfRecipientIsDriver();
@@ -56,6 +54,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 type: 'request'
             });
             
+            alert("You have rejected the request");
+            window.location.reload();
+
         } catch (error) {
             console.log("Error rejecting notification", error);
         }
@@ -64,9 +65,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const handleAccept = async () => {
         try {
             if(Number(userId) === notificationDetails.driverId && trip) {
-                const passengerMessage = 'Η αίτηση σας για συμμετοχή στη διαδρομή του/της ' + 
+                const passengerMessage = 'Your request to join the trip of ' + 
                                             trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
-                                            ' στις ' + formattedDate + ' εχει γίνει αποδεκτή';
+                                            ' at ' + formattedDate + ' has been accepted!';
 
                 const role: string = await checkIfRecipientIsDriver();
 
@@ -137,11 +138,11 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const displayAppropriateTitle = () => {
         if(notificationDetails.type === 'request'){
             if(displayAcceptReject){
-                return 'Αίτηση συμμετοχής σε διαδρομή σας';
+                return 'Request to join your trip';
             } else 
-                return 'Αίτηση συμμετοχής σε διαδρομή';
+                return 'Request to join a trip';
         } else if (notificationDetails.type === 'review'){
-            return 'Αξιολόγηση Συνεπιβατών';
+            return 'Trip participants review';
         }
     }
 
@@ -187,7 +188,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     await instance.put(`/user/${userId}?type=points`,{
                         overallPoints: promises.length
                     });
-                    alert("Οι αξιολογήσεις υποβλήθηκαν επιτυχώς");
+                    alert(`Your reviews have been submitted and you have been awarded ${promises.length} points!`);
                     await instance.put(`/notifications/${notificationDetails.notificationId}`, {
                         status: 'reviewed'
                     });
@@ -226,34 +227,34 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
 
     useEffect(() => {
         if(trip && !tripParticipantsSet) {
-            const tripParticipantsTemp: {firstName: string, lastName:string, participantId: number}[] = [];
+            const tripParticipantsTemp: {firstName: string, lastName:string, participantId: number, role: string}[] = [];
             if(trip.driverId === Number(userId))
                 setDisplayAcceptReject(true);
-            if(trip.driver && trip.driverId)
-                setTripParticipants([...tripParticipants, 
-                            { 
-                                firstName: trip.driver?.user.firstName, 
-                                lastName: trip.driver?.user.lastName,
-                                participantId: trip.driverId
-                            }]);
-            trip.tripPassengers.forEach( (tripPassenger) => {
+            if(trip.driver && trip.driverId && trip.driverId !== Number(userId)){
                 tripParticipantsTemp.push(
                     {
-                        firstName: tripPassenger.passenger.firstName, 
-                        lastName: tripPassenger.passenger.lastName,
-                        participantId: tripPassenger.passengerId
+                        firstName: trip.driver.user.firstName, 
+                        lastName: trip.driver.user.lastName,
+                        participantId: trip.driverId,
+                        role: 'driver'
                     });
+            }
+            trip.tripPassengers.forEach( (tripPassenger) => {
+                if(tripPassenger.passengerId !== Number(userId)){
+                    tripParticipantsTemp.push(
+                        {
+                            firstName: tripPassenger.passenger.firstName, 
+                            lastName: tripPassenger.passenger.lastName,
+                            participantId: tripPassenger.passengerId,
+                            role: 'passenger'
+                        });
+                }
             });
-            setTripParticipants([...tripParticipants, ...tripParticipantsTemp]);
+            setTripParticipants(tripParticipantsTemp);
             setTripParticipantsSet(true);
         }
 
     }, [trip]);
-
-    useEffect(() => {
-        console.log("Users rating", usersRating);
-    }, [usersRating]);
-        
 
     return (
         <IonCard color="primary">
@@ -281,7 +282,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                 finish='Πρυτανεία'
                                 driver={{
                                         user: trip.driver? trip.driver.user : {
-                                            firstName: 'Δεν υπάρχει οδηγός ακόμα',
+                                            firstName: 'There is no driver yet',
                                             lastName: '',
                                             overallRating: '0'
                                         },
@@ -300,14 +301,14 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 { 
                     displayAcceptReject && notificationDetails.type === 'request' &&
                         <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
-                            <IonButton color="danger" onClick={() => setRejected(true)}>Απορριψη</IonButton>
-                            <IonButton color="success" onClick={() => setAccepted(true)}>Αποδοχη</IonButton>
+                            <IonButton color="success" onClick={() => setAccepted(true)}>Accept</IonButton>
+                            <IonButton color="danger" onClick={() => setRejected(true)}>Reject</IonButton>
                         </div>
                 }
                 {
                     notificationDetails.type === 'review' &&
                         <div className="rating-container">
-                            <IonText>Πως σας φάνηκε ο/η </IonText>
+                            <IonText>How would you rate </IonText>
                             <Swiper
                                 pagination={true}
                                 className="my-swiper"
@@ -325,7 +326,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                                     height: '100%',
                                                 }
                                             }>
-                                            <IonText>{participant.firstName} {participant.lastName}</IonText>
+                                            <IonText>{participant.firstName} {participant.lastName} {" (" + participant.role + ")"}</IonText>
                                             <Rating
                                                 name="half-rating"
                                                 className="rating"
@@ -354,7 +355,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                 ))
                             }
                             </Swiper>                      
-                            <IonButton color="success" onClick={handleReviewSubmission}>Υποβολη Αξιολογησης</IonButton>
+                            <IonButton color="success" onClick={handleReviewSubmission}>Submit Review</IonButton>
                         </div>  
                 }
             </IonCardContent>
