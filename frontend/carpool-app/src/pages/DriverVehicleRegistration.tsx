@@ -5,7 +5,6 @@ import {
   IonFooter,
   IonGrid,
   IonHeader,
-  IonInput,
   IonPage,
   IonPicker,
   IonRow,
@@ -64,7 +63,7 @@ export const DriverVehicleRegistration: React.FC = () => {
     { maker: "Seat", models: ["Ibiza", "Leon"] },
   ];
 
-  const handleDriverVehicleRegistration = (e: React.FormEvent) => {
+  const handleDriverVehicleRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const formData = new FormData();
@@ -97,7 +96,7 @@ export const DriverVehicleRegistration: React.FC = () => {
     });
     console.log("form data: ",formData);
     
-    instance.post(`registration/driver/${userId}`, formData, {
+    await instance.post(`registration/driver/${userId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': 'Bearer your_token_here'
