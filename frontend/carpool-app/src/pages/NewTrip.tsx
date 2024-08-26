@@ -9,7 +9,8 @@ import { PassengerCredentials } from "../components/PassengerCredentials";
 interface requestBody {
     tripCreatorId: number,
     driverId: number | null,
-    startLocation: string,
+    startLocationId: number,
+    endLocationId: number,
     startingTime: string,
     stops: Stop[],
     passengers: {firstName: string, lastName: string}[]
@@ -27,18 +28,20 @@ export const NewTrip: React.FC = () => {
     const userIdInt = parseInt(userIdString as string, 10);
 
     const [showAlert] = useState(role === 'driver');
-    const [startingLocations, setStartingLocations] = useState<Stop[]>([]);
+    const [startLocations, setStartLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
     const [firstPassengerId, setFirstPassengerId] = useState<number | null>(null);
     const [firstPassengerCredentials, setFirstPassengerCredentials] = useState<{firstName: string, lastName: string} | null>(null);
-    //starting location picker
-    const [showStartingLocationPicker, setShowStartingLocationPicker] = useState(false);
+    //start end location picker
+    const [showStartLocationPicker, setShowStartLocationPicker] = useState(false);
     const [startLocationPickerKey, setStartLocationPickerKey] = useState<number>(0);
-    const [selectedStartingLocation, setSelectedStartingLocation] = useState<string>('');
+    const [showEndLocationPicker, setShowEndLocationPicker] = useState(false);
+    const [selectedStartLocation, setSelectedStartLocation] = useState<{loc: string, stopId: number} | null>(null);
+    const [selectedEndLocation, setSelectedEndLocation] = useState<{loc: string, stopId: number} | null>(null);
     //passenger number picker
     const [showPassengerNumberPicker ,setShowPassengerNumberPicker] = useState(false);
     const [passengerNumberPickerKey, setPassengerNumberPickerKey] = useState<number>(10);
-    const [selectedPassengerNumber, setSelectedPassengerNumber] = useState<number>(1);
+    const [selectedPassengerNumber, setSelectedPassengerNumber] = useState<number>(0);
     const [passengerCredentialsInputsKey, setPassengerCredentialsInputsKey] = useState<number>(20);
     //passenger credentials
     //TODO reset the passenger credentials when the user deletes a passenger
@@ -48,62 +51,52 @@ export const NewTrip: React.FC = () => {
     //additional stops
     const [stops, setStops] = useState<Stop[]>([]);
 
-    useEffect(() => {
-        instance.get('/trips/starting-locations')
-        .then(response => {
-            console.log("Starting locations: ", response.data);
-            setStartingLocations(response.data);
-        })
-    },[]);
-
-    useEffect(() => {
-        //the user creating the trip will be the first passenger except if he is the driver
-        if(tripDriverId){
-            if(userIdString && tripDriverId !== userIdInt){
-                console.log("First passenger id: ", userIdString);
-                setFirstPassengerId(parseInt(userIdString, 10));
-            }
-        }
-    }, [tripDriverId]);
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-            requestBody = {
-                tripCreatorId: userIdInt,
-                driverId: tripDriverId,
-                startLocation: selectedStartingLocation,
-                startingTime: selectedDate.toISOString(),
-                stops: stops,
-                passengers: passengerCredentials
-            }
-
-            const response = await instance.post('/trips', requestBody);
-            if(response){
-                console.log(response.data);
-                const newTripId = response.data.tripId;
-                alert("Trip created successfully");
-
-                //update the current trip of the user to the newly created one
-                await instance.put(`/user/${userIdInt}`, {
-                    currentTripId: newTripId
-                }).
-                then((response) => {
+            console.log("Check conditions: ", selectedStartLocation, selectedEndLocation, selectedDate, selectedPassengerNumber);
+            
+            if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate && selectedPassengerNumber !== 0){
+                requestBody = {
+                    tripCreatorId: userIdInt,
+                    driverId: tripDriverId,
+                    startLocationId: selectedStartLocation.stopId,
+                    endLocationId: selectedEndLocation.stopId,
+                    startingTime: selectedDate.toISOString(),
+                    stops: stops,
+                    passengers: passengerCredentials
+                }
+    
+                const response = await instance.post('/trips', requestBody);
+                if(response){
                     console.log(response.data);
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+                    const newTripId = response.data.tripId;
+                    alert("Trip created successfully");
+    
+                    //update the current trip of the user to the newly created one
+                    await instance.put(`/user/${userIdInt}`, {
+                        currentTripId: newTripId
+                    }).
+                    then((response) => {
+                        console.log(response.data);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+    
+                } else {
+                    console.log("Trip creation failed");
+                    setPassengerCredentials([]);
+                    alert("Trip creation failed");
+                }
 
+                history.push('/main/search-trips');
+                window.location.reload();
             } else {
-                console.log("Trip creation failed");
-                setPassengerCredentials([]);
-                alert("Trip creation failed");
+                alert("Please fill in all the fields");
             }
 
-            history.push('/main/search-trips');
-            window.location.reload();
         } catch (error) {
             console.log("Error creating trip or updating user", error);
             
@@ -152,6 +145,24 @@ export const NewTrip: React.FC = () => {
     useEffect(() => {
         console.log("first passenger id", firstPassengerId);
     }, [firstPassengerId]);
+
+    useEffect(() => {
+        instance.get('/trips/start-locations')
+        .then(response => {
+            console.log("Start locations: ", response.data);
+            setStartLocations(response.data);
+        })
+    },[]);
+
+    useEffect(() => {
+        //the user creating the trip will be the first passenger except if he is the driver
+        if(tripDriverId){
+            if(userIdString && tripDriverId !== userIdInt){
+                console.log("First passenger id: ", userIdString);
+                setFirstPassengerId(parseInt(userIdString, 10));
+            }
+        }
+    }, [tripDriverId]);
         
 
     return (
@@ -189,26 +200,31 @@ export const NewTrip: React.FC = () => {
                         <form className="trip-form" onSubmit={handleSubmit}>
                             <div className="form-contents">
                                 <IonButton onClick={() => {
-                                    setShowStartingLocationPicker(true);
+                                    setShowStartLocationPicker(true);
                                     setStartLocationPickerKey(prevKey => prevKey + 1);
                                     }} > 
                                     {
-                                        selectedStartingLocation ? (
-                                            <p style={{margin: 0}}>Starting at
-                                                {' ' + selectedStartingLocation}
+                                        selectedStartLocation && selectedEndLocation ? (
+                                            <p style={{margin: 0, wordWrap: 'break-word', whiteSpace: 'normal'}}>
+                                                Starting at
+                                                {' ' + selectedStartLocation.loc}
+                                                <br />
+                                                <br />
+                                                Ending at
+                                                {' ' + selectedEndLocation.loc}
                                             </p>
-                                        ) : "Select starting location"
+                                        ) : "Select start and end location"
                                     }
                                 </ IonButton>
                                 <IonPicker 
-                                    isOpen={showStartingLocationPicker}
+                                    isOpen={showStartLocationPicker}
                                     key={startLocationPickerKey}
                                     columns={[
                                         {
-                                            name: 'Starting Locations',
-                                            options: startingLocations.map((stop, index) => ({
+                                            name: 'Start Locations',
+                                            options: startLocations.map((stop) => ({
                                                 text: stop.stopLocation,
-                                                value: index
+                                                value: stop.stopId
                                             }))
                                         }
                                     ]}  
@@ -216,18 +232,64 @@ export const NewTrip: React.FC = () => {
                                         {
                                             text: "Cancel",
                                             role: "Cancel",
-                                            handler: () => setShowStartingLocationPicker(false),
+                                            handler: () => setShowStartLocationPicker(false),
                                         },
                                         {
                                             text: "Confirm",
                                             role: "Confirm",
                                             handler: (value) => {
-                                                // console.log(value);
-                                                // console.log(value['Starting Locations'].text);
-                                                setSelectedStartingLocation(value['Starting Locations'].text);
+                                                console.log("Selected stop:", value['Start Locations'].value);
+                                                
+                                                setSelectedStartLocation({loc: value['Start Locations'].text, stopId: value['Start Locations'].value});
+                                                if(value['Start Locations'].text !== 'Prytaneia'){
+                                                    const prytaneia = startLocations.find(stop => stop.stopLocation === 'Prytaneia');
+                                                    if(prytaneia){
+                                                        setSelectedEndLocation({loc: prytaneia.stopLocation, stopId: prytaneia.stopId});
+                                                    } else {
+                                                        console.log("Prytaneia not found");
+                                                    }
+                                                    setShowStartLocationPicker(false);
+                                                } else {
+                                                    setShowStartLocationPicker(false);
+                                                    setShowEndLocationPicker(true);
+                                                }
                                             }
                                         }
                                     ]}  
+                                />
+                                <IonPicker 
+                                    isOpen={showEndLocationPicker}
+                                    columns={[
+                                        {
+                                            name: 'End Locations',
+                                            options: startLocations
+                                                .filter(stop => stop.stopLocation !== 'Prytaneia')
+                                                .map((stop) => ({
+                                                    text: stop.stopLocation,
+                                                    value: stop.stopId
+                                                }))
+                                        }
+                                    ]}
+                                    buttons={[
+                                        {
+                                            text: "Cancel", 
+                                            role: "Cancel", 
+                                            handler: () => {
+                                                setShowEndLocationPicker(false)
+                                                setShowStartLocationPicker(true);
+                                            }
+                                        },
+                                        {
+                                            text: "Confirm",
+                                            role: "Confirm",
+                                            handler: (value) => {
+                                                console.log("Selected stop:", value['End Locations'].value);
+                                                
+                                                setSelectedEndLocation({loc: value['End Locations'].text, stopId: value['End Locations'].value});
+                                                setShowEndLocationPicker(false);
+                                            }
+                                        }
+                                    ]}
                                 />
                                 <IonButton onClick={() => {
                                     setShowPassengerNumberPicker(true);
@@ -235,7 +297,7 @@ export const NewTrip: React.FC = () => {
                                     setPassengerCredentialsInputsKey(prevKey => prevKey + 1);
                                 }}>
                                     {
-                                        selectedPassengerNumber ? (
+                                        selectedPassengerNumber > 0 ? (
                                             <p style={{margin: 0}}>Number of passengers
                                                 {' ' + selectedPassengerNumber }
                                             </p>
@@ -280,11 +342,11 @@ export const NewTrip: React.FC = () => {
                                     ]}
                                 />
                                 {
-                                    selectedPassengerNumber > 1 ? (
+                                    selectedPassengerNumber > 0 ? (
                                         <IonItem key={passengerCredentialsInputsKey}>
                                             <div className="passengers-credentials-container">
                                             {
-                                                Array.from({length: selectedPassengerNumber-1}, (_, i) => i).map((index) => {
+                                                Array.from({length: selectedPassengerNumber}, (_, i) => i).map((index) => {
                                                     return(
                                                         <PassengerCredentials 
                                                             key={index} 
@@ -312,8 +374,7 @@ export const NewTrip: React.FC = () => {
                                 <IonDatetime 
                                     presentation="date-time"
                                     showDefaultButtons={true}
-                                    //minimum date is the day after the current
-                                    min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()}
+                                    min={new Date(new Date().setHours(new Date().getHours())).toISOString()}
                                     hourCycle="h23"
                                     onIonChange={(e) => {
                                         console.log(e.detail.value);
