@@ -14,10 +14,10 @@ enum NotificationType {
 export interface TripProps {
     startingTime: string;
     dateOfTrip: string;
-    origin: string;
+    startLocation: string;
+    endLocation: string;
     noOfPassengers: number;
     noOfStops: number;
-    finish: string;
     driver?: {
         user: {
             firstName: string,

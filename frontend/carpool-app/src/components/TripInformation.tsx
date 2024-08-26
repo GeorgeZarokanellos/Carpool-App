@@ -25,7 +25,7 @@ import './TripInformation.scss';
 import { StarRating } from "../util/common_functions";
 import { TripTitle } from "./TripTitle";
 
-export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, finish, driver, tripCreator}) => {
+export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, startLocation, endLocation, noOfPassengers, driver, tripCreator}) => {
     const itemColor = "";   //TODO change to background color of the app
 
     return (
@@ -45,7 +45,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                     <IonItem lines="none" color={itemColor} >
                                         <IonIcon icon={locationOutline} slot="start" className="location-icon" />
                                         <IonLabel >
-                                            {origin}
+                                            {startLocation}
                                         </IonLabel>
                                     </IonItem>
                                 </div>
@@ -59,7 +59,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                 <div className="end-location">
                                     <IonItem lines="none" color={itemColor} >
                                             <IonText>
-                                                {finish}
+                                                {endLocation}
                                             </IonText>
                                             <IonIcon icon={flagOutline} slot="end" className="flag-icon" />
                                     </IonItem>

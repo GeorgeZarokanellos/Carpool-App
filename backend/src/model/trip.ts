@@ -30,11 +30,15 @@ Trip.init({
         type: DataTypes.INTEGER,
         field: 'driver_id'
     },
-    startLocation: {
-        type: DataTypes.ENUM,
-        values: ['Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvesteio', 'Aretha'],
+    startLocationId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'start_loc'
+        field: 'start_loc_id'
+    },
+    endLocationId : {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'end_loc_id'
     },
     startingTime: {
         type: DataTypes.DATE,

@@ -52,7 +52,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
       // console.log("Filtered results", filteredResults);
     }
     else {
-      setFilteredResults(trips.filter(trip => trip.startLocation.toLowerCase().includes(event.detail.value.toLowerCase())));
+      setFilteredResults(trips.filter(trip => trip.startLocation.stopLocation.toLowerCase().includes(event.detail.value.toLowerCase())));
       // console.log("filtered results", filteredResults);
       
     }
@@ -89,14 +89,14 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
               
               return(
                 <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
-                  <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '1.5rem 0rem'}} >
+                  <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '17rem', margin: '1.5rem 0rem'}} >
                       <TripInformation 
                         startingTime={formatDateTime(trip.startingTime).formattedTime} 
                         dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
-                        origin={trip.startLocation}
+                        startLocation={trip.startLocation.stopLocation}
+                        endLocation={trip.endLocation.stopLocation}
                         noOfPassengers={trip.noOfPassengers}
                         noOfStops={trip.noOfStops}
-                        finish='Πρυτανεία'
                         driver={trip.driver? {user: trip.driver.user, vehicle: trip.driver.vehicle} : undefined}
                         tripCreator ={trip.tripCreator}
                         />

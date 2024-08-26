@@ -5,11 +5,11 @@ enum Role {
     PASSENGER = "Passenger",
 }
 
-enum Status {
-    PLANNING = "planning",
-    IN_PROGRESS = "in_progress",
-    COMPLETED = "completed",
-}
+// enum Status {
+//     PLANNING = "planning",
+//     IN_PROGRESS = "in_progress",
+//     COMPLETED = "completed",
+// }
 
 
 export type User = {
@@ -24,7 +24,8 @@ export type Trip = {
     tripId: number;
     tripCreatorId: number;
     driverId: number | null;
-    startLocation: string;
+    startLocationId: number;
+    endLocationId: number;
     startingTime: string;
     noOfPassengers: number;
     noOfStops: number;
@@ -46,6 +47,12 @@ export type Trip = {
     tripCreator: {
         firstName: string;
         lastName: string;
+    }
+    startLocation: {
+        stopLocation: string;  
+    }
+    endLocation: {
+        stopLocation: string;
     }
 }
 

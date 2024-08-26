@@ -276,10 +276,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                             <TripInformation 
                                 startingTime={formattedTime} 
                                 dateOfTrip={formattedDate} 
-                                origin={trip.startLocation}
+                                startLocation={trip.startLocation.stopLocation}
+                                endLocation={trip.endLocation.stopLocation}
                                 noOfPassengers={trip.noOfPassengers}
                                 noOfStops={trip.noOfStops}
-                                finish='Πρυτανεία'
                                 driver={{
                                         user: trip.driver? trip.driver.user : {
                                             firstName: 'There is no driver yet',
