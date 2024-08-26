@@ -1,6 +1,6 @@
-import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonTitle } from "@ionic/react";
+import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonLoading, IonPage, IonRow, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
-import { ExtendedTrip, Stop, Trip, TripStops } from "../interfacesAndTypes/Types";
+import { ExtendedTrip, Stop } from "../interfacesAndTypes/Types";
 import { formatDateTime } from "../util/common_functions";
 import instance from "../AxiosConfig";
 import { TripMapDisplay } from "./TripMapDisplay";
@@ -277,13 +277,12 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     }
 
     if(tripData){
-      // console.log('Trip data', tripData);
       
         return (
             <>
                 <IonContent >
                   <TripMapDisplay tripStops={tripData.tripStops} />
-                  <IonTitle class="ion-text-center">Πληροφορίες ταξιδιού</IonTitle>
+                  <IonTitle class="ion-text-center">Trip Information</IonTitle>
                   <div className="grid-contents">
                     <IonGrid>
                       <IonRow>
@@ -298,7 +297,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                             <IonItem lines="none">
                               <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
                               <IonLabel>
-                                {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' συνεπιβάτες'}
+                                {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' passengers'}
                               </IonLabel>
                             </IonItem>
                             <div className="passengers-details">
@@ -307,7 +306,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                             <div className="driver-details">
                               <IonItem lines="none">
                                 <IonIcon icon={carOutline} slot="start" className="car-icon" />
-                                <IonLabel>Οδηγός</IonLabel>
+                                <IonLabel>Driver</IonLabel>
                               </IonItem>
                               <IonItem lines="none">
                                 <IonAvatar style={{ marginRight: '1rem', width: "50%" }}>
@@ -326,30 +325,47 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                         </IonCol>
                         <IonCol size="5" className="custom-col">
                           <div className="stops-display" style={{ overflowY: 'auto', maxHeight: '100%' }}>
-                            <div className="stop">
-                              <LocationOnIcon />
-                              {tripData.startLocation}
-                            </div>
+                            <LocationOnIcon />
+                            <IonText style={{textAlign: 'center'}}>{tripData.startLocation.stopLocation}</IonText>
                             <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
                               <g transform="scale(1.4)">
                                 {/* used to scale only the arrow and not the rectangle around it */}
                                 <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
                               </g>
                             </svg>
-                            {tripData.tripStops.map((stop, index) => (
-                              <div key={index} className="stop">
-                                <HailIcon />
-                                {stop.details.stopLocation}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                                  <g transform="scale(1.4)">
-                                    {/* used to scale only the arrow and not the rectangle around it */}
-                                    <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
-                                  </g>
-                                </svg>
-                              </div>
-                            ))}
+                            <HailIcon />
+                            {
+                              tripData.tripStops.length > 0 ?
+                                tripData.tripStops.map((stop, index) => {
+                                  if(index === 0){
+                                    return (
+                                      <IonText key={index} style={{textAlign: 'center'}}>
+                                        {stop.details.stopLocation}
+                                      </IonText>
+                                    )
+                                  } else {
+                                    return (
+                                      <React.Fragment key={index}>
+                                        <HailIcon />
+                                        <IonText style={{textAlign: 'center'}}>
+                                          {stop.details.stopLocation}
+                                        </IonText>
+                                      </React.Fragment>
+                                    )
+                                  }
+                                }
+                                  
+                                )
+                              : 'No stops'
+                            }
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
+                              <g transform="scale(1.4)">
+                                {/* used to scale only the arrow and not the rectangle around it */}
+                                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
+                              </g>
+                            </svg>
                             <SportsScoreIcon />
-                            Πρυτανεία
+                            {tripData.endLocation.stopLocation}
                           </div>
                         </IonCol>
                       </IonRow>
@@ -396,9 +412,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     } else {
         return (
             <IonPage>
-                <IonContent>
-                    <IonTitle>Δεν υπάρχουν πληροφορίες για το ταξίδι</IonTitle>
-                </IonContent>
+                <IonLoading isOpen={true} message={'Φόρτωση πληροφοριών ταξιδιού..'} />
             </IonPage>
         )
     }
