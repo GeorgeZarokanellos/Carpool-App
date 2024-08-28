@@ -410,11 +410,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             </>  
         )
     } else {
-        return (
-            <IonPage>
-                <IonLoading isOpen={true} message={'Φόρτωση πληροφοριών ταξιδιού..'} />
-            </IonPage>
-        )
+      return (
+        <IonTitle>Retrieving Trip Information...</IonTitle>
+      )
     }
 
 }

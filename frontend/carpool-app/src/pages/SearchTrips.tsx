@@ -1,5 +1,5 @@
 import React, { useEffect, useState} from 'react';
-import { IonButton, IonContent, IonGrid, IonHeader, IonPage, IonRow, IonSearchbar } from '@ionic/react';
+import { IonButton, IonContent, IonGrid, IonHeader, IonLoading, IonPage, IonRow, IonSearchbar } from '@ionic/react';
 import { TripInformation } from '../components/TripInformation';
 import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.scss';
@@ -14,6 +14,7 @@ interface searchTripProps {
 const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const history = useHistory();
 
 
@@ -22,28 +23,36 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const viewportHeight = window.innerHeight;
 
   useEffect(() => {
-    // console.log("refresh key", refreshKey);
-    //TODO this doesnt work when the user is from mobile
-    const queryParams = new URLSearchParams({
-    userDate: new Date().toISOString(),
-    });
-
-    // console.log("query params", queryParams.toString());
-    
-    instance.get(`/trips?${queryParams.toString()}`)
-    .then(response => {
-      console.log("response from server", response.data);
-      
-      setTrips(response.data);
-      setFilteredResults(response.data);
-      // console.log("filtered data from response", filteredResults);
-      
-    })
-    .catch(error => {
-      console.log(error);
-    });
-  
+    retrieveTrips();
   },[refreshKey]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  },[])
+
+  const retrieveTrips = async () => {
+    try {
+      const queryParams = new URLSearchParams({
+        userDate: new Date().toISOString(),
+        });
+    
+        // console.log("query params", queryParams.toString());
+        
+        const response = await instance.get(`/trips?${queryParams.toString()}`)
+        console.log("Response from server", response.data);
+
+        setTrips(response.data);
+        setFilteredResults(response.data);
+        
+    } catch (error) {
+      console.log("Error retrieving trips", error);
+      
+    }
+  }
 
   const handleSearch = (event: CustomEvent) => {
     if(event.detail && event.detail.value === ""){
@@ -66,10 +75,6 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
     history.push("/main/create-trip")
   }
 
-  // useEffect(() => {
-  //   console.log("filtered results", filteredResults);
-  // }, [filteredResults]);
-
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
       <IonHeader className='ion-no-border'>
@@ -84,27 +89,28 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
         <IonGrid >
           <div className='trips-list-container'>
             {
-            filteredResults.map((trip) => {
-              // console.log(trip.startingTime);
-              
-              return(
-                <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
-                  <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '17rem', margin: '1.5rem 0rem'}} >
-                      <TripInformation 
-                        startingTime={formatDateTime(trip.startingTime).formattedTime} 
-                        dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
-                        startLocation={trip.startLocation.stopLocation}
-                        endLocation={trip.endLocation.stopLocation}
-                        noOfPassengers={trip.noOfPassengers}
-                        noOfStops={trip.noOfStops}
-                        driver={trip.driver? {user: trip.driver.user, vehicle: trip.driver.vehicle} : undefined}
-                        tripCreator ={trip.tripCreator}
-                        />
-                      
-                  </IonRow>
-                </Link>
+              filteredResults.length !== 0 ? (
+                filteredResults.map((trip) => {
+                  return(
+                    <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
+                      <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '17rem', margin: '1.5rem 0rem'}} >
+                          <TripInformation 
+                            startingTime={formatDateTime(trip.startingTime).formattedTime} 
+                            dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
+                            startLocation={trip.startLocation.stopLocation}
+                            endLocation={trip.endLocation.stopLocation}
+                            noOfPassengers={trip.noOfPassengers}
+                            noOfStops={trip.noOfStops}
+                            driver={trip.driver? {user: trip.driver.user, vehicle: trip.driver.vehicle} : undefined}
+                            tripCreator ={trip.tripCreator}
+                            />
+                      </IonRow>
+                    </Link>
+                  )}
+              )) : (
+                <IonLoading isOpen={isLoading} message={"Retrieving trip information.."} />
               )
-            })}
+            }
           </div>
         </IonGrid>
       </IonContent>

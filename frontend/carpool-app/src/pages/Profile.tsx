@@ -14,9 +14,16 @@ interface profileProps {
 const Profile: React.FC<profileProps> = ({refreshKey}) => {
   const [profileData, setProfileData] = useState<ProfileData>();
   const [imageSrc, setImageSrc] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   // let rating:number;
     
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    },3000);
 
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     instance.get(`/profile/${localStorage.getItem('userId')}`)
@@ -71,7 +78,7 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
             </div>
           ): 
           (
-            <IonLoading isOpen={true} message={"Retrieving profile information.."} />
+            <IonLoading isOpen={isLoading} message={"Retrieving profile information.."} />
           )
           }
         </IonContent>
