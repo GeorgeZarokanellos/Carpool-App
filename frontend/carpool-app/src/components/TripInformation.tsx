@@ -26,8 +26,7 @@ import { StarRating } from "../util/common_functions";
 import { TripTitle } from "./TripTitle";
 
 export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, startLocation, endLocation, noOfPassengers, driver, tripCreator}) => {
-    const itemColor = "";   //TODO change to background color of the app
-
+    const itemColor = "";   //TODO change to background color of the app    
     return (
     <IonCol size="12" >
         <IonCard className="trip-info-container" color={itemColor}>
@@ -58,10 +57,10 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                             <IonCol size="6">
                                 <div className="end-location">
                                     <IonItem lines="none" color={itemColor} >
+                                            <IonIcon icon={flagOutline} slot="start" className="flag-icon" />
                                             <IonText>
                                                 {endLocation}
                                             </IonText>
-                                            <IonIcon icon={flagOutline} slot="end" className="flag-icon" />
                                     </IonItem>
                                 </div>
                             </IonCol>

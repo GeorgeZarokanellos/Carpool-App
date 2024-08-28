@@ -4,7 +4,7 @@ ion-content{
 
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    height: 100%;
 
     ion-title{
         text-decoration: underline;
@@ -12,6 +12,7 @@ ion-content{
 
     .map{
         height: 40%;
+        overflow-y: hidden;
     }
     
     .grid-contents{
