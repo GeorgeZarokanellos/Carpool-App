@@ -5,6 +5,14 @@ enum Role {
     PASSENGER = "Passenger",
 }
 
+export enum tripStatus {
+    INPROGRESS = 'in_progress',
+    COMPLETED = 'completed',
+    PLANNING = 'planning',
+    LOCKED = 'locked',
+    CANCELLED = 'cancelled'
+}
+
 // enum Status {
 //     PLANNING = "planning",
 //     IN_PROGRESS = "in_progress",

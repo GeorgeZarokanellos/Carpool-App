@@ -1,3 +1,21 @@
+enum role {
+    driver = 'driver',
+    passenger = 'passenger'
+}
+
+enum NotificationType {
+    REQUEST = 'request',
+    REVIEW = 'review'
+}
+
+export enum tripStatus {
+    INPROGRESS = 'in_progress',
+    COMPLETED = 'completed',
+    PLANNING = 'planning',
+    LOCKED = 'locked',
+    CANCELLED = 'cancelled'
+}
+
 interface passengerInterface {
     firstName: string;
     lastName: string;
@@ -9,6 +27,7 @@ interface tripInterface {
     startLocationId: number;
     endLocationId: number;
     startingTime: Date;
+    status?: tripStatus;
 }
 
 interface updatedTripInterface {
@@ -17,6 +36,7 @@ interface updatedTripInterface {
     addStops?: number[];
     removeStops?: number[];
     updateStartingTime?: Date;
+    status?: tripStatus;
 }
 
 interface updatedUserInterface {
@@ -24,15 +44,6 @@ interface updatedUserInterface {
     overallPoints?: number;
 }
 
-enum role {
-    driver = 'driver',
-    passenger = 'passenger'
-}
-
-enum NotificationType {
-    REQUEST = 'request',
-    REVIEW = 'review'
-}
 
 interface addUserRequestBodyInterface {
     universityId: number;
