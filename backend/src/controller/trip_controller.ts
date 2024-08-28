@@ -5,6 +5,7 @@ import sequelize from '../database/connect_to_db';
 import { Op, type Transaction } from 'sequelize';
 import logger from '../util/winston';
 import Vehicle from '../model/vehicle';
+import { tripStatus } from '../interface/interface';
 
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
     async function returnTripsAsync(): Promise<void> {
@@ -18,7 +19,8 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                 where: {
                     startingTime: {
                         [Op.gt]: parsedDate
-                    }
+                    },
+                    status: tripStatus.PLANNING
                 },
                 include: [
                     {
@@ -168,18 +170,28 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
 export const createTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
         console.log(req.body); 
-        const {tripCreatorId, driverId, startLocationId, endLocationId, startingTime}: tripInterface = req.body;
+        const {tripCreatorId, driverId, startLocationId, endLocationId, startingTime, status}: tripInterface = req.body;
         const stops: number[] = req.body.stops;
         const passengers: passengerInterface[] = req.body.passengers;
-        
-   
-        const newTrip = await Trip.create({
-            tripCreatorId,
-            driverId,
-            startLocationId,
-            endLocationId,
-            startingTime,
-        },{transaction});
+        let newTrip: Trip;
+        if(status !== undefined){   //if status is provided
+            newTrip = await Trip.create({
+                tripCreatorId,
+                driverId,
+                startLocationId,
+                endLocationId,
+                startingTime,
+                status
+            },{transaction});
+        } else {    //if status is not provided set it to db default
+            newTrip = await Trip.create({
+                tripCreatorId,
+                driverId,
+                startLocationId,
+                endLocationId,
+                startingTime
+            },{transaction});
+        }
         await addStopsToTrip(stops, newTrip, transaction);
         await addPassengersToTrip(passengers, newTrip, transaction);
         await newTrip.save({transaction});
