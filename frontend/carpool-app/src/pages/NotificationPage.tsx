@@ -1,4 +1,4 @@
-import { IonContent, IonHeader, IonPage, IonTitle } from "@ionic/react";
+import { IonContent, IonHeader, IonPage, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import './NotificationPage.scss';
@@ -59,16 +59,6 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
         setFilteredNotifications(tempFilteredNotifications);
     }, [notifications]);
 
-    useEffect(() => {
-        if(filteredNotifications){
-            // window.location.reload();
-            console.log("Filtered Notifications", filteredNotifications);
-        }
-    }, [filteredNotifications]);
-
-    useEffect(() => {
-        console.log("Notifications refresh key", refreshKey);
-    }, [refreshKey]);
 
     return (
         <IonPage>
@@ -77,11 +67,19 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
             </IonHeader>
             <IonContent>
                 {
-                    filteredNotifications && filteredNotifications.map((notification, index)=> {
-                        return (
-                            <NotificationDisplay key={index} notificationDetails={notification}/>
+                    filteredNotifications.length !== 0 ? 
+                        (
+                            filteredNotifications.map((notification, index)=> {
+                                return (
+                                    <NotificationDisplay key={index} notificationDetails={notification}/>
+                                )
+                            }
                         )
-                    })
+                    ) : (
+                        <div style={{height: "100%", display: "flex", alignItems: "center"}}>
+                            <IonText class='ion-text-center'>No new notifications at the moment.<br />Come back later!</IonText>
+                        </div>
+                    )
                 }
             </IonContent>
         </IonPage>
