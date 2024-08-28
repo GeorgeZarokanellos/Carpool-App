@@ -5,6 +5,7 @@ import { Stop } from "../interfacesAndTypes/Types";
 import './NewTrip.scss';
 import { useHistory } from "react-router";
 import { PassengerCredentials } from "../components/PassengerCredentials";
+import { tripStatus } from "../interfacesAndTypes/Types";
 
 interface requestBody {
     tripCreatorId: number,
@@ -14,6 +15,7 @@ interface requestBody {
     startingTime: string,
     stops: Stop[],
     passengers: {firstName: string, lastName: string}[]
+    status?: tripStatus
 }
 
 export const NewTrip: React.FC = () => {
@@ -58,14 +60,27 @@ export const NewTrip: React.FC = () => {
             console.log("Check conditions: ", selectedStartLocation, selectedEndLocation, selectedDate, selectedPassengerNumber);
             
             if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate && selectedPassengerNumber !== 0){
-                requestBody = {
-                    tripCreatorId: userIdInt,
-                    driverId: tripDriverId,
-                    startLocationId: selectedStartLocation.stopId,
-                    endLocationId: selectedEndLocation.stopId,
-                    startingTime: selectedDate.toISOString(),
-                    stops: stops,
-                    passengers: passengerCredentials
+                if(selectedPassengerNumber < 3){
+                    requestBody = {
+                        tripCreatorId: userIdInt,
+                        driverId: tripDriverId,
+                        startLocationId: selectedStartLocation.stopId,
+                        endLocationId: selectedEndLocation.stopId,
+                        startingTime: selectedDate.toISOString(),
+                        stops: stops,
+                        passengers: passengerCredentials
+                    }
+                } else if (selectedPassengerNumber === 3) {
+                    requestBody = {
+                        tripCreatorId: userIdInt,
+                        driverId: tripDriverId,
+                        startLocationId: selectedStartLocation.stopId,
+                        endLocationId: selectedEndLocation.stopId,
+                        startingTime: selectedDate.toISOString(),
+                        stops: stops,
+                        passengers: passengerCredentials,
+                        status: tripStatus.LOCKED
+                    }
                 }
     
                 const response = await instance.post('/trips', requestBody);
