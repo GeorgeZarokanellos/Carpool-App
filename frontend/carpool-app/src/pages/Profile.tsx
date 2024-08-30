@@ -6,6 +6,7 @@ import { type ProfileData } from '../interfacesAndTypes/Types';
 import { SubmittedReceivedReviewsDisplay } from '../components/ReviewsDisplay';
 import { TripsDisplay } from '../components/TripsDisplay';
 import { arrayBufferTo64String } from '../util/common_functions';
+import { Rating } from '@mui/material';
 
 interface profileProps {
   refreshKey: number;
@@ -14,43 +15,41 @@ interface profileProps {
 const Profile: React.FC<profileProps> = ({refreshKey}) => {
   const [profileData, setProfileData] = useState<ProfileData>();
   const [imageSrc, setImageSrc] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  // let rating:number;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
     
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if(profileData !== undefined){
       setIsLoading(false);
-    },3000);
+    }
+    
 
-    return () => clearTimeout(timer);
-  }, []);
+  }, [profileData]);
 
   useEffect(() => {
-    instance.get(`/profile/${localStorage.getItem('userId')}`)
-    .then(response => {
+    retrieveProfileData();
+  }, [refreshKey]);
+  
+  const retrieveProfileData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await instance.get(`/profile/${localStorage.getItem('userId')}`);
       setProfileData(response.data);
-      // console.log("Profile data retrieved: ", profileData);
+      console.log("Profile data retrieved: ", response.data);
       if(response.data && response.data.profilePicture){  //check response data because profile data gets set asynchronously
         setImageSrc(arrayBufferTo64String(response.data.profilePicture));
-        // console.log("Base64 string: ", base64String);
+        setIsLoading(false);
       }
-    })
-    .catch(error => {
+    } catch (error) {
       console.log(error);
       
-    })
-  }, [refreshKey]);
+    }
+  }
 
-  // useEffect(() => {
-  //   console.log("imageSrc: ", imageSrc);
-  // }, [imageSrc]);
-
-    
   return (
     <IonPage>
       <IonContent fullscreen>
         <IonContent >
-          { profileData ? (
+          { profileData !== undefined ? (
             <div className='profile-container'>
               <div className='profile-contents'>
                 <div className='profile-picture-container'>
@@ -64,15 +63,16 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
                   </div>
                 <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
                 <IonItem lines='none' >
-                  {/* <div>
-                    {ratingStars}
-                  </div> */}
+                  <div className='user-rating'>
+                    <Rating name="read-only" value={Number(profileData.overallRating)} readOnly />
+                    {"( " + profileData.overallRating + " )"}
+                  </div>
                 </IonItem>
                 <IonItem lines='none'>
                     < SubmittedReceivedReviewsDisplay submittedReviews={profileData.userSubmittedReviews} userReviews={profileData.userReviews}/>
                 </IonItem>
                 <IonItem lines='none'>
-                  < TripsDisplay tripsCreated={profileData.tripsCreated} tripsParticipated={profileData.tripsParticipated}/>
+                  < TripsDisplay tripsCompleted={profileData.tripsCompleted}/>
                 </IonItem>
               </div>
             </div>

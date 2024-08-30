@@ -23,6 +23,12 @@
             }
 
         }
+
+        .user-rating{
+            @include display-flex-center('both');
+            width: 100%;
+            // flex-direction: column;
+        }
     }
 
 }
