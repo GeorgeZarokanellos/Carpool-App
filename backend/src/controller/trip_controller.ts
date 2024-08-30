@@ -136,14 +136,14 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                         model: Stop,
                         as: 'startLocation',
                         foreignKey: 'startLocationId',
-                        attributes: ['stopLocation'],
+                        attributes: ['stopLocation', 'lat', 'lng'],
                         
                     },
                     {
                         model: Stop,
                         as: 'endLocation',
                         foreignKey: 'endLocationId',
-                        attributes: ['stopLocation'],
+                        attributes: ['stopLocation', 'lat', 'lng'],
                         
                     }
                 ]

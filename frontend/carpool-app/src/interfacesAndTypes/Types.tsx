@@ -13,11 +13,6 @@ export enum tripStatus {
     CANCELLED = 'cancelled'
 }
 
-// enum Status {
-//     PLANNING = "planning",
-//     IN_PROGRESS = "in_progress",
-//     COMPLETED = "completed",
-// }
 
 
 export type User = {
@@ -67,6 +62,8 @@ export type Trip = {
 export type ExtendedTrip = Trip & {
     tripPassengers: tripPassenger[];
     tripStops: TripStops
+    startLocation: Stop;
+    endLocation: Stop;
 }
 
 export type tripPassenger = {
@@ -94,8 +91,8 @@ export type TextFieldTypes = 'date' | 'email' | 'number' | 'password' | 'search'
 
 export type Review = {
     reviewId: number;
-    reviewRating: number;
-    reviewDateTime: Date;
+    reviewRating: string;
+    reviewDateTime: string;
     tripId: number;
     reviewedUserId: number;
     // reviewerId: number;
@@ -105,26 +102,24 @@ export type Review = {
     }
 }
 
-
-
 export type ProfileData = {
     username: string;
     firstName: string;
     lastName: string;
     role: Role;
     phone: string;
-    overallRating: number;
+    overallRating: string;
     profilePicture: ProfilePictureBuffer;
     userReviews: Review[];
     userSubmittedReviews: Review[];
-    tripsCreated: Trip[];
-    tripsParticipated: Trip[];
+    tripsCompleted: Trip[];
 }
 
 export type descIndex = {
     text: string,
     index: number
 }
+
 export type autoMaker = {
     maker: string,
     models: string[]

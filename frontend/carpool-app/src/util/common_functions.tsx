@@ -22,7 +22,7 @@ export const formatDate = (dateString: string | Date): string => {
         return `${dateParts[2]}/${dateParts[1]}`;
     } else {
         console.log("DateParts is empty:", dateParts);
-        return ""; // Add a return statement here
+        return ""; 
     }
 }
 
