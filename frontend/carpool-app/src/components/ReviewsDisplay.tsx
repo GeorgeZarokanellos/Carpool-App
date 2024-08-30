@@ -2,8 +2,7 @@ import { IonButton, IonItem, IonList, IonText, IonTitle } from "@ionic/react";
 import React, { useState } from "react";
 import { Review } from "../interfacesAndTypes/Types";
 import './ReviewsDisplay.scss';
-import { StarRating } from "../util/common_functions";
-import { formatDate } from "../util/common_functions";
+import { formatDateTime, StarRating } from "../util/common_functions";
 
 interface SRReviewsDisplayProps {
     submittedReviews: Review[]; 
@@ -15,11 +14,6 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
     const [selectedList, setSelectedList] = useState<string>("received");
     const [receivedButtonColor, setReceivedButtonColor] = useState<string>('secondary');
     const [submittedButtonColor, setSubmittedButtonColor] = useState<string>('primary');
-
-    let formattedDate;
-    // console.log("Received reviews from component", userReviews);
-    // console.log("Submitted reviews from component", submittedReviews);
-    // console.log(selectedList === "received");
     
     return (
         <div className="review-display-container">
@@ -41,37 +35,33 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
             <div className="reviews-list">
                 {selectedList === "received" ? (
                     <IonList >
-                        {userReviews.map((review) => {
-                            // console.log(review.reviewDateTime);
-                            // console.log(review);
-                            
+                        {userReviews.map((review, index) => {
+                            const { formattedDate, formattedTime } = formatDateTime(review.reviewDateTime);
                             return (
-                                <IonItem lines='none' key={review.reviewId} className="review-container" color='primary'>
+                                <IonItem lines='none' key={index} className="review-container" color='primary'>
                                     <div className="item-contents">
                                         <IonText>
                                             Submitted by {review.reviewer.firstName + ' ' + review.reviewer.lastName} 
-                                            {' at ' + formatDate(review.reviewDateTime)}
+                                            {' at ' + formattedTime + ' on ' + formattedDate}
                                         </IonText>
-                                        <StarRating rating={review.reviewRating} />
+                                        <StarRating rating={Number(review.reviewRating)} />
                                     </div>
                                 </IonItem>
                             )
                         })}
                     </IonList>
                 ):(
-                    <IonList>
-                        {submittedReviews.map((review) => {
-                            // console.log(review.reviewDateTime);
-                            // console.log(review.reviewRating);
-                            
+                    <IonList >
+                        {submittedReviews.map((review, index) => {
+                            const { formattedDate, formattedTime } = formatDateTime(review.reviewDateTime);
                             return (
-                                <IonItem lines='none' key={review.reviewId} className="review-container" color='primary'>
+                                <IonItem lines='none' key={index} className="review-container" color='primary'>
                                     <div className="item-contents">
                                         <IonText>
                                             Submitted by {review.reviewer.firstName + ' ' + review.reviewer.lastName} 
-                                            {' at ' + formatDate(review.reviewDateTime)}
+                                            {' at '+ formattedTime + ' on ' + formattedDate}
                                         </IonText>
-                                        <StarRating rating={review.reviewRating} />
+                                        <StarRating rating={Number(review.reviewRating)} />
                                     </div>
                                 </IonItem>
                             )
