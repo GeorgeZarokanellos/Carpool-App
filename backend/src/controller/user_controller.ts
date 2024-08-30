@@ -89,22 +89,25 @@ export const retrieveUserSubmittedReviews = async (userId: string) : Promise<Rev
     }
 }
 
-export const retrieveCreatedTrips = async (user: User): Promise<Trip[]> => {
-    // console.log(user);
-    // console.log(user.userId);
+export const retrieveCompletedTrips = async (userId: string): Promise<Trip[]> => {
     try {
-        const tripsCreated : Trip[] = await Trip.findAll({
+        const tripsCompleted : Trip[] = await Trip.findAll({
             where : {
-                tripCreatorId: user.userId,
-                // status: 'completed'
+                [Op.or]: [
+                    {
+                        tripCreatorId: Number(userId),
+                    },
+                    {
+                        driverId: Number(userId),
+                    },
+                    {
+                        '$tripPassengers.passenger_id$': Number(userId)
+                    }
+                ],
+                status: 'completed'
             },
-            attributes : [ 'startLocation', 'noOfStops', 'startingTime', 'noOfPassengers', 'status'],
+            attributes : [ 'startLocationId', 'endLocationId', 'noOfStops', 'startingTime', 'noOfPassengers', 'status'],
             include : [
-                // {
-                //     model: User,
-                //     as: 'tripCreator',
-                //     attributes: ['firstName', 'lastName'] 
-                // },
                 {
                     model: Driver,
                     as: 'driver',
@@ -114,32 +117,24 @@ export const retrieveCreatedTrips = async (user: User): Promise<Trip[]> => {
                         as: 'user',
                         attributes: ['firstName', 'lastName']
                     }]
-                }
-                // {
-                //     model: TripPassenger,
-                //     as: 'tripPassengers',
-                //     include: [
-                //         {
-                //             model: User,
-                //             as: 'passenger',
-                //             attributes: ['firstName', 'lastName']
-                //         }
-                //     ]
-                // },
-                // {
-                //     model: TripStop,
-                //     as: 'tripStop',
-                //     include: [
-                //         {
-                //             model: Stop,
-                //             as: 'stopLocation',
-                //             attributes: ['stopLocation']
-                //         }
-                //     ]
-                // }
+                },
+                {
+                    model: TripPassenger,
+                    as: 'tripPassengers',
+                },
+                {
+                    model: Stop,
+                    as: 'startLocation',
+                    attributes: ['stopLocation']
+                },
+                {
+                    model: Stop,
+                    as: 'endLocation',
+                    attributes: ['stopLocation']
+                },
             ]
         });
-        return tripsCreated;
+        return tripsCompleted;
     } catch (error) {
         console.error(error);
         if(typeof error === 'string'){
@@ -151,18 +146,19 @@ export const retrieveCreatedTrips = async (user: User): Promise<Trip[]> => {
     }
 }
 
-export const retrieveParticipatedTrips = async (user: User): Promise<Trip[]> => {
-    // console.log(user);
-    // console.log(user.userId);
+export const retrieveParticipatedTrips = async (userId: string): Promise<Trip[]> => {
     try {
-        const tripIds: TripPassenger[] = await TripPassenger.findAll({
+        const tripPassengerRecords: TripPassenger[] = await TripPassenger.findAll({
             where: {
-                passengerId: user.userId
+                passengerId: Number(userId)
             }
         });
+        const tripIds = tripPassengerRecords.map((tripPassenger) => tripPassenger.tripId);
         const tripsParticipated: Trip[] = await Trip.findAll({
             where: {
-                tripId: tripIds.map(tripId => tripId.tripId)
+                tripId: {
+                    [Op.in]: tripIds
+                }
             }
         });
         return tripsParticipated;
