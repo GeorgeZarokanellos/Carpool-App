@@ -10,8 +10,9 @@ ion-content{
         text-decoration: underline;
     }
 
-    .map{
-        height: 40%;
+    .map-container{
+        height: 40vh;
+        max-height: 40%;
         overflow-y: hidden;
     }
     
@@ -80,4 +81,14 @@ ion-content{
     width: 100%;
     @include display-flex-center('justify');
     background-color: white;
+}
+
+.no-current-trip{
+    @include display-flex-center('both');
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    background-color: white;
+    color: black;
+    
 }

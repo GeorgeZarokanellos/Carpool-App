@@ -1,4 +1,4 @@
-import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonLoading, IonPage, IonRow, IonText, IonTitle } from "@ionic/react";
+import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop } from "../interfacesAndTypes/Types";
 import { formatDateTime } from "../util/common_functions";
@@ -42,6 +42,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
     const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
     const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
+    //loading
+    const [isLoading, setIsLoading] = useState(false);
 
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
@@ -50,15 +52,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     
 
     useEffect(() => {
-        instance.get(`/trips/${clickedTripId}`)
-        .then(response => {
-            console.log(response.data);
-            setTripData(response.data);
-            
-        })
-        .catch(error => {
-            console.log(error);
-        })
+        retrieveTripData();
     }, [clickedTripId]);
 
     useEffect(() => {
@@ -98,7 +92,23 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
           setDriverWantsToEndTrip(false);
         }
       }
-    }, [driverWantsToEndTrip])
+    }, [driverWantsToEndTrip]);
+
+    const retrieveTripData = async () => {
+        try {
+            setIsLoading(true);
+            const response = await instance.get(`/trips/${clickedTripId}`);
+            if(response.data.length !== 0){
+                setIsLoading(false);
+                setTripData(response.data);
+            } else {
+                setIsLoading(false);
+                console.log('Empty response from server');
+            }
+        } catch (error) {
+            console.log('Error retrieving trip data', error);
+        }
+    }
 
     const handleTripCompletion = async (userConfirmed: boolean) => {
       if(tripData && !reviewNotificationsSent){
@@ -281,7 +291,12 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         return (
             <>
                 <IonContent >
-                  <TripMapDisplay tripStops={tripData.tripStops} />
+                  <div id="map" className="map-container">
+                    <TripMapDisplay 
+                      tripStops={tripData.tripStops} 
+                      startLocation={tripData.startLocation} 
+                      endLocation={tripData.endLocation}/>
+                  </div>
                   <IonTitle class="ion-text-center">Trip Information</IonTitle>
                   <div className="grid-contents">
                     <IonGrid>
@@ -365,7 +380,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                               </g>
                             </svg>
                             <SportsScoreIcon />
-                            {tripData.endLocation.stopLocation}
+                            <IonText style={{textAlign: 'center'}}>{tripData.endLocation.stopLocation}</IonText>
                           </div>
                         </IonCol>
                       </IonRow>
@@ -411,7 +426,18 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         )
     } else {
       return (
-        <IonTitle>Retrieving Trip Information...</IonTitle>
+        <>
+          <IonLoading isOpen={isLoading} message={'Loading trip information...'} />
+          {
+            !isLoading && 
+              <div className="no-current-trip">
+                <IonText class="ion-text-center">You are not participating in a trip right now!</IonText>
+                <IonButton routerLink="/main/search-trips" shape="round" >
+                  Search or Create a trip here!
+                </IonButton>
+              </div>
+          }
+        </>
       )
     }
 
