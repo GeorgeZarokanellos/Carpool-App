@@ -1,5 +1,5 @@
 import React, { useEffect, useState} from 'react';
-import { IonButton, IonContent, IonGrid, IonHeader, IonLoading, IonPage, IonRow, IonSearchbar } from '@ionic/react';
+import { IonButton, IonContent, IonGrid, IonHeader, IonLoading, IonPage, IonRow, IonSearchbar, IonText} from '@ionic/react';
 import { TripInformation } from '../components/TripInformation';
 import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.scss';
@@ -14,7 +14,7 @@ interface searchTripProps {
 const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const history = useHistory();
 
 
@@ -25,14 +25,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   useEffect(() => {
     retrieveTrips();
   },[refreshKey]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  },[])
+    
 
   const retrieveTrips = async () => {
     try {
@@ -41,12 +34,17 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
         });
     
         // console.log("query params", queryParams.toString());
-        
+        setIsLoading(true);
         const response = await instance.get(`/trips?${queryParams.toString()}`)
         console.log("Response from server", response.data);
-
-        setTrips(response.data);
-        setFilteredResults(response.data);
+        if(response.data.length !== 0){
+          setIsLoading(false);
+          setTrips(response.data);
+          setFilteredResults(response.data);
+        } else {
+          setIsLoading(false);
+          console.log("Empty response from server");
+        }
         
     } catch (error) {
       console.log("Error retrieving trips", error);
@@ -108,7 +106,15 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
                     </Link>
                   )}
               )) : (
-                <IonLoading isOpen={isLoading} message={"Retrieving trip information.."} />
+                <>
+                  <IonLoading isOpen={isLoading} message={"Retrieving available trips.."} />
+                  {
+                    !isLoading && 
+                      <div className='no-trips-container'>
+                        <IonText>No trips available at the moment!</IonText>
+                      </div>
+                  }
+                </>
               )
             }
           </div>
