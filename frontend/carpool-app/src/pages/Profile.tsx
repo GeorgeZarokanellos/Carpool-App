@@ -44,47 +44,46 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
       
     }
   }
-
-  return (
-    <IonPage>
-      <IonContent fullscreen>
-        <IonContent >
-          { profileData !== undefined ? (
-            <div className='profile-container'>
-              <div className='profile-contents'>
-                <div className='profile-picture-container'>
-                    {/* <IonLabel>Insert profile <br /> picture below</IonLabel> */}
-                    <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
-                        <IonAvatar >
-                          <img alt="Silhouette of a person's head" src={imageSrc? imageSrc : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
-                        </IonAvatar>
-                      {/* <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} /> */}
-                    </IonButton>
-                  </div>
-                <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
-                <IonItem lines='none' >
-                  <div className='user-rating'>
-                    <Rating name="read-only" value={Number(profileData.overallRating)} readOnly />
-                    {"( " + profileData.overallRating + " )"}
-                  </div>
-                </IonItem>
-                <IonItem lines='none'>
-                    < SubmittedReceivedReviewsDisplay submittedReviews={profileData.userSubmittedReviews} userReviews={profileData.userReviews}/>
-                </IonItem>
-                <IonItem lines='none'>
-                  < TripsDisplay tripsCompleted={profileData.tripsCompleted}/>
-                </IonItem>
+  if(profileData !== undefined){
+    return (
+      <IonPage>
+        <IonContent fullscreen>
+          <IonContent >
+              <div className='profile-container'>
+                <div className='profile-contents'>
+                  <div className='profile-picture-container'>
+                      {/* <IonLabel>Insert profile <br /> picture below</IonLabel> */}
+                      <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
+                          <IonAvatar >
+                            <img alt="Silhouette of a person's head" src={imageSrc? imageSrc : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
+                          </IonAvatar>
+                        {/* <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} /> */}
+                      </IonButton>
+                    </div>
+                  <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
+                  <IonItem lines='none' >
+                    <div className='user-rating'>
+                      <Rating name="read-only" value={Number(profileData.overallRating)} readOnly />
+                      {"( " + profileData.overallRating + " )"}
+                    </div>
+                  </IonItem>
+                  <IonItem lines='none'>
+                      < SubmittedReceivedReviewsDisplay submittedReviews={profileData.userSubmittedReviews} userReviews={profileData.userReviews}/>
+                  </IonItem>
+                  <IonItem lines='none'>
+                    < TripsDisplay tripsCompleted={profileData.tripsCompleted}/>
+                  </IonItem>
+                </div>
               </div>
-            </div>
-          ): 
-          (
-            <IonLoading isOpen={isLoading} message={"Retrieving profile information.."} />
-          )
-          }
+          </IonContent>
         </IonContent>
-      </IonContent>
-    </IonPage>
-  );
+      </IonPage>
+    );
+  } else {
+    return (
+      <IonLoading isOpen={isLoading} message={"Retrieving profile information.."} />
+    )
+  }
 };
 
 export default Profile;
