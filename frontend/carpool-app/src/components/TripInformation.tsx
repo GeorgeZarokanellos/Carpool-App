@@ -3,7 +3,6 @@ import {
         IonCard, 
         IonCardContent, 
         IonCardHeader, 
-        IonIcon, 
         IonItem, 
         IonGrid, 
         IonRow, 
@@ -13,14 +12,12 @@ import {
         IonText
     } from "@ionic/react";
 import { TripProps } from "../interfacesAndTypes/Interfaces";
-import { 
-        timeOutline, 
-        peopleOutline, 
-        locationOutline, 
-        flagOutline,
-        carOutline,
-        starOutline,
-    } from 'ionicons/icons';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import DriveEtaIcon from '@mui/icons-material/DriveEta';
+import FlagIcon from '@mui/icons-material/Flag';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import './TripInformation.scss';
 import { StarRating } from "../util/common_functions";
 import { TripTitle } from "./TripTitle";
@@ -42,7 +39,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                             <IonCol size="5">
                                 <div className="start-location">
                                     <IonItem lines="none" color={itemColor} >
-                                        <IonIcon icon={locationOutline} slot="start" className="location-icon" />
+                                        <LocationOnIcon className="location-icon"/>
                                         <IonLabel >
                                             {startLocation}
                                         </IonLabel>
@@ -57,7 +54,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                             <IonCol size="6">
                                 <div className="end-location">
                                     <IonItem lines="none" color={itemColor} >
-                                            <IonIcon icon={flagOutline} slot="start" className="flag-icon" />
+                                            <FlagIcon className="flag-icon"/>
                                             <IonText>
                                                 {endLocation}
                                             </IonText>
@@ -70,11 +67,11 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                         <IonCol size="6" >
                             <div className="time-people-container">
                                 <IonItem lines="none" color={itemColor}>
-                                    <IonIcon icon={timeOutline} slot="start" className="time-icon" />
+                                    <AccessTimeIcon className="time-icon"/>
                                     <IonLabel>{startingTime}</IonLabel>
                                 </IonItem>
                                 <IonItem lines="none" color={itemColor}>
-                                    <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
+                                    <PeopleAltIcon className="people-icon"/>
                                     {noOfPassengers + (driver? + 1 : + 0) + ( driver ? '/' + driver.vehicle.noOfSeats + ' Συνεπιβ.' : ' Συνεπιβ.')}
                                 </IonItem>
                             </div>
@@ -82,10 +79,11 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                         <IonCol size="6" className="">
                             <div className="driver-info-container">
                                 <IonItem lines="none" color={itemColor} >
-                                        <IonLabel >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'Δεν υπάρχει οδηγός ακόμα')}</IonLabel>
-                                        {/* <IonIcon icon={carOutline} className="car-icon" slot="end"/> */}
+                                        <DriveEtaIcon className="car-icon"/>
+                                        <IonText >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'Δεν υπάρχει οδηγός ακόμα')}</IonText>
                                 </IonItem>
                                 <IonItem lines="none" color={itemColor} >
+                                    <ThumbUpIcon className="thumb-icon"/>
                                     < StarRating rating={Number(driver?.user.overallRating)}/>
                                 </IonItem>
                             </div>
