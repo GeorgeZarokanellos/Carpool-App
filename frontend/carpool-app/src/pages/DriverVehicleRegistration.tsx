@@ -35,6 +35,7 @@ export const DriverVehicleRegistration: React.FC = () => {
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<string>("");
   const [noOfSeats, setNoOfSeats] = useState<string>('');
   const [vehicleNumberPlate, setVehicleNumberPlate] = useState<string>("");
+  const [licenseId, setLicenseId] = useState<number | null>(null);
   const [driversLicense, setDriversLicense] = useState<Blob>();
   const [driversLicenseFileName, setDriversLicenseFileName] = useState<string>(""); 
   const [vehicleInsurance, setVehicleInsurance] = useState<Blob>();
@@ -48,7 +49,6 @@ export const DriverVehicleRegistration: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
   const userId = (location.state as LocationState)?.userId;
-  console.log('User id from driver reg page: ', userId);
   //set width and height to the available screen size to bypass header and footer
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
@@ -69,6 +69,7 @@ export const DriverVehicleRegistration: React.FC = () => {
     const formData = new FormData();
 
     const vehicleAndDriverData = {
+      licenseId: licenseId,
       plateNumber: vehicleNumberPlate,
       maker: selectedVehicleMaker.maker,
       model: selectedVehicleModel,
@@ -80,13 +81,11 @@ export const DriverVehicleRegistration: React.FC = () => {
     }
     
     Object.entries(vehicleAndDriverData).forEach(([key, value]) => {
-      if(value !== undefined){  //check if the state is not undefined/empty1
+      if(value !== undefined && value !== null){  //check if the state is not undefined/empty1
         if(key === 'vehicleImages' && Array.isArray(value)){ 
-          console.log("vehicle images is an array",key);
-          value.forEach((file, index) => {  //if its an array of pictures loop through it and append each picture
-            console.log("image:", file);
+          // console.log("vehicle images is an array",key);
+          value.forEach((file) => {  //if its an array of pictures loop through it and append each picture
             formData.append(`${key}`, file);
-            console.log(formData);
           });
         } else if (value instanceof Blob ) //if value is a single blob append it straight away
           formData.append(`${key}`, value);
@@ -104,9 +103,11 @@ export const DriverVehicleRegistration: React.FC = () => {
     })
     .then(response => {
       console.log("From driver multipart post request", response.data);
+      alert("Driver and vehicle registration successful");
       history.push('/main/search-trips');
     })
     .catch(error => {
+      alert("Driver and vehicle registration failed");
       console.log("Error from driver multipart request", error);
       
     })
@@ -120,8 +121,6 @@ export const DriverVehicleRegistration: React.FC = () => {
                                   ) => {
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files?.[0]?.name !== undefined) {
-        console.log(e.target.files[0]);
-        // console.log(e.target.files[0].name);
         setFileMethod(e.target.files[0]);
         setNameMethod(e.target.files[0].name);
       }
@@ -147,8 +146,10 @@ export const DriverVehicleRegistration: React.FC = () => {
 
   const updateVehicleNumberPlate =  (event: React.ChangeEvent<HTMLInputElement>) => {
     setVehicleNumberPlate(event.target.value);
-    console.log("From updateVehicleNumberPlate",vehicleNumberPlate);
-    
+  }
+
+  const updateLicenseId = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLicenseId(parseInt(event.target.value));
   }
 
   return (
@@ -209,11 +210,6 @@ export const DriverVehicleRegistration: React.FC = () => {
                           {
                             text: "Confirm",
                             handler: (value) => {
-                              console.log(
-                                "selected automaker before set:",
-                                value["Car Maker"]
-                              );
-
                               setSelectedVehicleMaker(
                                 autoMakers[value["Car Maker"].value]
                               );
@@ -250,7 +246,6 @@ export const DriverVehicleRegistration: React.FC = () => {
                           {
                             text: "Confirm",
                             handler: (value) => {
-                              console.log("selected model:", value["Model"].text);
                               setSelectedVehicleModel(value["Model"].text);
                               setShowModelPicker(false);
                             },
@@ -286,13 +281,15 @@ export const DriverVehicleRegistration: React.FC = () => {
                       {
                         text: 'Confirm',
                         handler: (value) => {
-                          // console.log(value.Seats.value);
                           setNoOfSeats(value.Seats.value);
                           setShowNoOfSeatsPicker(false);
                         }
                       }
                     ]}
                   />
+                </div>
+                <div className="licenseId-container">
+                  <input type="text" placeholder="Drivers License Id" value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
                 </div>
                 <div className="plate-number-container">
                   <input type="text" placeholder="Vehicle number plate" value={vehicleNumberPlate} onChange={updateVehicleNumberPlate}/>
@@ -314,7 +311,6 @@ export const DriverVehicleRegistration: React.FC = () => {
                   <Swiper
                     spaceBetween={50}
                     slidesPerView={1}
-                    onSlideChange={() => console.log('slide change')}
                   >
                     {
                       imageUrls.map((url, index) => (
