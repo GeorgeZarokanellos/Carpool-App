@@ -50,7 +50,6 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const userIdNumber = Number(userId);
     const history = useHistory();
     
-
     useEffect(() => {
         retrieveTripData();
     }, [clickedTripId]);
@@ -59,6 +58,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         if(tripData){
             instance.get(`/stops`)
             .then(response => {
+              console.log('Available stops', response.data);
+              
                 setAvailableStops(response.data);
             })
             .catch(error => {
@@ -96,15 +97,19 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
 
     const retrieveTripData = async () => {
         try {
-            setIsLoading(true);
-            const response = await instance.get(`/trips/${clickedTripId}`);
-            if(response.data.length !== 0){
-                setIsLoading(false);
-                setTripData(response.data);
-            } else {
-                setIsLoading(false);
-                console.log('Empty response from server');
-            }
+            if(clickedTripId !== 0){
+              setIsLoading(true);
+              const response = await instance.get(`/trips/${clickedTripId}`);
+              console.log('Trip data', response.data);
+              
+              if(response.data.length !== 0){
+                  setIsLoading(false);
+                  setTripData(response.data);
+              } else {
+                  setIsLoading(false);
+                  console.log('Empty response from server');
+              }
+            } 
         } catch (error) {
             console.log('Error retrieving trip data', error);
         }
@@ -396,6 +401,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                       <UserSelectStopModal
                           isOpen={stopSelectModal}
                           onClose={() => setStopSelectModal(false)}
+                          endLocationId={tripData.endLocationId}
                           availableStops={availableStops}
                           onSelectStop={(stop) => {
                           setSelectedStop(stop);
