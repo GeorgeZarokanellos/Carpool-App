@@ -57,6 +57,7 @@ interface addUserRequestBodyInterface {
 }
 
 interface carRegisterRequestBodyInterface {
+    licenseId: number;
     plateNumber: string;
     maker: string;
     model: string;

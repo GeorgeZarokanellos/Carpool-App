@@ -8,7 +8,7 @@ interface RatingProps {
 
 export const StarRating: React.FC<RatingProps> = ({ rating }) => {
     return (
-        <Rating name="read-only" value={rating} precision={0.5} readOnly />
+        <Rating name="read-only" value={rating} precision={0.5} readOnly style={{color: 'black'}}/>
     )
 }
 

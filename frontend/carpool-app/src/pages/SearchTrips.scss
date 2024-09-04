@@ -18,13 +18,6 @@ ion-header{
     width: 100%;
     height: 100%;
     overflow-y: scroll;
-
-    .no-trips-container{
-        @include display-flex-center('both');
-        height: 100%;
-        width: 100%;
-        text-align: center;
-    }
 }
 
 .create-trip-button-container{
@@ -37,4 +30,11 @@ ion-header{
         height: 70%;
         background-color: white;
     }
+}
+
+.no-trips-container{
+    @include display-flex-center('both');
+    height: 100%;
+    width: 100%;
+    text-align: center;
 }
