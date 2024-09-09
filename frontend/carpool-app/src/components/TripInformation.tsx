@@ -17,6 +17,7 @@ import FlagIcon from '@mui/icons-material/Flag';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import StarIcon from '@mui/icons-material/Star';
 import './TripInformation.scss';
 import { TripTitle } from "./TripTitle";
 import { Rating } from "@mui/material";
@@ -80,10 +81,11 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                                         <DriveEtaIcon className="car-icon"/>
                                         <IonText >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'Δεν υπάρχει οδηγός ακόμα')}</IonText>
                                 </IonItem>
-                                <IonItem lines="none"  >
+                                <IonItem lines="none" className="rating-container">
                                     <ThumbUpIcon className="thumb-icon"/>
                                     <Rating 
                                         name="read-only" 
+                                        className="rating"
                                         value={Number(driver?.user.overallRating)} 
                                         precision={0.5} 
                                         readOnly 
