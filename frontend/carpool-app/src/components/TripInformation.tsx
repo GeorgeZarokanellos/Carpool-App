@@ -26,7 +26,7 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
     return (
     <IonCol size="12" >
         <IonCard className="trip-info-container" >
-            <IonCardHeader style={{padding: '0'}}>
+            <IonCardHeader >
                 <IonCardTitle >
                     <TripTitle dateOfTrip={dateOfTrip} tripCreator={tripCreator}/>
                 </IonCardTitle>

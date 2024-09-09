@@ -40,7 +40,7 @@ export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops, startL
             center={[38.24368476508384, 21.73212381808353]} 
             zoom={14} 
             className='map' 
-            style={{height: '100vh', width: '100%'}}
+            style={{height: '100vh', width: '100vw'}}
             scrollWheelZoom={false}
             tap={false}
             >
