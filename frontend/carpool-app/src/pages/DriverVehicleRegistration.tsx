@@ -173,6 +173,12 @@ export const DriverVehicleRegistration: React.FC = () => {
               encType="multipart/form-data"
             >
               <div className="form-contents">
+                <div className="licenseId-container">
+                  <input type="text" placeholder="DRIVERS LICENSE ID" required value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
+                </div>
+                <div className="plate-number-container">
+                  <input type="text" placeholder="VEHICLE NUMBER PLATE" required value={vehicleNumberPlate !== null ? vehicleNumberPlate : ''} onChange={updateVehicleNumberPlate}/>
+                </div>
                 <div className="pickers">
                     <IonButton onClick={() => setShowMakerPicker(true)}>
                     {
@@ -287,12 +293,6 @@ export const DriverVehicleRegistration: React.FC = () => {
                       }
                     ]}
                   />
-                </div>
-                <div className="licenseId-container">
-                  <input type="text" placeholder="Drivers License Id" required value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
-                </div>
-                <div className="plate-number-container">
-                  <input type="text" placeholder="Vehicle number plate" required value={vehicleNumberPlate !== null ? vehicleNumberPlate : ''} onChange={updateVehicleNumberPlate}/>
                 </div>
                 <div className="drivers-license-container">
                   {createFileUploadButton( "DriversLicense", driversLicenseFileName, "driversLicense" , setDriversLicense , setDriversLicenseFileName)}

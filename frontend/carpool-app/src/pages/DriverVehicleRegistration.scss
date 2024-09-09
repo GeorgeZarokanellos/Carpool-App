@@ -23,36 +23,36 @@ ion-content{
 
         .form-contents {
             height: 100%;
-            width: 80%;
+            width: 85%;
             @include display-flex-center('both');
             flex-direction: column;
             *{
                 width: 100%;
                 max-width: 25rem;
                 margin-bottom: 0.5rem;
+                ion-button,
+                input{
+                    max-width: 95%;
+                }
             }
 
             .plate-number-container,
             .licenseId-container{
+                height: 2.1rem;
                 input {
                     background-color: #3880ff;
                     text-align: center;
-                    font-size: 1.1rem;
-                    border-radius: 0.4rem;
+                    font-size: 0.92rem;
+                    border-radius: 0.2rem;
                     height: 100%;
                     border: none;
-                    color: white;
+                    color: $ionic-text-color;
+                    font: $ionic-font;
 
                     &::placeholder {
-                        color: white;
+                        color: $ionic-text-color;
                         opacity: 1;
                     }
-                }
-            }
-
-            .no-of-seats-container{
-                ion-button {
-                    width: 100%;
                 }
             }
         }
