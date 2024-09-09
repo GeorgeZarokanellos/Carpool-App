@@ -1,4 +1,4 @@
-import { IonAlert, IonButton, IonContent, IonDatetime, IonFooter, IonHeader, IonItem, IonPage, IonPicker, IonTitle, IonToolbar } from "@ionic/react";
+import { IonButton, IonContent, IonDatetime, IonFooter, IonHeader, IonItem, IonPage, IonPicker, IonTitle, IonToolbar } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import { Stop } from "../interfacesAndTypes/Types";
@@ -25,15 +25,11 @@ export const NewTrip: React.FC = () => {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    const role: string | null = localStorage.getItem('role');
     const userIdString = localStorage.getItem('userId');
     const userIdInt = parseInt(userIdString as string, 10);
 
-    const [showAlert] = useState(role === 'driver');
     const [startLocations, setStartLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
-    const [firstPassengerId, setFirstPassengerId] = useState<number | null>(null);
-    const [firstPassengerCredentials, setFirstPassengerCredentials] = useState<{firstName: string, lastName: string} | null>(null);
     //start end location picker
     const [showStartLocationPicker, setShowStartLocationPicker] = useState(false);
     const [startLocationPickerKey, setStartLocationPickerKey] = useState<number>(0);
@@ -59,7 +55,7 @@ export const NewTrip: React.FC = () => {
         try {
             console.log("Check conditions: ", selectedStartLocation, selectedEndLocation, selectedDate, selectedPassengerNumber);
             
-            if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate && selectedPassengerNumber !== 0){
+            if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate !== null ){
                 if(selectedPassengerNumber < 3){
                     requestBody = {
                         tripCreatorId: userIdInt,
@@ -123,44 +119,6 @@ export const NewTrip: React.FC = () => {
         setPassengerCredentials([...passengerCredentials, {firstName: firstName, lastName: lastName}]);
     }
 
-    const retrieveCurrentUsersCredentials = async () => {
-        try {
-            await instance.get(`/user/${userIdInt}`)
-            .then(response => {
-                console.log(response.data);
-                setFirstPassengerCredentials({
-                    firstName: response.data.firstName,
-                    lastName: response.data.lastName
-                });
-            });
-        } catch (error) {
-            console.log("Error retrieving user's credentials", error);
-        }
-    }
-
-    useEffect(() => {   //retrieve the first passenger's credentials
-        if(firstPassengerId){
-            retrieveCurrentUsersCredentials();
-        }
-
-    },[firstPassengerId]);
-
-    useEffect(() => {   //add the first passenger's credentials to the passengerCredentials array
-        if(firstPassengerCredentials && passengerCredentials.length === 0){
-            setPassengerCredentials([firstPassengerCredentials]);
-        } else if(firstPassengerCredentials){
-            setPassengerCredentials([...passengerCredentials, firstPassengerCredentials]);
-        }
-    }, [firstPassengerCredentials]);
-
-    useEffect(() => {
-        console.log("Request Body: ", requestBody);
-    }, [passengerCredentials]);
-
-    useEffect(() => {
-        console.log("first passenger id", firstPassengerId);
-    }, [firstPassengerId]);
-
     useEffect(() => {
         instance.get('/trips/start-locations')
         .then(response => {
@@ -170,15 +128,12 @@ export const NewTrip: React.FC = () => {
     },[]);
 
     useEffect(() => {
-        //the user creating the trip will be the first passenger except if he is the driver
-        if(tripDriverId){
-            if(userIdString && tripDriverId !== userIdInt){
-                console.log("First passenger id: ", userIdString);
-                setFirstPassengerId(parseInt(userIdString, 10));
-            }
-        }
-    }, [tripDriverId]);
-        
+        console.log("Request Body: ", requestBody);
+    }, [passengerCredentials]);
+    
+    useEffect(() => {
+        setTripDriverId(userIdInt);
+    }, [userIdInt]);
 
     return (
         <div>
@@ -191,26 +146,6 @@ export const NewTrip: React.FC = () => {
                     </IonToolbar>
                 </IonHeader>
                 <IonContent>
-                    <IonAlert 
-                        isOpen={showAlert} 
-                        header="Are you gonna be the driver or not?"
-                        buttons={[{
-                                text: 'yes',
-                                role: 'confirm',
-                                handler: () => {
-                                    setTripDriverId(userIdInt);
-                                }
-                            },
-                            {
-                                text: 'no',
-                                role: 'cancel',
-                                handler: () => {
-                                    //if the driver wants to be passenger 
-                                    setFirstPassengerId(userIdInt);
-                                }
-                            }
-                        ]}
-                    />
                     <div className="new-trip-input-container">
                         <form className="trip-form" onSubmit={handleSubmit}>
                             <div className="form-contents">
@@ -316,7 +251,7 @@ export const NewTrip: React.FC = () => {
                                             <p style={{margin: 0}}>Number of passengers
                                                 {' ' + selectedPassengerNumber }
                                             </p>
-                                        ) : "Select number of passengers"
+                                        ) : "Add passengers"
                                     }
                                 </IonButton>
                                 <IonPicker 

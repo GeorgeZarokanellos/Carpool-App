@@ -96,7 +96,6 @@ ion-content{
     @include display-flex-center('both');
     height: 100%;
     width: 100%;
-    flex-direction: column;
     background-color: $trip-info-background-color;
     color: $ionic-text-color;
 }

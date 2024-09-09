@@ -15,7 +15,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
+  const userRole = localStorage.getItem('userRole');
 
   //screen dimensions
   const viewportWidth = window.innerWidth;
@@ -75,7 +75,9 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
               animated={true}
               onIonChange={handleSearch} 
               onIonClear={handleClearSearch}
-              class='custom'/>
+              color={'primary'}
+              class='custom'
+            />
           </IonHeader>
           <IonContent >
             <IonGrid >
@@ -103,11 +105,14 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
               </div>
             </IonGrid>
           </IonContent>
-          <div className='create-trip-button-container'>
-            <IonButton shape='round' routerLink="/main/create-trip">
-              Create a new trip
-            </IonButton>
-          </ div>
+          {
+            userRole === 'driver' &&
+              <div className='create-trip-button-container'>
+                  <IonButton shape='round' routerLink="/main/create-trip">
+                    Create a new trip
+                  </IonButton>
+              </ div>
+          }
         </IonPage>
     );
   } else {
@@ -119,6 +124,14 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
             <div className='no-trips-container'>
               <IonText>No trips available at the moment!</IonText>
             </div>
+        }
+        {
+          userRole === 'driver' &&
+            <div className='create-trip-button-container'>
+                <IonButton shape='round' routerLink="/main/create-trip">
+                  Create a new trip
+                </IonButton>
+            </ div>
         }
       </IonPage>
     )

@@ -437,9 +437,20 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
           {
             !isLoading && 
               <div className="no-current-trip">
-                <IonText class="ion-text-center">You are not participating in a trip right now!</IonText>
                 <IonButton routerLink="/main/search-trips" shape="round" >
-                  Search or Create a trip here!
+                  <IonText>
+                  { userRole === 'driver' ? (
+                      <>
+                          No current trip.<br />
+                          Create one here!
+                      </>
+                    ) : (
+                      <>
+                          No current trip.<br />
+                          Search for one here!
+                      </>
+                    )}
+                  </IonText>
                 </IonButton>
               </div>
           }
