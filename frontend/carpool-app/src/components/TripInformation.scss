@@ -7,17 +7,13 @@
 .arrow-icon,
 .start-icon,
 .car-icon,
-.thumb-icon
+.thumb-icon,
+.flag-icon
 {
   margin-right: 0.6rem;
   font-size: 1.5rem;
+  color: $ionic-text-color;
 } 
-
-.flag-icon 
-{
-  font-size: 1.5rem;
-  margin-right: 0.6rem;
-}
 
 .trip-info-container {
   cursor: pointer;
@@ -26,9 +22,6 @@
   max-width: 30rem;
   margin: 0.5rem 0;
   
-  ion-card-header{
-    border-bottom: 1px solid white;
-  }
 
   .custom-content {
     padding: 0;
@@ -41,23 +34,25 @@
     width: 100%;
   }
 
-  .end-location {
+  .end-location{
+    height: 100%;
     display: flex;
     justify-content: center;
-
+    align-items: center;
+    background-color: $trip-info-background-color;
   }
 
   .arrow-container{
     width: 100%;
     height: 100%;
     @include display-flex-center('both');
+    background-color: $trip-info-background-color;
   }
 
   .destination{
     @include display-flex-center('both');
     flex-direction: row;
   }
-
 
 }
 
@@ -68,11 +63,17 @@
   height: 30%;
 }
 
+ion-item{
+  --ion-item-background: var(--trip-info-background-color);
+}
+
 ion-card-header {
   padding: 0.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: $trip-info-background-color;
+  border-bottom: 1px solid white;
 }
 
 ion-col{
@@ -84,4 +85,5 @@ ion-col{
 
 ion-text {
   width: 100%;
+  color: $ionic-text-color;
 }

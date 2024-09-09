@@ -6,10 +6,6 @@ ion-content{
     flex-direction: column;
     height: 100%;
 
-    ion-title{
-        text-decoration: underline;
-    }
-
     .map-container{
         height: 40vh;
         max-height: 40%;
@@ -18,7 +14,15 @@ ion-content{
     
     .grid-contents{
         max-height: 60%;
+        height: 100%;
         overflow-y: scroll;
+        background-color: $trip-info-background-color;
+        color: $ionic-text-color;
+
+        ion-title{
+            text-decoration: underline;
+            color: $ionic-text-color;
+        }
 
         .custom-col{
             display: flex;
@@ -31,6 +35,10 @@ ion-content{
                 flex-direction: column;
                 height: 100%;
                 width: 100%;
+
+                ion-item{
+                    color: var(--ionic-text-color);
+                }
                 
                 .passengers-details{
                     width: 100%;
@@ -50,6 +58,7 @@ ion-content{
                 .time-icon,
                 .calendar-icon{
                     font-size: 1.5rem;
+                    color: $ionic-text-color;
                 }
             }
 
@@ -80,7 +89,7 @@ ion-content{
 .join-button{
     width: 100%;
     @include display-flex-center('justify');
-    background-color: white;
+    background-color: $trip-info-background-color;
 }
 
 .no-current-trip{
@@ -88,7 +97,6 @@ ion-content{
     height: 100%;
     width: 100%;
     flex-direction: column;
-    background-color: white;
-    color: black;
-    
+    background-color: $trip-info-background-color;
+    color: $ionic-text-color;
 }

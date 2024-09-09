@@ -294,7 +294,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     return (
         <IonCard color="primary">
             <IonCardHeader>
-                <IonCardTitle class="ion-text-center">
+                <IonCardTitle class="ion-text-center" >
                     {
                         displayAppropriateTitle()
                     }
@@ -390,7 +390,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                 ))
                             }
                             </Swiper>                      
-                            <IonButton color="success" onClick={handleReviewSubmission}>Submit Review</IonButton>
+                            <IonButton onClick={handleReviewSubmission}>Submit Review</IonButton>
                         </div>  
                 }
             </IonCardContent>

@@ -1,6 +1,7 @@
+@import '../global.scss';
+
 ion-card{
     border-radius: 1rem;
-    color: black;
     height: fit-content;
 
     .card-content{
@@ -13,6 +14,7 @@ ion-card{
         .notification-message{
             display: flex;
             text-align: center;
+            font-size: 1rem;
         }
 
         .trip-display-container{
@@ -26,7 +28,6 @@ ion-card{
             text-align: center;
             font-size: 1rem;
 
-
             .my-swiper{
                 width: 100%;
                 height: 4rem;
@@ -37,11 +38,18 @@ ion-card{
                         background: black; // Change the background color of the pagination dots
                     } 
                 }
+
+                .swiper-slide{
+                    .rating{
+                        font-size: 1.7rem;
+                    }
+                }
+    
             }
 
-            // ion-button{
-            //     margin-top: 1rem;
-            // }
+            ion-button{
+                --background: var(--success-color);
+            }
         
         }
     }
