@@ -1,5 +1,5 @@
 import { IonPage } from "@ionic/react";
-import React, { useEffect } from "react";
+import React, { useEffect} from "react";
 import { DetailedTripInformation } from "../components/DetailedTripInformation";
 import instance from "../AxiosConfig";
 
@@ -33,14 +33,8 @@ export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) =>
         }
     }, [refreshKey]);
     
-    // if(currentTripId === 0){
-    //     return (
-    //         <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
-    //             <h1> No current trip </h1>
-    //         </IonPage>
-    //     )
-    // }
     return (
+        
         <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
             <DetailedTripInformation clickedTripId={Number(currentTripId)} page="currentTrip"/>    
         </IonPage>

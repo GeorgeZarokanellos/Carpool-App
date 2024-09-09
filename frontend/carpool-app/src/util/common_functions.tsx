@@ -22,7 +22,7 @@ export const formatDate = (dateString: string | Date): string => {
         return `${dateParts[2]}/${dateParts[1]}`;
     } else {
         console.log("DateParts is empty:", dateParts);
-        return ""; // Add a return statement here
+        return ""; 
     }
 }
 
@@ -33,7 +33,7 @@ export const formatDateTime = (dateString: string): {formattedDate: string, form
     const date = new Date(dateString);  
     const offset = date.getTimezoneOffset();    //take the offset of local from UTC in minutes
     const localDate = new Date(date.getTime() - (offset * 60 * 1000));  //convert to local time
-    console.log("Local Date", localDate);
+    // console.log("Local Date", localDate);
     
     const dateTimeParts = localDate.toISOString().split('T');
     const timeParts = `${dateTimeParts[1]}`.split(':');

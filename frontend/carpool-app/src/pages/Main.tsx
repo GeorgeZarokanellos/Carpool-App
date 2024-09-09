@@ -15,6 +15,8 @@ import { DetailedTripInformationPage } from './DetailedTripInformationPage';
 export const Main: React.FC = () => {
   const [searchTripsRefreshKey, setSearchTripsRefreshKey] = useState(0);
   const [currentTripRefreshKey, setCurrentTripRefreshKey] = useState(0);
+  const [notificationRefreshKey, setNotificationRefreshKey] = useState(0);
+  const [profileRefreshKey, setProfileRefreshKey] = useState(0);
 
  return (
     <IonTabs>
@@ -22,8 +24,8 @@ export const Main: React.FC = () => {
           <Route path="/main/current-trip" render={() => <CurrentTripPage refreshKey={currentTripRefreshKey} />} />
           <Route path="/main/tab2" component={Tab2} />
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={searchTripsRefreshKey}/>}/>
-          <Route path="/main/notifications" component={NotificationPage}/>
-          <Route path="/main/profile" component={Profile} />
+          <Route path="/main/notifications" render={() => <NotificationPage refreshKey={notificationRefreshKey} /> }/>
+          <Route path="/main/profile" render={() => <Profile refreshKey={profileRefreshKey} /> }/>
           <Route path="/main/create-trip" component={NewTrip} />
           <Route path="/main/trip-info/:tripId" component={DetailedTripInformationPage}/>
         </IonRouterOutlet>
@@ -38,10 +40,10 @@ export const Main: React.FC = () => {
             <IonIcon aria-hidden="true" icon={search} />
             {/* <IonLabel>Search Trips</IonLabel> */}
           </IonTabButton>
-          <IonTabButton tab="notifications" href="/main/notifications">
+          <IonTabButton tab="notifications" href="/main/notifications" onClick={() => setNotificationRefreshKey(notificationRefreshKey => notificationRefreshKey + 1)}>
             <IonIcon aria-hidden="true" icon={notifications} />
           </IonTabButton>
-          <IonTabButton tab="profile" href="/main/profile">
+          <IonTabButton tab="profile" href="/main/profile" onClick={() => setProfileRefreshKey(profileRefreshKey => profileRefreshKey + 1)}>
             <IonIcon aria-hidden="true" icon={person} />
             {/* <IonLabel>Tab 5</IonLabel> */}
           </IonTabButton>

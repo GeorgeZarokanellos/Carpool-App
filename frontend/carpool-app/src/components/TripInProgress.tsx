@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { IonButton, IonText } from "@ionic/react";
+import { IonItem } from "@ionic/react";
 import "./TripInProgress.scss";
 import instance from "../AxiosConfig";
 
 interface TripInProgressProps {
     tripId: number;
-    startingTime: string;
+    startingTime: string;    // const itemColor = "rgb(44, 110, 219)";
+
     tripDriverCurrentUser: boolean;
     setDriverWantsToEndTrip: (value: boolean) => void;
 }
@@ -34,22 +35,21 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({tripId, startingT
     return (
         tripInProgress ? (
             <div className="trip-in-progress">
-                <IonText>
+                <IonItem shape="round">
                     The trip is in progress!
-                    
-                </IonText>
+                </IonItem>
                 {
                     tripDriverCurrentUser &&
-                    <IonButton  color="danger" onClick={() => setDriverWantsToEndTrip(true)}>
+                    <IonItem  color="danger" onClick={() => setDriverWantsToEndTrip(true)}>
                         End Trip
-                    </IonButton>
+                    </IonItem>
                 }
             </div>
         ) : (
             <div className="trip-not-in-progress">
-                <IonText>
-                    The trip hasn&apos;t started yet.
-                </IonText>
+                <IonItem shape="round">
+                    This trip hasn&apos;t started yet
+                </IonItem>
             </div>
         )
     );

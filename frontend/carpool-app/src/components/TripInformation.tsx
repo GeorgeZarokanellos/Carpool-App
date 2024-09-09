@@ -3,36 +3,30 @@ import {
         IonCard, 
         IonCardContent, 
         IonCardHeader, 
-        IonIcon, 
         IonItem, 
         IonGrid, 
         IonRow, 
         IonCol, 
-        IonLabel, 
         IonCardTitle, 
         IonText
     } from "@ionic/react";
 import { TripProps } from "../interfacesAndTypes/Interfaces";
-import { 
-        timeOutline, 
-        peopleOutline, 
-        locationOutline, 
-        flagOutline,
-        carOutline,
-        starOutline,
-    } from 'ionicons/icons';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import DriveEtaIcon from '@mui/icons-material/DriveEta';
+import FlagIcon from '@mui/icons-material/Flag';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import './TripInformation.scss';
-import { StarRating } from "../util/common_functions";
 import { TripTitle } from "./TripTitle";
+import { Rating } from "@mui/material";
 
-export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, origin, noOfPassengers, finish, driver, tripCreator}) => {
-    const itemColor = "";   //TODO change to background color of the app
-
+export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip, startLocation, endLocation, noOfPassengers, driver, tripCreator}) => {
     return (
     <IonCol size="12" >
-        <IonCard className="trip-info-container" color={itemColor}>
-            <IonCardHeader >
-                <IonCardTitle className="custom-font">
+        <IonCard className="trip-info-container" >
+            <IonCardHeader style={{padding: '0'}}>
+                <IonCardTitle >
                     <TripTitle dateOfTrip={dateOfTrip} tripCreator={tripCreator}/>
                 </IonCardTitle>
             </IonCardHeader>
@@ -42,26 +36,26 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                         <div className="start-finish">
                             <IonCol size="5">
                                 <div className="start-location">
-                                    <IonItem lines="none" color={itemColor} >
-                                        <IonIcon icon={locationOutline} slot="start" className="location-icon" />
-                                        <IonLabel >
-                                            {origin}
-                                        </IonLabel>
+                                    <IonItem lines="none"  >
+                                        <LocationOnIcon className="location-icon"/>
+                                        <IonText>
+                                            {startLocation}
+                                        </IonText>
                                     </IonItem>
                                 </div>
                             </IonCol>
                             <IonCol size="1">
                                 <div className="arrow-container">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="100px" height="30px" viewBox="0 0 16 16"><path fill="black" fillRule="evenodd" d="M10.159 10.72a.75.75 0 1 0 1.06 1.06l3.25-3.25L15 8l-.53-.53l-3.25-3.25a.75.75 0 0 0-1.061 1.06l1.97 1.97H1.75a.75.75 0 1 0 0 1.5h10.379z" clipRule="evenodd"></path></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="100px" height="30px" viewBox="0 0 16 16"><path fill="white" fillRule="evenodd" d="M10.159 10.72a.75.75 0 1 0 1.06 1.06l3.25-3.25L15 8l-.53-.53l-3.25-3.25a.75.75 0 0 0-1.061 1.06l1.97 1.97H1.75a.75.75 0 1 0 0 1.5h10.379z" clipRule="evenodd"></path></svg>
                                 </div>
                             </IonCol>
                             <IonCol size="6">
                                 <div className="end-location">
-                                    <IonItem lines="none" color={itemColor} >
+                                    <IonItem lines="none"  >
+                                            <FlagIcon className="flag-icon"/>
                                             <IonText>
-                                                {finish}
+                                                {endLocation}
                                             </IonText>
-                                            <IonIcon icon={flagOutline} slot="end" className="flag-icon" />
                                     </IonItem>
                                 </div>
                             </IonCol>
@@ -70,24 +64,31 @@ export const TripInformation: React.FC<TripProps>  = ({startingTime, dateOfTrip,
                     <IonRow>
                         <IonCol size="6" >
                             <div className="time-people-container">
-                                <IonItem lines="none" color={itemColor}>
-                                    <IonIcon icon={timeOutline} slot="start" className="time-icon" />
-                                    <IonLabel>{startingTime}</IonLabel>
+                                <IonItem lines="none" >
+                                    <AccessTimeIcon className="time-icon"/>
+                                    <IonText>{startingTime}</IonText>
                                 </IonItem>
-                                <IonItem lines="none" color={itemColor}>
-                                    <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
-                                    {noOfPassengers + (driver? + 1 : + 0) + ( driver ? '/' + driver.vehicle.noOfSeats + ' Συνεπιβ.' : ' Συνεπιβ.')}
+                                <IonItem lines="none" >
+                                    <PeopleAltIcon className="people-icon"/>
+                                    <IonText>{noOfPassengers + (driver? + 1 : + 0) + ( driver ? '/' + driver.vehicle.noOfSeats + ' Συνεπιβ.' : ' Συνεπιβ.')}</IonText>
                                 </IonItem>
                             </div>
                         </IonCol>
                         <IonCol size="6" className="">
                             <div className="driver-info-container">
-                                <IonItem lines="none" color={itemColor} >
-                                        <IonLabel >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'Δεν υπάρχει οδηγός ακόμα')}</IonLabel>
-                                        {/* <IonIcon icon={carOutline} className="car-icon" slot="end"/> */}
+                                <IonItem lines="none"  >
+                                        <DriveEtaIcon className="car-icon"/>
+                                        <IonText >{(driver? driver.user.firstName + ' ' + driver.user.lastName : 'Δεν υπάρχει οδηγός ακόμα')}</IonText>
                                 </IonItem>
-                                <IonItem lines="none" color={itemColor} >
-                                    < StarRating rating={Number(driver?.user.overallRating)}/>
+                                <IonItem lines="none"  >
+                                    <ThumbUpIcon className="thumb-icon"/>
+                                    <Rating 
+                                        name="read-only" 
+                                        value={Number(driver?.user.overallRating)} 
+                                        precision={0.5} 
+                                        readOnly 
+                                        classes={{ iconEmpty: 'custom-rating' }}
+                                        />
                                 </IonItem>
                             </div>
                         </IonCol>

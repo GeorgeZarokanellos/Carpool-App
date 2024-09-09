@@ -18,6 +18,8 @@ TripStop.belongsTo(Stop, {foreignKey: 'stopId', as: 'details'});
 
 TripStop.belongsTo(Trip, {foreignKey: 'tripId', targetKey: 'tripId'});
 Trip.hasMany(TripStop, {foreignKey: 'tripId', as: 'tripStops'});
+Trip.belongsTo(Stop, {foreignKey: 'startLocationId', targetKey: 'stopId' ,as: 'startLocation'});
+Trip.belongsTo(Stop, {foreignKey: 'endLocationId', targetKey: 'stopId' , as: 'endLocation'});
 
 Trip.belongsTo(Driver, {foreignKey: 'driverId', targetKey: 'driverId' ,as: 'driver'});
 Trip.belongsTo(User, {foreignKey: 'tripCreatorId', targetKey: 'userId', as: 'tripCreator'});

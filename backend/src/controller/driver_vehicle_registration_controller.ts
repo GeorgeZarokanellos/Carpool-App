@@ -37,6 +37,7 @@ const uploadFiles = async (
                 
                 if (req.files && Object.keys(req.files).length === 0) {
                     console.warn("No files were uploaded.");
+                    res.status(400).send('No files were uploaded.');
                 } else {
                     console.log("Uploaded files:", req.files);
                 }
@@ -56,7 +57,7 @@ const initializeUpload = async (req:Request, res:Response, next: NextFunction , 
             if(!username){
                 throw new Error('Username is missing');
             }
-            const dir = path.resolve(`/home/george/Desktop/CarpoolApp/backend/static/${username}`);   // create a folder for each driver using the username
+            const dir = path.resolve(`/home/george/Desktop/Carpool-App/backend/static${username}`);   // create a folder for each driver using the username
             fs.access(dir, fs.constants.F_OK, (err) => {   // check if the folder already exists
                 if(err !== null){    // err here means that the folder doesn't exist
                     fs.mkdir(dir, {recursive:true}, (err)=>{  // create the folder
@@ -93,15 +94,14 @@ const initializeUpload = async (req:Request, res:Response, next: NextFunction , 
         await uploadFiles(req, res, Storage, fileFilter);
         next();
     } catch (error) {
-        console.log("Error from initialize upload in upload files");
-        
+        console.log("Error from initializeUpload:", error);
+        res.status(500).json({ error: "Initialization of file upload failed", details: (error as Error).message });
     }
 }
 
 export const findUsernameAndInitializeUpload = async (req:Request, res: Response, next: NextFunction , driverId: number): Promise<void> => {
     try {
         const user: User | null = await User.findByPk(driverId);
-        // console.log("User from findUsername", user);
         
         if (user !== null) {
             const username: string = user.username;
@@ -109,18 +109,21 @@ export const findUsernameAndInitializeUpload = async (req:Request, res: Response
                 await initializeUpload(req, res, next, username); // initialize the upload function
             } catch (error) {
                 console.log("error in initializing upload", error);
-                // next(error);
+                res.status(500).json({ error: "Initialization of file upload failed", details: (error as Error).message });
             }
         } else {
-            res.status(404).send('User not found from initialization of upload');
-            // return Promise.reject('User not found from initialization of upload');
+            res.status(404).json({ error: "User not found from initialization of upload" });
+            return;
         }
-    } catch (err) {
-        if (err instanceof Error)
-            console.error('Error from findUsernameAndInitializeUpload:' + err.message);
-        else if (typeof err === 'string')
-            console.error('Error from findUsernameAndInitializeUpload:' + err);
-        res.status(500).send(err);
+    } catch (error) {
+        if (error instanceof Error){
+            console.log("Error from findUsernameAndInitializeUpload:", error);
+            res.status(500).json({ error: "Initialization of file upload failed", details: (error as Error).message });
+        } else {
+            console.log("Error from findUsernameAndInitializeUpload:", error);
+            res.status(500).json({ error: "Initialization of file upload failed", details: error });
+        }
+            
         // return Promise.reject(err);
     }
 };
@@ -131,14 +134,15 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
             const driverId = Number(req.params.id);
             
             // const bodyFromMulter: carRegisterRequestBodyInterface =  await findUsernameAndInitializeUpload(req, res, next, driverId);
-            const {plateNumber, maker, model, noOfSeats}: carRegisterRequestBodyInterface = req.body;
+            const {licenseId, plateNumber, maker, model, noOfSeats}: carRegisterRequestBodyInterface = req.body;
+            
             // console.log('body from multer', bodyFromMulter);
 
             // create a new driver and vehicle in a transaction
             await sequelize.transaction(async (transaction) => {
                 const newDriver = await Driver.create({ 
                     driverId,
-                    licenseId: 90342, // temporary value
+                    licenseId,
                 }, {transaction});
 
                 const newVehicle = await Vehicle.create({
@@ -154,6 +158,8 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
                     await user.update({role: 'driver'}, {transaction}); // update the role of the user to driver
                 else {
                     console.error('User not found');
+                    // res.status(404).send('User not found');
+                    return;
                 }
 
                 res.status(200).send({driver: newDriver, vehicle: newVehicle, files: req.files});
@@ -161,11 +167,13 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
 
 
         } catch(err) {
-            if(err instanceof Error)
-                console.error('Error from addDriverAndVehicleAsync:' + err.message);
-            else if (typeof err === 'string')
-                console.error('Error from addDriverAndVehicleAsync:' + err);
-            res.status(500).send(err);
+            if(err instanceof Error){
+                console.error(err.message);
+                res.status(500).json({ error: 'Error adding driver and vehicle' , details: err.message });
+            } else {
+                console.error(err);
+                res.status(500).json({ error: 'Error adding driver and vehicle', details: err });
+            }
         }
     }
     addDriverAndVehicleAsync().catch(next);

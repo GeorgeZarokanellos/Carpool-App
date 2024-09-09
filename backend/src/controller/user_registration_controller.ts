@@ -39,7 +39,7 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
                     reject(err);
                     console.warn("image wasn't uploaded");
                 } else {
-                    // console.log(req.file);
+                    // console.log(req.file);  
                     
                     if(req.file !== undefined){
                         // console.log("request body: ", req);  
@@ -94,6 +94,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 if(existingUser.getDataValue('email') === email)
                     message += 'Email already exists!';
                 res.status(400).send(message);
+                return;
             }
             //check if req.file is populated
             if(req.file !== undefined){
@@ -136,6 +137,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             else if (typeof err === 'string')
                 console.log('Error: ' + err);
             res.status(500).send(err);
+            return ;
         }
     }
     addUserAsync().catch(next); // catch any errors that occur in the addUserAsync function

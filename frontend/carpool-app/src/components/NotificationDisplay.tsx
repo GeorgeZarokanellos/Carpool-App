@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination} from 'swiper/modules';
+import { tripStatus } from "../interfacesAndTypes/Types";
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
@@ -34,7 +35,6 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
             const passengerMessage = 'Your request to join the trip of ' + 
                                         trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
                                         ' at ' + formattedDate + ' has been rejected.';
-            // console.log(passengerMessage);
 
             const role: string = await checkIfRecipientIsDriver();
             //* update notification to rejected
@@ -53,7 +53,8 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 recipient: role,
                 type: 'request'
             });
-            
+        
+
             alert("You have rejected the request");
             window.location.reload();
 
@@ -108,12 +109,19 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     currentTripId: notificationDetails.tripId
                 });
 
-                alert("You have accepted the request");
+                const tripIsFull = await checkTripCapacityAndUpdateStatus(notificationDetails.tripId);
+                if(tripIsFull === true){
+                    alert("You have accepted the request and the trip is now full!");
+                } else {
+                    alert("You have accepted the request!");
+                } 
+
                 window.location.reload();
             }
             
         } catch (error) {
             console.log("Error accepting notification", error);
+            throw new Error("One or more operations wasnt succesful" + error);
         }
     }
 
@@ -207,6 +215,33 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
         }
     }
 
+    const checkTripCapacityAndUpdateStatus = async (tripId: number): Promise<boolean> => {
+        try {
+            let tripIsFull = false;
+            const response = await instance.get(`/trips/${tripId}`);
+            const tripData: ExtendedTrip = response.data;
+            console.log("Trip data", tripData);
+            
+            if(tripData.driver){
+                //check if trip is full after accepting a request
+                if(tripData.noOfPassengers + 1 === tripData.driver.vehicle.noOfSeats){
+                    await instance.patch(`/trips/${notificationDetails.tripId}`, {
+                        status: tripStatus.LOCKED
+                    });
+                    tripIsFull = true;
+                    //check if trip is not full after rejecting a request
+                } 
+            } else {
+                console.log("No driver for the trip");
+                throw new Error("No driver for the trip");
+            }
+            return tripIsFull;
+        } catch (error) {
+            console.log("Error checking if trip is full", error);
+            throw new Error("Error checking if trip is full");
+        }
+    }
+
     useEffect(() => {
         if(accepted) {
             console.log('Accepted', accepted);
@@ -259,7 +294,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     return (
         <IonCard color="primary">
             <IonCardHeader>
-                <IonCardTitle class="ion-text-center">
+                <IonCardTitle class="ion-text-center" >
                     {
                         displayAppropriateTitle()
                     }
@@ -276,10 +311,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                             <TripInformation 
                                 startingTime={formattedTime} 
                                 dateOfTrip={formattedDate} 
-                                origin={trip.startLocation}
+                                startLocation={trip.startLocation.stopLocation}
+                                endLocation={trip.endLocation.stopLocation}
                                 noOfPassengers={trip.noOfPassengers}
                                 noOfStops={trip.noOfStops}
-                                finish='Πρυτανεία'
                                 driver={{
                                         user: trip.driver? trip.driver.user : {
                                             firstName: 'There is no driver yet',
@@ -355,7 +390,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                 ))
                             }
                             </Swiper>                      
-                            <IonButton color="success" onClick={handleReviewSubmission}>Submit Review</IonButton>
+                            <IonButton onClick={handleReviewSubmission}>Submit Review</IonButton>
                         </div>  
                 }
             </IonCardContent>

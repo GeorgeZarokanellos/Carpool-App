@@ -1,12 +1,15 @@
-import { IonContent, IonHeader, IonPage, IonTitle } from "@ionic/react";
+import { IonContent, IonHeader, IonPage, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import './NotificationPage.scss';
 import { NotificationDisplay } from "../components/NotificationDisplay";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 
+interface NotificationPageProps {
+    refreshKey: number;
+}
 
-export const NotificationPage:React.FC = () => {
+export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) => {
     const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
     const [filteredNotifications, setFilteredNotifications] = useState<NotificationInterface[]>([]);
 
@@ -19,9 +22,27 @@ export const NotificationPage:React.FC = () => {
         });
     }
 
+    const retrieveNotifications = async () => {
+
+        try {
+            console.log(`/notifications/${userId}?${queryParams.toString()}`);
+            await instance.get(`/notifications/${userId}?${queryParams.toString()}`)
+            .then(response => {
+                console.log(response.data);
+                setNotifications(response.data);
+            })
+            .catch(error => {
+                console.log("Error retrieving notifications", error);
+            });
+        } catch (error) {
+            console.log("Error retrieving notifications", error);
+        }
+
+    }
+
     useEffect(() => {
         retrieveNotifications();
-    }, []);
+    }, [refreshKey]);
 
     useEffect(() => {
         const tempFilteredNotifications: NotificationInterface[] = [];
@@ -38,23 +59,6 @@ export const NotificationPage:React.FC = () => {
         setFilteredNotifications(tempFilteredNotifications);
     }, [notifications]);
 
-    useEffect(() => {
-        if(filteredNotifications)
-            console.log("Filtered Notifications", filteredNotifications);
-    }, [filteredNotifications]);
-
-    const retrieveNotifications = async () => {
-
-        try {
-            console.log(`/notifications/${userId}?${queryParams.toString()}`);
-            const response = await instance.get(`/notifications/${userId}?${queryParams.toString()}`);
-            console.log(response.data);
-            setNotifications(response.data);
-        } catch (error) {
-            console.log("Error retrieving notifications", error);
-        }
-
-    }
 
     return (
         <IonPage>
@@ -63,11 +67,19 @@ export const NotificationPage:React.FC = () => {
             </IonHeader>
             <IonContent>
                 {
-                    filteredNotifications && filteredNotifications.map((notification, index)=> {
-                        return (
-                            <NotificationDisplay key={index} notificationDetails={notification}/>
+                    filteredNotifications.length !== 0 ? 
+                        (
+                            filteredNotifications.map((notification, index)=> {
+                                return (
+                                    <NotificationDisplay key={index} notificationDetails={notification}/>
+                                )
+                            }
                         )
-                    })
+                    ) : (
+                        <div style={{height: "100%", display: "flex", alignItems: "center"}}>
+                            <IonText class='ion-text-center'>No new notifications at the moment.<br />Come back later!</IonText>
+                        </div>
+                    )
                 }
             </IonContent>
         </IonPage>

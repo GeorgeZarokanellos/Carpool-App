@@ -5,11 +5,14 @@ enum Role {
     PASSENGER = "Passenger",
 }
 
-enum Status {
-    PLANNING = "planning",
-    IN_PROGRESS = "in_progress",
-    COMPLETED = "completed",
+export enum tripStatus {
+    INPROGRESS = 'in_progress',
+    COMPLETED = 'completed',
+    PLANNING = 'planning',
+    LOCKED = 'locked',
+    CANCELLED = 'cancelled'
 }
+
 
 
 export type User = {
@@ -24,7 +27,8 @@ export type Trip = {
     tripId: number;
     tripCreatorId: number;
     driverId: number | null;
-    startLocation: string;
+    startLocationId: number;
+    endLocationId: number;
     startingTime: string;
     noOfPassengers: number;
     noOfStops: number;
@@ -47,11 +51,19 @@ export type Trip = {
         firstName: string;
         lastName: string;
     }
+    startLocation: {
+        stopLocation: string;  
+    }
+    endLocation: {
+        stopLocation: string;
+    }
 }
 
 export type ExtendedTrip = Trip & {
     tripPassengers: tripPassenger[];
     tripStops: TripStops
+    startLocation: Stop;
+    endLocation: Stop;
 }
 
 export type tripPassenger = {
@@ -79,8 +91,8 @@ export type TextFieldTypes = 'date' | 'email' | 'number' | 'password' | 'search'
 
 export type Review = {
     reviewId: number;
-    reviewRating: number;
-    reviewDateTime: Date;
+    reviewRating: string;
+    reviewDateTime: string;
     tripId: number;
     reviewedUserId: number;
     // reviewerId: number;
@@ -90,26 +102,24 @@ export type Review = {
     }
 }
 
-
-
 export type ProfileData = {
     username: string;
     firstName: string;
     lastName: string;
     role: Role;
     phone: string;
-    overallRating: number;
+    overallRating: string;
     profilePicture: ProfilePictureBuffer;
     userReviews: Review[];
     userSubmittedReviews: Review[];
-    tripsCreated: Trip[];
-    tripsParticipated: Trip[];
+    tripsCompleted: Trip[];
 }
 
 export type descIndex = {
     text: string,
     index: number
 }
+
 export type autoMaker = {
     maker: string,
     models: string[]

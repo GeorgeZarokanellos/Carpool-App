@@ -1,28 +1,3 @@
-interface passengerInterface {
-    firstName: string;
-    lastName: string;
-}
-
-interface tripInterface {
-    tripCreatorId: number;
-    driverId: number | null;
-    startLocation: string;
-    startingTime: Date;
-}
-
-interface updatedTripInterface {
-    addPassengers?: passengerInterface[];
-    removePassengers?: passengerInterface[];
-    addStops?: number[];
-    removeStops?: number[];
-    updateStartingTime?: Date;
-}
-
-interface updatedUserInterface {
-    currentTripId?: number;
-    overallPoints?: number;
-}
-
 enum role {
     driver = 'driver',
     passenger = 'passenger'
@@ -32,6 +7,43 @@ enum NotificationType {
     REQUEST = 'request',
     REVIEW = 'review'
 }
+
+export enum tripStatus {
+    INPROGRESS = 'in_progress',
+    COMPLETED = 'completed',
+    PLANNING = 'planning',
+    LOCKED = 'locked',
+    CANCELLED = 'cancelled'
+}
+
+interface passengerInterface {
+    firstName: string;
+    lastName: string;
+}
+
+interface tripInterface {
+    tripCreatorId: number;
+    driverId: number | null;
+    startLocationId: number;
+    endLocationId: number;
+    startingTime: Date;
+    status?: tripStatus;
+}
+
+interface updatedTripInterface {
+    addPassengers?: passengerInterface[];
+    removePassengers?: passengerInterface[];
+    addStops?: number[];
+    removeStops?: number[];
+    updateStartingTime?: Date;
+    status?: tripStatus;
+}
+
+interface updatedUserInterface {
+    currentTripId?: number;
+    overallPoints?: number;
+}
+
 
 interface addUserRequestBodyInterface {
     universityId: number;
@@ -45,6 +57,7 @@ interface addUserRequestBodyInterface {
 }
 
 interface carRegisterRequestBodyInterface {
+    licenseId: number;
     plateNumber: string;
     maker: string;
     model: string;

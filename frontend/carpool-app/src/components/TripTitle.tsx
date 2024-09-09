@@ -1,4 +1,6 @@
 import React from 'react';
+import './TripTitle.scss';
+
 
 interface TripTitleProps {
     dateOfTrip: string;
@@ -15,8 +17,8 @@ export const TripTitle: React.FC<TripTitleProps> = ({dateOfTrip, tripCreator}) =
                         today.getMonth() === tripDate.getMonth() &&
                         today.getFullYear() === tripDate.getFullYear();
     return (
-        <div className='title' style={{textAlign: "center", color: 'black'}}>
-            {'Διαδρομή του/της ' + tripCreator.firstName + ' ' + tripCreator.lastName + ' για ' + (isTripToday ? 'σήμερα' : 'της ' + dateOfTrip) }
+        <div className='title' style={{textAlign: "center"}}>
+            {tripCreator.firstName + ' ' + tripCreator.lastName + ' \'s trip ' + (isTripToday ? 'for today' : 'on ' + dateOfTrip) }
         </div>
     )
 }

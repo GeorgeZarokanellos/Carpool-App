@@ -1,6 +1,6 @@
-import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonPage, IonRow, IonTitle } from "@ionic/react";
+import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
-import { ExtendedTrip, Stop, Trip, TripStops } from "../interfacesAndTypes/Types";
+import { ExtendedTrip, Stop } from "../interfacesAndTypes/Types";
 import { formatDateTime } from "../util/common_functions";
 import instance from "../AxiosConfig";
 import { TripMapDisplay } from "./TripMapDisplay";
@@ -42,29 +42,24 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
     const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
     const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
+    //loading
+    const [isLoading, setIsLoading] = useState(false);
 
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
     const userIdNumber = Number(userId);
     const history = useHistory();
     
-
     useEffect(() => {
-        instance.get(`/trips/${clickedTripId}`)
-        .then(response => {
-            console.log(response.data);
-            setTripData(response.data);
-            
-        })
-        .catch(error => {
-            console.log(error);
-        })
+        retrieveTripData();
     }, [clickedTripId]);
 
     useEffect(() => {
         if(tripData){
             instance.get(`/stops`)
             .then(response => {
+              console.log('Available stops', response.data);
+              
                 setAvailableStops(response.data);
             })
             .catch(error => {
@@ -98,7 +93,27 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
           setDriverWantsToEndTrip(false);
         }
       }
-    }, [driverWantsToEndTrip])
+    }, [driverWantsToEndTrip]);
+
+    const retrieveTripData = async () => {
+        try {
+            if(clickedTripId !== 0){
+              setIsLoading(true);
+              const response = await instance.get(`/trips/${clickedTripId}`);
+              console.log('Trip data', response.data);
+              
+              if(response.data.length !== 0){
+                  setIsLoading(false);
+                  setTripData(response.data);
+              } else {
+                  setIsLoading(false);
+                  console.log('Empty response from server');
+              }
+            } 
+        } catch (error) {
+            console.log('Error retrieving trip data', error);
+        }
+    }
 
     const handleTripCompletion = async (userConfirmed: boolean) => {
       if(tripData && !reviewNotificationsSent){
@@ -277,14 +292,18 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     }
 
     if(tripData){
-      // console.log('Trip data', tripData);
       
         return (
             <>
                 <IonContent >
-                  <TripMapDisplay tripStops={tripData.tripStops} />
-                  <IonTitle class="ion-text-center">Πληροφορίες ταξιδιού</IonTitle>
+                  <div id="map" className="map-container">
+                    <TripMapDisplay 
+                      tripStops={tripData.tripStops} 
+                      startLocation={tripData.startLocation} 
+                      endLocation={tripData.endLocation}/>
+                  </div>
                   <div className="grid-contents">
+                    <IonTitle class="ion-text-center">Trip Information</IonTitle>
                     <IonGrid>
                       <IonRow>
                         <IonCol size="7" className="custom-col">
@@ -298,7 +317,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                             <IonItem lines="none">
                               <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
                               <IonLabel>
-                                {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' συνεπιβάτες'}
+                                {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' passengers'}
                               </IonLabel>
                             </IonItem>
                             <div className="passengers-details">
@@ -307,7 +326,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                             <div className="driver-details">
                               <IonItem lines="none">
                                 <IonIcon icon={carOutline} slot="start" className="car-icon" />
-                                <IonLabel>Οδηγός</IonLabel>
+                                <IonLabel>Driver</IonLabel>
                               </IonItem>
                               <IonItem lines="none">
                                 <IonAvatar style={{ marginRight: '1rem', width: "50%" }}>
@@ -326,30 +345,47 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                         </IonCol>
                         <IonCol size="5" className="custom-col">
                           <div className="stops-display" style={{ overflowY: 'auto', maxHeight: '100%' }}>
-                            <div className="stop">
-                              <LocationOnIcon />
-                              {tripData.startLocation}
-                            </div>
+                            <LocationOnIcon />
+                            <IonText style={{textAlign: 'center'}}>{tripData.startLocation.stopLocation}</IonText>
                             <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
                               <g transform="scale(1.4)">
                                 {/* used to scale only the arrow and not the rectangle around it */}
                                 <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
                               </g>
                             </svg>
-                            {tripData.tripStops.map((stop, index) => (
-                              <div key={index} className="stop">
-                                <HailIcon />
-                                {stop.details.stopLocation}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                                  <g transform="scale(1.4)">
-                                    {/* used to scale only the arrow and not the rectangle around it */}
-                                    <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
-                                  </g>
-                                </svg>
-                              </div>
-                            ))}
+                            <HailIcon />
+                            {
+                              tripData.tripStops.length > 0 ?
+                                tripData.tripStops.map((stop, index) => {
+                                  if(index === 0){
+                                    return (
+                                      <IonText key={index} style={{textAlign: 'center'}}>
+                                        {stop.details.stopLocation}
+                                      </IonText>
+                                    )
+                                  } else {
+                                    return (
+                                      <React.Fragment key={index}>
+                                        <HailIcon />
+                                        <IonText style={{textAlign: 'center'}}>
+                                          {stop.details.stopLocation}
+                                        </IonText>
+                                      </React.Fragment>
+                                    )
+                                  }
+                                }
+                                  
+                                )
+                              : 'No stops'
+                            }
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
+                              <g transform="scale(1.4)">
+                                {/* used to scale only the arrow and not the rectangle around it */}
+                                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
+                              </g>
+                            </svg>
                             <SportsScoreIcon />
-                            Πρυτανεία
+                            <IonText style={{textAlign: 'center'}}>{tripData.endLocation.stopLocation}</IonText>
                           </div>
                         </IonCol>
                       </IonRow>
@@ -365,6 +401,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                       <UserSelectStopModal
                           isOpen={stopSelectModal}
                           onClose={() => setStopSelectModal(false)}
+                          endLocationId={tripData.endLocationId}
                           availableStops={availableStops}
                           onSelectStop={(stop) => {
                           setSelectedStop(stop);
@@ -394,13 +431,31 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
             </>  
         )
     } else {
-        return (
-            <IonPage>
-                <IonContent>
-                    <IonTitle>Δεν υπάρχουν πληροφορίες για το ταξίδι</IonTitle>
-                </IonContent>
-            </IonPage>
-        )
+      return (
+        <>
+          <IonLoading isOpen={isLoading} message={'Loading trip information...'} />
+          {
+            !isLoading && 
+              <div className="no-current-trip">
+                <IonButton routerLink="/main/search-trips" shape="round" >
+                  <IonText>
+                  { userRole === 'driver' ? (
+                      <>
+                          No current trip.<br />
+                          Create one here!
+                      </>
+                    ) : (
+                      <>
+                          No current trip.<br />
+                          Search for one here!
+                      </>
+                    )}
+                  </IonText>
+                </IonButton>
+              </div>
+          }
+        </>
+      )
     }
 
 }

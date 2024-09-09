@@ -6,77 +6,83 @@ import { type ProfileData } from '../interfacesAndTypes/Types';
 import { SubmittedReceivedReviewsDisplay } from '../components/ReviewsDisplay';
 import { TripsDisplay } from '../components/TripsDisplay';
 import { arrayBufferTo64String } from '../util/common_functions';
+import { Rating } from '@mui/material';
 
-const Profile: React.FC = () => {
+interface profileProps {
+  refreshKey: number;
+}
+
+const Profile: React.FC<profileProps> = ({refreshKey}) => {
   const [profileData, setProfileData] = useState<ProfileData>();
   const [imageSrc, setImageSrc] = useState<string>('');
-  // let rating:number;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+    
+  useEffect(() => {
+    if(profileData !== undefined){
+      setIsLoading(false);
+    }
     
 
+  }, [profileData]);
 
   useEffect(() => {
-    instance.get(`/profile/${localStorage.getItem('userId')}`)
-    .then(response => {
+    retrieveProfileData();
+  }, [refreshKey]);
+  
+  const retrieveProfileData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await instance.get(`/profile/${localStorage.getItem('userId')}`);
       setProfileData(response.data);
-      // console.log("Profile data retrieved: ", profileData);
+      console.log("Profile data retrieved: ", response.data);
       if(response.data && response.data.profilePicture){  //check response data because profile data gets set asynchronously
         setImageSrc(arrayBufferTo64String(response.data.profilePicture));
-        // console.log("Base64 string: ", base64String);
+        setIsLoading(false);
       }
-    })
-    .catch(error => {
+    } catch (error) {
       console.log(error);
       
-    })
-  }, []);
-
-  useEffect(() => {
-    console.log("imageSrc: ", imageSrc);
-  }, [imageSrc]);
-
-  // useEffect(() => {
-  //   console.log("Profile data: ", profileData);
-  // }, [profileData]);
-    
-  return (
-    <IonPage>
-      <IonContent fullscreen>
-        <IonContent >
-          { profileData ? (
-            <div className='profile-container'>
-              <div className='profile-contents'>
-                <div className='profile-picture-container'>
-                    {/* <IonLabel>Insert profile <br /> picture below</IonLabel> */}
-                    <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
-                        <IonAvatar >
-                          <img alt="Silhouette of a person's head" src={imageSrc? imageSrc : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
-                        </IonAvatar>
-                      {/* <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} /> */}
-                    </IonButton>
+    }
+  }
+  if(profileData !== undefined){
+    return (
+      <IonPage>
+        <IonContent fullscreen>
+          <IonContent >
+              <div className='profile-container'>
+                <div className='profile-contents'>
+                  <div className='profile-picture-container'>
+                      <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
+                          <IonAvatar >
+                            <img alt="Silhouette of a person's head" src={imageSrc? imageSrc : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
+                          </IonAvatar>
+                      </IonButton>
+                    </div>
+                  <div className='user-name-rating-container'>
+                    <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
+                    <div className='user-rating'>
+                      <Rating name="read-only" value={Number(profileData.overallRating)} readOnly />
+                      {'(' + profileData.overallRating + ')'}
+                    </div>
+                    {" from " + profileData.userReviews.length + " reviews"}
                   </div>
-                <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
-                <IonItem lines='none' >
-                  {/* <div>
-                    {ratingStars}
-                  </div> */}
-                </IonItem>
-                <IonItem lines='none'>
-                    < SubmittedReceivedReviewsDisplay submittedReviews={profileData.userSubmittedReviews} userReviews={profileData.userReviews}/>
-                </IonItem>
-                <IonItem lines='none'>
-                  < TripsDisplay tripsCreated={profileData.tripsCreated} tripsParticipated={profileData.tripsParticipated}/>
-                </IonItem>
+                  <IonItem lines='none'>
+                      < SubmittedReceivedReviewsDisplay submittedReviews={profileData.userSubmittedReviews} userReviews={profileData.userReviews}/>
+                  </IonItem>
+                  <IonItem lines='none'>
+                    < TripsDisplay tripsCompleted={profileData.tripsCompleted}/>
+                  </IonItem>
+                </div>
               </div>
-            </div>
-          ): ''
-          // (
-            // <IonLoading isOpen={true} message={"Retrieving profile information.."} />
-          // )
-          }
+          </IonContent>
         </IonContent>
-      </IonContent>
-    </IonPage>
-  );
+      </IonPage>
+    );
+  } else {
+    return (
+      <IonLoading isOpen={isLoading} message={"Retrieving profile information.."} />
+    )
+  }
 };
 
 export default Profile;
