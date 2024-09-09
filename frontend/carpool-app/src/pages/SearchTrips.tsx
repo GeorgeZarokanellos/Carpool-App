@@ -15,6 +15,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [refreshTrips, setRefreshTrips] = useState<boolean>(true);
   const userRole = localStorage.getItem('userRole');
 
   //screen dimensions
@@ -22,8 +23,19 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const viewportHeight = window.innerHeight;
 
   useEffect(() => {
-    retrieveTrips();
-  },[refreshKey]);
+    const interval = setInterval(() => {
+      setRefreshTrips(!refreshTrips);
+    }, 10*60*1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if(refreshTrips){
+      retrieveTrips();
+      setRefreshTrips(false);
+    }
+  },[refreshKey,refreshTrips]);
 
   const retrieveTrips = async () => {
     try {
@@ -38,14 +50,13 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
         if(response.data.length > 0){
           setTrips(response.data);
           setFilteredResults(response.data);
+          setIsLoading(false);
         } else {
           console.log("Empty response from server");
         }
         
     } catch (error) {
       console.log("Error retrieving trips", error);
-    } finally {
-      setIsLoading(false);
     }
   }
 
