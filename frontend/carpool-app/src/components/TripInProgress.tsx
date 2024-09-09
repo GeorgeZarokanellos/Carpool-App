@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { IonButton, IonItem, IonLabel, IonText } from "@ionic/react";
+import { IonItem } from "@ionic/react";
 import "./TripInProgress.scss";
 import instance from "../AxiosConfig";
 
