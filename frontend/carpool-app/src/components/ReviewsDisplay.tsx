@@ -24,13 +24,13 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
                     setReceivedButtonColor('secondary');
                     setSubmittedButtonColor('primary');
                 }
-                } color={receivedButtonColor}>Received</IonButton>
-                <IonButton onClick={() => {
+                } color={receivedButtonColor}><IonText style={{color: 'white'}}>Received</IonText></IonButton>
+                <IonButton  onClick={() => {
                     setSelectedList("Submitted");
                     setSubmittedButtonColor('secondary');
                     setReceivedButtonColor('primary');
                 }
-                } color={submittedButtonColor}>Submitted</IonButton>
+                } color={submittedButtonColor}><IonText style={{color: 'white'}}>Submitted</IonText></IonButton>
             </div>
             <div className="reviews-list">
                 {selectedList === "received" ? (
@@ -40,7 +40,7 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
                             return (
                                 <IonItem lines='none' key={index} className="review-container" color='primary'>
                                     <div className="item-contents">
-                                        <IonText>
+                                        <IonText >
                                             Submitted by {review.reviewer.firstName + ' ' + review.reviewer.lastName} 
                                             {' at ' + formattedTime + ' on ' + formattedDate}
                                         </IonText>

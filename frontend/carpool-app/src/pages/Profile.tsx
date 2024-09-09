@@ -52,21 +52,20 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
               <div className='profile-container'>
                 <div className='profile-contents'>
                   <div className='profile-picture-container'>
-                      {/* <IonLabel>Insert profile <br /> picture below</IonLabel> */}
                       <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
                           <IonAvatar >
                             <img alt="Silhouette of a person's head" src={imageSrc? imageSrc : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
                           </IonAvatar>
-                        {/* <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} /> */}
                       </IonButton>
                     </div>
-                  <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
-                  <IonItem lines='none' >
+                  <div className='user-name-rating-container'>
+                    <IonTitle>{profileData.firstName} {profileData.lastName}</IonTitle>
                     <div className='user-rating'>
                       <Rating name="read-only" value={Number(profileData.overallRating)} readOnly />
-                      {"( " + profileData.overallRating + " )"}
+                      {'(' + profileData.overallRating + ')'}
                     </div>
-                  </IonItem>
+                    {" from " + profileData.userReviews.length + " reviews"}
+                  </div>
                   <IonItem lines='none'>
                       < SubmittedReceivedReviewsDisplay submittedReviews={profileData.userSubmittedReviews} userReviews={profileData.userReviews}/>
                   </IonItem>
