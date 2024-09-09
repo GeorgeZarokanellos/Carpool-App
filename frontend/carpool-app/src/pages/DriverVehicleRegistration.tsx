@@ -34,7 +34,7 @@ export const DriverVehicleRegistration: React.FC = () => {
   });
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<string>("");
   const [noOfSeats, setNoOfSeats] = useState<string>('');
-  const [vehicleNumberPlate, setVehicleNumberPlate] = useState<string>("");
+  const [vehicleNumberPlate, setVehicleNumberPlate] = useState<string | null>(null);
   const [licenseId, setLicenseId] = useState<number | null>(null);
   const [driversLicense, setDriversLicense] = useState<Blob>();
   const [driversLicenseFileName, setDriversLicenseFileName] = useState<string>(""); 
@@ -289,10 +289,10 @@ export const DriverVehicleRegistration: React.FC = () => {
                   />
                 </div>
                 <div className="licenseId-container">
-                  <input type="text" placeholder="Drivers License Id" value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
+                  <input type="text" placeholder="Drivers License Id" required value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
                 </div>
                 <div className="plate-number-container">
-                  <input type="text" placeholder="Vehicle number plate" value={vehicleNumberPlate} onChange={updateVehicleNumberPlate}/>
+                  <input type="text" placeholder="Vehicle number plate" required value={vehicleNumberPlate !== null ? vehicleNumberPlate : ''} onChange={updateVehicleNumberPlate}/>
                 </div>
                 <div className="drivers-license-container">
                   {createFileUploadButton( "DriversLicense", driversLicenseFileName, "driversLicense" , setDriversLicense , setDriversLicenseFileName)}

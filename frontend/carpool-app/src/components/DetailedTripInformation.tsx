@@ -302,8 +302,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                       startLocation={tripData.startLocation} 
                       endLocation={tripData.endLocation}/>
                   </div>
-                  <IonTitle class="ion-text-center">Trip Information</IonTitle>
                   <div className="grid-contents">
+                    <IonTitle class="ion-text-center">Trip Information</IonTitle>
                     <IonGrid>
                       <IonRow>
                         <IonCol size="7" className="custom-col">
