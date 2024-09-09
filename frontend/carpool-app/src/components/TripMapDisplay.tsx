@@ -4,7 +4,6 @@ import 'leaflet/dist/leaflet.css';
 import { Stop, TripStops } from '../interfacesAndTypes/Types';
 import { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
-import 'leaflet-routing-machine';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
