@@ -1,7 +1,7 @@
 import React from "react";
 import { Stop } from "../interfacesAndTypes/Types";
 import { IonButton, IonContent, IonItem, IonList, IonModal} from "@ionic/react";
-
+import './UserSelectStopModal.scss';
 
 interface UserSelectStopModalProps {
     isOpen: boolean;
@@ -14,9 +14,9 @@ interface UserSelectStopModalProps {
 export const UserSelectStopModal:React.FC<UserSelectStopModalProps> = ({isOpen, onClose, endLocationId, availableStops, onSelectStop}) => {
 
     return (
-        <IonModal isOpen={isOpen}>
-            <IonContent>
-                <div style={{width: '100%', textAlign: 'center', display:'flex', justifyContent: 'center'}}>
+        <IonModal isOpen={isOpen} >
+            <IonContent className="modal-content">
+                <div className="title-container">
                     <h3 style={{width: '80%'}}>
                         Choose from which stop you want to be picked up
                     </h3>
@@ -36,9 +36,11 @@ export const UserSelectStopModal:React.FC<UserSelectStopModalProps> = ({isOpen, 
                         })
                     }
                 </IonList>
-                <IonButton onClick={onClose} expand="block" color="danger">
-                    Close
-                </IonButton>
+                <div className="close-container">
+                    <IonButton onClick={onClose} className="close-button">
+                        Close
+                    </IonButton>
+                </div>
             </IonContent>
         </IonModal>
     )
