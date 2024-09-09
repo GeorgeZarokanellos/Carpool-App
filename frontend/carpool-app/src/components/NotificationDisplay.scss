@@ -52,6 +52,20 @@ ion-card{
             }
         
         }
+
+        .accept-reject-container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            .accept{
+                --background: var(--success-color);
+            }
+
+            .reject{
+                --background: var(--danger-color);
+            }
+        }
     }
 
 }

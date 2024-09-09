@@ -335,9 +335,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 </div>
                 { 
                     displayAcceptReject && notificationDetails.type === 'request' &&
-                        <div style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
-                            <IonButton color="success" onClick={() => setAccepted(true)}>Accept</IonButton>
-                            <IonButton color="danger" onClick={() => setRejected(true)}>Reject</IonButton>
+                        <div className="accept-reject-container" style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
+                            <IonButton className="accept" onClick={() => setAccepted(true)}>Accept</IonButton>
+                            <IonButton className="reject" onClick={() => setRejected(true)}>Reject</IonButton>
                         </div>
                 }
                 {
