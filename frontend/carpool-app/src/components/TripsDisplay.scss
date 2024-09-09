@@ -1,0 +1,43 @@
+@import '../global.scss';
+
+.trip-display-container {
+    @include display-flex-center("both");
+    width: 100%;
+    flex-direction: column;
+    border-radius: 10px;
+    padding-bottom: 0.4rem;
+    max-width: 25rem;
+    color: $ionic-text-color;
+    background-color: $trip-info-background-color;
+
+    .trips-list{
+        width: 100%;
+        padding: 0 0.1rem 0 0.1rem;
+        border-radius: 4px; 
+        overflow: hidden;
+        overflow-y: auto;
+        max-height: 15rem;
+
+        ion-list{
+            @include display-flex-center('both');
+            background-color: $trip-info-background-color;
+            flex-direction: column;
+            border-radius: 4px;
+            padding: 0;
+            ion-item{
+                width: 95%;
+                margin: 0.2rem 0;
+                border-radius: 4px;
+                text-align: center;
+
+                .item-contents{
+                    width: 100%;
+                    @include display-flex-center('both');
+                    text-align: center;
+                    flex-direction: column;
+                }
+            }
+        }
+
+    }
+}

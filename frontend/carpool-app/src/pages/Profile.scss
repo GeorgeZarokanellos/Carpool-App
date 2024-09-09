@@ -1,0 +1,46 @@
+@import '../global.scss';
+
+.profile-container{
+    @include display-flex-center('justify');
+    width: 100%;
+    overflow-y: auto;
+    
+    .profile-contents{
+        @include display-flex-center('both');
+        width: 95%;
+        flex-direction: column;
+        ion-item{
+            width: 100%;
+            margin-bottom: 1rem;
+            --background: var(--ionic-text-color);
+        }
+        .profile-picture-container{
+            @include display-flex-center('both');
+            flex-direction: column;
+            ion-avatar {
+                height: 10rem;
+                width: 10rem;
+                
+            }
+
+        }
+
+        .user-name-rating-container{
+            @include display-flex-center('both');
+            flex-direction: column;
+            width: 90%;
+            background-color: $trip-info-background-color;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            color: $ionic-text-color;
+
+            .user-rating{
+                @include display-flex-center('both');
+                width: 100%;
+                color: $ionic-text-color;
+            }
+        }
+
+    }
+
+}

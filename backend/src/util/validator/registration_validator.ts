@@ -2,12 +2,11 @@ import {type ValidationChain, check} from 'express-validator';
 
 export const newUserValidationRules = (): ValidationChain[] => {
     return [
-        check('universityId')
-            .isNumeric()
-            .withMessage('University ID must be a number')
-            .isLength({min: 12, max: 12})
-            .withMessage('Unisersity ID must be 12 characters long'),
-
+        // check('universityId')
+        //     .isNumeric()
+        //     .withMessage('University ID must be a number')
+        //     .isLength({min: 12, max: 12})
+        //     .withMessage('University ID must be 12 characters long'),
 
         check('firstName')
             .isString()
@@ -27,11 +26,11 @@ export const newUserValidationRules = (): ValidationChain[] => {
             .isLength({min: 4, max: 10})
             .withMessage('Username must be between 4 and 10 characters long'),
         
-        check('password')
-            .isString()
-            .withMessage('Password must be a string')
-            .isLength({min: 8, max: 15})
-            .withMessage('Password must be between 8 and 15 characters long'),
+        // check('password')
+        //     .isString()
+        //     .withMessage('Password must be a string')
+        //     .isLength({min: 8, max: 15})
+        //     .withMessage('Password must be between 8 and 15 characters long'),
         
         check('email')
             .isEmail()
@@ -49,25 +48,25 @@ export const newUserValidationRules = (): ValidationChain[] => {
 
 export const newDriverAndVehicleValidationRules = (): ValidationChain[] => {
     return [
-        check('vehicleId')
+        check('plateNumber')
             .isString()
-            .withMessage('Vehicle ID must be a string'),
-
-        check('carMaker')
-            .isString()
-            .withMessage('Car maker must be a string')
-            .isLength({min: 2, max: 15})
-            .withMessage('Car maker must be between 2 and 15 characters long'),
+            .withMessage('Plate number must be a string'),
         
-        check('carModel')
+        check('maker')
             .isString()
-            .withMessage('Car model must be a string')
+            .withMessage('maker must be a string')
             .isLength({min: 2, max: 15})
-            .withMessage('Car model must be between 2 and 15 characters long'),
+            .withMessage('maker must be between 2 and 15 characters long'),
         
-        check('carCapacity')
+        check('model')
+            .isString()
+            .withMessage('model must be a string')
+            .isLength({min: 2, max: 15})
+            .withMessage('model must be between 2 and 15 characters long'),
+        
+        check('noOfSeats')
             .isInt({min: 2, max: 4})
-            .withMessage('Car capacity must be a number between 2 and 4')
+            .withMessage('noOfSeats must be a number between 2 and 4')
     ]
 }
 

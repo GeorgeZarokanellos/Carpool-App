@@ -1,6 +1,6 @@
 import { DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db';
-import { role } from '../interface/trip_interface';
+import { role } from '../interface/interface';
 
 // user id is not provided when creating a new user since the database will automatically generate it
 // interface UserCreationAttributes extends Optional<UserAttributes, 'userId'> {}  
@@ -18,6 +18,8 @@ class User extends Model {
     declare overallRating: number;
     declare overallPoints: number;
     declare noOfReviews: number;
+    declare profilePicture: Blob;
+    declare currentTripId: number;
 }
 
 User.init({ 
@@ -80,7 +82,17 @@ User.init({
         type: DataTypes.INTEGER,
         defaultValue: 0,
         field: 'no_of_reviews'
+    },
+    profilePicture: {
+        type: DataTypes.BLOB,
+        field: 'profile_picture'
+    },
+    currentTripId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'current_trip_id'
     }
+
 }, 
 {
     sequelize, // We need to pass the connection instance

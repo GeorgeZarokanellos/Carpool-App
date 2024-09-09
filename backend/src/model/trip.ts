@@ -4,11 +4,11 @@ import sequelize from '../database/connect_to_db'; // import the connection inst
 class Trip extends Model {
     declare tripId: number;
     declare tripCreatorId: number;
-    declare driverId: number;
+    declare driverId: number | null;
     declare startLocation: string;
-    declare stops: number;
-    declare passengers: number;
-    declare tripDate: Date;
+    declare startingTime: Date;
+    declare noOfPassengers: number;
+    declare noOfStops: number;
     declare status: string;
 }
 
@@ -30,11 +30,20 @@ Trip.init({
         type: DataTypes.INTEGER,
         field: 'driver_id'
     },
-    startLocation: {
-        type: DataTypes.ENUM,
-        values: ['Plateia Gewrgiou', 'Plateia Olgas', 'Pyrosvesteio', 'Aretha'],
+    startLocationId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'start_loc'
+        field: 'start_loc_id'
+    },
+    endLocationId : {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'end_loc_id'
+    },
+    startingTime: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        field: 'starting_time'
     },
     noOfPassengers: {
         type: DataTypes.INTEGER,
@@ -45,11 +54,6 @@ Trip.init({
         type: DataTypes.INTEGER,
         defaultValue: 0,
         field: 'no_of_stops'
-    },
-    tripDate: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        field: 'date'
     },
     status: {
         type: DataTypes.ENUM,

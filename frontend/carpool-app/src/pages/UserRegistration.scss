@@ -1,0 +1,57 @@
+@import '../global.scss';
+
+
+
+ion-content {
+    
+        .custom-form {
+            @include display-flex-center('justify');
+            width: 100%;
+
+            .form-contents {
+                height: 100%;
+                width: 80%;
+                @include display-flex-center('both');
+                flex-direction: column;
+                text-align: center;
+                max-width: 30rem;
+
+                .profile-picture-container{
+                    @include display-flex-center('both');
+                    flex-direction: column;
+                    ion-avatar {
+                        height: 10rem;
+                        width: 10rem;
+                        
+                    }
+                    
+                    .hover-space{
+                        @include display-flex-center('both');
+
+                        .profile-picture-hover {
+                            position: absolute;
+                            background-color: black;
+                            color: white;
+                        }
+                    }
+
+                }
+
+                ion-checkbox {
+                    margin-top: 1rem;
+                }
+            }
+        }
+    
+    
+    }
+
+.register-button-container {
+    width: 100%;
+    @include display-flex-center('both');
+    ion-button {
+        width: 80%;
+        max-width: 15rem;
+    }
+}
+

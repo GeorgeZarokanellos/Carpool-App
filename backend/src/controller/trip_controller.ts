@@ -1,15 +1,27 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../model/association';
-import { type passengerInterface, type updateDetailsInterface } from '../interface/trip_interface';
+import { type passengerInterface, type updatedTripInterface , type tripInterface } from '../interface/interface';
 import sequelize from '../database/connect_to_db';
-import { type Transaction } from 'sequelize';
+import { Op, type Transaction } from 'sequelize';
 import logger from '../util/winston';
+import Vehicle from '../model/vehicle';
+import { tripStatus } from '../interface/interface';
 
-// #region public crud functions
 export const returnTrips = (req: Request,res: Response, next: NextFunction): void => {
     async function returnTripsAsync(): Promise<void> {
+        const userDateTime = req.query.userDate as string;
+        const parsedDate = new Date(userDateTime);
+        console.log(parsedDate);
+        
+        
         try {
             const trips = await Trip.findAll({
+                where: {
+                    startingTime: {
+                        [Op.gt]: parsedDate
+                    },
+                    status: tripStatus.PLANNING
+                },
                 include: [
                     {
                         model: Driver,
@@ -18,12 +30,38 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                             {
                                 model: User,
                                 as: 'user',
-                                attributes: ['firstName', 'lastName']
+                                attributes: ['firstName', 'lastName', 'overallRating']
+                            },
+                            {
+                                model: Vehicle,
+                                as: 'vehicle',
+                                attributes: ['noOfSeats', 'maker', 'model']
                             }
                         ]
                     },
+                    {
+                        model: User,
+                        as: 'tripCreator',
+                        foreignKey: 'tripCreatorId',
+                        attributes: ['firstName', 'lastName']
+                    },
+                    {
+                        model: Stop,
+                        as: 'startLocation',
+                        foreignKey: 'startLocationId',
+                        attributes: ['stopLocation'],
+                        
+                    },
+                    {
+                        model: Stop,
+                        as: 'endLocation',
+                        foreignKey: 'endLocationId',
+                        attributes: ['stopLocation'],
+                        
+                    }
                 ]
             });
+            // console.log(trips);
             res.status(200).send(trips);
         } catch (error) {
             console.error(error);
@@ -47,35 +85,73 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
             const trip = await Trip.findByPk(TripId,{
                 include: [
                     {
+                        model: User,
+                        as: 'tripCreator',
+                        attributes: ['firstName','lastName'],
+
+                    },
+                    {
                         model: Driver,
                         as: 'driver',
+                        attributes: ['licenseId'],
+                        include:[
+                            {
+                                model: User,
+                                as: 'user',
+                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
+                            },
+                            {
+                                model: Vehicle,
+                                as: 'vehicle',
+                                
+                                attributes: ['noOfSeats']
+                            }
+                        ]
                     },
                     {
                         model: TripPassenger,
                         as: 'tripPassengers',
+                        attributes: ['passengerId'],
                         include: [
                             {
                                 model: User,
                                 as: 'passenger',
-                                attributes: ['firstName', 'lastName']
-                            }
+                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
+                            },
                         ]
                     },
                     {
                         model: TripStop,
-                        as: 'tripStop',
+                        as: 'tripStops',
+                        attributes: ['stopId'],
                         include: [
                             {
                                 model: Stop,
-                                as: 'stopLocation',
-                                attributes: ['loc']
+                                as: 'details',
+                                attributes: ['stopLocation', 'lat', 'lng']
                             }
                         ]
+                    },
+                    {
+                        model: Stop,
+                        as: 'startLocation',
+                        foreignKey: 'startLocationId',
+                        attributes: ['stopLocation', 'lat', 'lng'],
+                        
+                    },
+                    {
+                        model: Stop,
+                        as: 'endLocation',
+                        foreignKey: 'endLocationId',
+                        attributes: ['stopLocation', 'lat', 'lng'],
+                        
                     }
                 ]
             });
             if(trip === null)
                 throw new Error(`Trip with id ${TripId} not found!`);
+            console.log(trip);  
+            
             res.status(200).send(trip);
         } catch (error) {
             console.error(error);
@@ -92,26 +168,30 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
 }
 
 export const createTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
-    await sequelize.transaction(async (transaction: Transaction) => { 
-        const {userId, driverId, startLocation} = req.body;
-        const stops: string[] = req.body.stops;
+    await sequelize.transaction(async (transaction: Transaction) => {
+        console.log(req.body); 
+        const {tripCreatorId, driverId, startLocationId, endLocationId, startingTime, status}: tripInterface = req.body;
+        const stops: number[] = req.body.stops;
         const passengers: passengerInterface[] = req.body.passengers;
-        const currentUserId: number = userId;
-        //TODO uncomment below line to test session when ready
-        // const currentUserId = req.session.userId;    
-        const currentUserIsDriver = await Driver.findOne({
-            where: {
-                driverId: currentUserId
-            }
-        });
-        const finalDriverId = currentUserIsDriver === null ? driverId : currentUserId;  // if the user is a driver, the driverId is the same as the userId
-        const newTrip = await Trip.create({
-            driverId: finalDriverId,
-            tripCreatorId: userId,
-            startLocation,
-            tripDate: "2024-01-17",
-            status: 'planning'  
-        },{transaction});
+        let newTrip: Trip;
+        if(status !== undefined){   //if status is provided
+            newTrip = await Trip.create({
+                tripCreatorId,
+                driverId,
+                startLocationId,
+                endLocationId,
+                startingTime,
+                status
+            },{transaction});
+        } else {    //if status is not provided set it to db default
+            newTrip = await Trip.create({
+                tripCreatorId,
+                driverId,
+                startLocationId,
+                endLocationId,
+                startingTime
+            },{transaction});
+        }
         await addStopsToTrip(stops, newTrip, transaction);
         await addPassengersToTrip(passengers, newTrip, transaction);
         await newTrip.save({transaction});
@@ -131,34 +211,34 @@ export const createTrip = async(req: Request,res: Response, next: NextFunction):
 export const updateTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
         const tripId: string = req.params.id;  
-        const updateDetails: updateDetailsInterface = req.body; // {startLocation, tripDate}
-        const removePassengers: passengerInterface[] = req.body.removePassengers;
-        const addStops: string[] = req.body.addStops;    
-        const removeStops: string[] = req.body.removeStops;    
+        const updateDetails: updatedTripInterface = req.body;   
         const trip = await Trip.findByPk(tripId);
         if(trip === null)
             throw new Error(`Trip with id ${tripId} not found!`);
         // console.log(req.body.userId + " " + trip.tripCreatorId);
 
-        if(req.body.userId === trip.tripCreatorId){ // only the user that created the trip can update it 
-            // if(addPassengers){
-            //     await addPassengersToTrip(addPassengers, tripId);
-            // }
-            if(removePassengers !== null && removePassengers !== undefined){
+        if(req.body.userId === trip.driverId){ 
+            if(updateDetails.addPassengers !== null && updateDetails.addPassengers !== undefined){``
+                await addPassengersToTrip(updateDetails.addPassengers, trip ,transaction);
+            }
+            if(updateDetails.removePassengers !== null && updateDetails.removePassengers !== undefined){
                 // console.log("remove passengers if: ", removePassengers);
-                await removePassengersFromTrip(removePassengers, trip, transaction);
+                await removePassengersFromTrip(updateDetails.removePassengers, trip, transaction);
             }
-            if(addStops !== null && addStops !== undefined){
+            if(updateDetails.addStops !== null && updateDetails.addStops !== undefined){
                 // console.log("add stops if: ", addStops);
-                await addStopsToTrip(addStops, trip, transaction);
+                await addStopsToTrip(updateDetails.addStops, trip, transaction);
             }
-            if(removeStops !== null && removeStops !== undefined){
+            if(updateDetails.removeStops !== null && updateDetails.removeStops !== undefined){
                 // console.log("remove stops if: ", removeStops);
-                await removeStopsFromTrip(removeStops, trip, transaction);
+                await removeStopsFromTrip(updateDetails.removeStops, trip, transaction);
             }
         }
         await trip.update(updateDetails, {transaction});    // update the trip with the new details and include the changes in the transaction
-        res.status(200).json(trip);
+        res.status(200).json({
+            message: `Trip with id ${tripId} was updated!`,
+            trip: trip
+        });
     }).catch((err) => {
         console.error(err);
         if(typeof err === 'string'){
@@ -211,29 +291,38 @@ export const deleteTrip = async(req: Request,res: Response, next: NextFunction):
  */
 const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, transaction: Transaction): Promise<void> => {
     if(passengers.length > 0){
+        logger.info("passengers: ", passengers, "from addPassengersToTrip");
         const firstNames = passengers.map(passenger => passenger.firstName);    // returns an array of first names of the passengers to be added
         const lastNames = passengers.map(passenger => passenger.lastName);      // returns an array of last names of the passengers to be added
-        const tripPassengersNames = await User.findAll({    // returns an array of user objects
+        const usersToBeAdded = await User.findAll({    // returns an array of user objects
             where:
             {
                 firstName: firstNames,
                 lastName: lastNames
             }
         });
-        logger.info("trip passengers names: ", tripPassengersNames);
-        if(tripPassengersNames.length !== passengers.length)
+        logger.info("trip passengers names: ", usersToBeAdded);
+        if(usersToBeAdded.length !== passengers.length)
             throw new Error('One or more passengers were not found!');
-        const tripPassengersIds = tripPassengersNames.map(passenger => passenger.userId);   // returns an array of the users ids to be added as passengers
-        logger.info("trip passengers ids: ", tripPassengersIds);        
-        const tripPassengersAddPromises = tripPassengersIds.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
+        const userIdsToAdd = usersToBeAdded.map(passenger => passenger.userId);   // returns an array of the users ids to be added as passengers
+        logger.info("trip passengers ids: ", userIdsToAdd);        
+        const tripPassengersAddPromises = userIdsToAdd.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
             return await TripPassenger.create({
                 tripId: Trip.tripId,
                 passengerId
             },{transaction});
         });
-        logger.info("trip passengers promises: ", tripPassengersAddPromises);        
-        await Promise.all(tripPassengersAddPromises);    // wait for all the promises to be resolved
-        Trip.passengers += tripPassengersAddPromises.length;
+        const updateCurrentTripIdPromises = userIdsToAdd.map(async passengerId => {
+            return await User.update({
+                currentTripId: Trip.tripId
+            },{where: {userId: passengerId}, transaction});
+        });
+        const allPromises = [...tripPassengersAddPromises, ...updateCurrentTripIdPromises];
+        await Promise.all(allPromises);    // wait for all the promises to be resolved
+        logger.debug("trip: " , Trip, "tripPassengersIds: ", userIdsToAdd);
+        logger.debug("trip passengers: ", Trip.noOfPassengers, "tripPassengersIds.length: ", userIdsToAdd.length);
+        Trip.noOfPassengers += userIdsToAdd.length;
+        logger.debug("trip passengers: ", Trip.noOfPassengers);
         await Trip.save({transaction});  // save the updated trip
     } 
 }   
@@ -268,7 +357,7 @@ const removePassengersFromTrip = async(passengers: passengerInterface[], Trip: T
                 });
         });
         await Promise.all(tripPassengersDeletePromises);    // wait for all the promises to be resolved
-        Trip.passengers -= tripPassengersDeletePromises.length;
+        Trip.noOfPassengers -= tripPassengersDeletePromises.length;
         await Trip.save({transaction});  // save the updated trip 
     }
 }
@@ -282,30 +371,34 @@ const removePassengersFromTrip = async(passengers: passengerInterface[], Trip: T
  * @returns A promise that resolves to void.
  * @throws Error if one or more stops were not found.
  */
-const addStopsToTrip = async(stops: string[], Trip: Trip, transaction: Transaction): Promise<void> => {
+const addStopsToTrip = async(stops: number[], Trip: Trip, transaction: Transaction): Promise<void> => {
     if(stops.length > 0){
+        logger.debug("stops: ", stops, "from addStopsToTrip");
         const stopRecords = await Stop.findAll({   // returns an array of stop objects
             where: {
-                stopLoc: stops // returns only the names of the stops that are in the stops array
-            }
+                stopId: stops,  
+            },
+            attributes: ['stopId']
         });
-        console.log("stop records: ",stopRecords);
+        console.log("stop records: ", stopRecords);
         if(stopRecords.length !== stops.length)
             throw new Error('One or more stops were not found!');
-        const stopIds = stopRecords.map(stop => stop.stopId); // iterates over the array of stop objects and returns an array of their ids
-        console.log("stop ids: ", stopIds);
+        // const tripStopIds = stopRecords.map(stop => stop.stopId); // iterates over the array of stop objects and returns an array of their ids
+        // logger.debug("trip stop ids: ", tripStopIds);
         
-        const tripStopAddPromises = stopIds.map(async stopId => {   // create an array of promises for each TripsStop entry
+        const tripStopAddPromises = stopRecords.map(async stop => {   // create an array of promises for each TripsStop entry
                 return await TripStop.create({
                     tripId: Trip.tripId,
-                    stopId
+                    stopId: stop.stopId
                 },{transaction});
         });
-        console.log("trip stop promises:", tripStopAddPromises);
         
         // wait for all the promises to be resolved
-        await Promise.all(tripStopAddPromises); 
-        Trip.stops += tripStopAddPromises.length;
+        await Promise.all(tripStopAddPromises);
+        logger.debug("trip: " , Trip);
+        // logger.debug("trip stops: ", Trip.noOfStops, "tripStopIds.length: ", tripStopIds.length); 
+        Trip.noOfStops += stopRecords.length;
+        logger.debug("trip stops: ", Trip.noOfStops);
         await Trip.save({transaction});  // include the changes to the trip in the transaction
     }
       
@@ -319,23 +412,20 @@ const addStopsToTrip = async(stops: string[], Trip: Trip, transaction: Transacti
  * @param transaction - The transaction object for the database operation.
  * @returns A promise that resolves to void.
  */
-const removeStopsFromTrip = async(stops: string[], Trip: Trip, transaction: Transaction): Promise<void> => {
-    console.log(stops);
-    // console.log('anything');
+const removeStopsFromTrip = async(stops: number[], Trip: Trip, transaction: Transaction): Promise<void> => {
+    logger.debug("stops: ", stops, "from removeStopsFromTrip");
     if(stops.length > 0){
         const stopRecords = await Stop.findAll({   // returns an array of stop objects
             where: {
-                stopLoc: stops // returns only the names of the stops that are in the stops array
+                stopId: stops // returns the stops whose ids are in the stops array
             }
         });
     
-        const stopIds = stopRecords.map(stop => stop.stopId); // iterates over the array of stop objects and returns an array of their ids
-    
-        const tripStopDeletePromises = stopIds.map(async stopId => {   // create an array of promises for each TripsStop entry
+        const tripStopDeletePromises = stopRecords.map(async stop => {   // create an array of promises for each TripsStop entry
                 return await TripStop.destroy({
                     where:  {
                         tripId: Trip.tripId,
-                        stopId
+                        stopId: stop.stopId
                     },
                     transaction
                 });
@@ -343,7 +433,7 @@ const removeStopsFromTrip = async(stops: string[], Trip: Trip, transaction: Tran
         });
         // wait for all the promises to be resolved
         await Promise.all(tripStopDeletePromises);    
-        Trip.stops -= tripStopDeletePromises.length;
+        Trip.noOfStops -= tripStopDeletePromises.length;
         await Trip.save({transaction});  // include the changes to the trip in the transaction
         
     }
@@ -380,5 +470,23 @@ const deleteTripStop = async (tripId: string, transaction: Transaction): Promise
         },
         transaction
     });      
+}
+
+export const retrieveAllStartLocations = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const stops = await Stop.findAll();
+        console.log(stops);
+        
+        res.status(200).send(stops);
+    } catch (error) {
+        console.error(error);
+            if(typeof error === 'string'){
+                // console.log("There was an error retrieving the stops: " + error);
+                res.status(500).send('Error retrieving stops: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving stops: ' + error.message);
+            }
+    }
 }
 //#endregion

@@ -1,0 +1,23 @@
+@mixin display-flex-center($type: 'justify') {
+    display: flex;
+  
+    @if $type == 'justify' {
+      justify-content: center;
+    } @else if $type == 'align' {
+      align-items: center;
+    } @else if($type == 'both'){
+      justify-content: center;
+      align-items: center;
+    }
+} 
+
+$font-size-large: 2rem;
+$ionic-background-color: #3880ff;
+$ionic-text-color: #fff;
+$trip-info-background-color: rgb(44, 110, 219);
+$success-color: #32c977;
+
+:root{
+  --success-color: #32c977;
+  --trip-info-background-color: rgb(44, 110, 219);
+}

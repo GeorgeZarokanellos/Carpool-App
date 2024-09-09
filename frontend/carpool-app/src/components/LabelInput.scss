@@ -1,0 +1,21 @@
+@import '../global.scss';
+
+.label-input{
+    margin: 0.5rem;
+    width: 100%;
+    max-width: 25rem;
+
+    ion-input{
+        font-size: 1.35rem;
+    }
+
+    //remove increment/decrement arrows from number input
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield; /* Firefox */
+    }
+}

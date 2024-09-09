@@ -1,20 +1,63 @@
+# PDF files
 /pdf
+
+# IDEs
+backend/.idea/*
+backend/.vscode/*
+frontend/.vscode/*
+.vscode/settings.json
+/.idea
+/database/.idea
+
+# Misc
 /database_img
 /screenshots
+/backend/static
+
+# Environments
 /backend/.env
-/backend/node_modules
 /backend/ssl_certificate
+
+# Dependencies
+/backend/node_modules
 /backend/uploads
 /backend/dist
 /backend/.eslintrc.js
 /backend/tsconfig.json
-/.idea
-/.vscode/
 /backend/env
 /database/test.sql
 /backend/logs
 /backend/src/logs
+
+# Frontend dependencies
 /frontend/carpool-app/node_modules
+/frontend/carpool-app/.pnp
+/frontend/carpool-app/.pnp.js
+
+# Testing
+/frontend/carpool-app/coverage
+
+# Production
+/frontend/carpool-app/build
+
+# Misc
+/frontend/carpool-app/.DS_Store
+/frontend/carpool-app/.env.local
+/frontend/carpool-app/.env.development.local
+/frontend/carpool-app/.env.test.local
+/frontend/carpool-app/.env.production.local
+/frontend/carpool-app/.nx
+/frontend/carpool-app/.nx/cache
 /frontend/carpool-app/.vscode
-/database/.idea
+/frontend/carpool-app/.idea
+/frontend/carpool-app/public/assets
+
+# Debug logs
+/frontend/carpool-app/npm-debug.log*
+/frontend/carpool-app/yarn-debug.log*
+/frontend/carpool-app/yarn-error.log*
+
+# Optional eslint cache
+/frontend/carpool-app/.eslintcache
+
 
