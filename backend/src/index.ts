@@ -21,6 +21,7 @@ import stop_router from './router/stop_router';
 import review_router from './router/review_router';
 import notification_router from './router/notification_router';
 import user_router from './router/user_router';
+import path from 'path';
 // #endregion
 
 // #region SSL certificate
@@ -61,6 +62,7 @@ app.use(session({
 
 app.use(passport.initialize()); 
 app.use(passport.session());// to use persistent login session
+app.use('/static/uploads', express.static(path.join(__dirname, '../static/uploads')));
 
 // #region middleware
 app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
@@ -69,7 +71,7 @@ app.post(`${basePath}/login`, passport.authenticate('local'), (req,res) => {
     
     if(req.isAuthenticated()){
         req.session.save(); 
-        res.status(200).json({message: 'Login successful', userId: req.user.userId, role: req.user.role });
+        res.status(200).json({message: 'Login successful', userId: req.user.userId, role: req.user.role, username: req.user.username });
     }
     else 
         res.status(401).send('Login failed');
