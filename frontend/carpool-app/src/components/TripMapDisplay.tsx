@@ -40,9 +40,8 @@ export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops, startL
             center={[38.24368476508384, 21.73212381808353]} 
             zoom={14} 
             className='map' 
-            style={{height: '100vh', width: '100vw'}}
+            style={{height: '100vh', width: '100wh'}}
             scrollWheelZoom={false}
-            tap={false}
             >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -18,7 +18,7 @@ export const TripTitle: React.FC<TripTitleProps> = ({dateOfTrip, tripCreator}) =
                         today.getFullYear() === tripDate.getFullYear();
     return (
         <div className='title' style={{textAlign: "center"}}>
-            {tripCreator.firstName + ' ' + tripCreator.lastName + ' \'s trip ' + (isTripToday ? 'for today' : 'on ' + dateOfTrip) }
+            {tripCreator.firstName + ' ' + tripCreator.lastName + '\'s trip ' + (isTripToday ? 'for today' : 'on ' + dateOfTrip) }
         </div>
     )
 }

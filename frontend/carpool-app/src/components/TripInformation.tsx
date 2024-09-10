@@ -17,7 +17,6 @@ import FlagIcon from '@mui/icons-material/Flag';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import StarIcon from '@mui/icons-material/Star';
 import './TripInformation.scss';
 import { TripTitle } from "./TripTitle";
 import { Rating } from "@mui/material";

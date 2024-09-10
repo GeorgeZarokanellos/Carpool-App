@@ -262,6 +262,10 @@ export const NewTrip: React.FC = () => {
                                             name: 'Passenger Number',
                                             options: [
                                                 {
+                                                    text: '0',
+                                                    value: 0
+                                                },
+                                                {
                                                     text: '1',
                                                     value: 1
                                                 },

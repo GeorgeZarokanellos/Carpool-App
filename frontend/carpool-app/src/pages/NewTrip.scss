@@ -19,6 +19,7 @@
             flex-direction: column;
 
             ion-item {
+                --background: transparent;
                 .passengers-credentials-container{
                     @include display-flex-center('both');
                     flex-direction: column;
