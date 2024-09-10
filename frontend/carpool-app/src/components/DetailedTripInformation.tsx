@@ -48,7 +48,6 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
 
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
-    // const username = localStorage.getItem('username');
     const userIdNumber = Number(userId);
     const history = useHistory();
     
