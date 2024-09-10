@@ -14,7 +14,8 @@ import HailIcon from '@mui/icons-material/Hail';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import { useHistory } from "react-router";
 import { TripInProgress } from "./TripInProgress";
-
+import { Swiper,SwiperSlide } from 'swiper/react';
+import 'swiper/css';
 
 interface detailedTripInfoProps {
     clickedTripId: number;
@@ -23,7 +24,7 @@ interface detailedTripInfoProps {
 
 export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ clickedTripId, page }) => {
     const [tripData, setTripData] = useState<ExtendedTrip>();
-
+    const [vehicleImages, setVehicleImages] = useState<string[]>([]);
     //join request modal
     const [stopSelectModal, setStopSelectModal] = useState(false);
     const [selectedStop, setSelectedStop] = useState<Stop>();
@@ -47,6 +48,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
 
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
+    // const username = localStorage.getItem('username');
     const userIdNumber = Number(userId);
     const history = useHistory();
     
@@ -101,10 +103,14 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
               setIsLoading(true);
               const response = await instance.get(`/trips/${clickedTripId}`);
               console.log('Trip data', response.data);
+              const vehicleImageURLs = await instance.get(`/user/vehicle/${response.data.driverId}`);
+              // console.log('Vehicle images', vehicleImageURLs.data);
+              
               
               if(response.data.length !== 0){
                   setIsLoading(false);
                   setTripData(response.data);
+                  setVehicleImages(vehicleImageURLs.data);
               } else {
                   setIsLoading(false);
                   console.log('Empty response from server');
@@ -308,18 +314,20 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                       <IonRow>
                         <IonCol size="7" className="custom-col">
                           <div className="passenger-time-info">
-                            <IonItem lines="none">
-                              <IonIcon icon={timeOutline} slot="start" className="time-icon" />
-                              <IonLabel>{formatDateTime(tripData.startingTime).formattedTime}</IonLabel>
-                              <IonIcon icon={calendarOutline} className="calendar-icon" style={{ marginRight: '0.5rem' }} />
-                              <IonLabel>{formatDateTime(tripData.startingTime).formattedDate}</IonLabel>
-                            </IonItem>
-                            <IonItem lines="none">
-                              <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
-                              <IonLabel>
-                                {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' passengers'}
-                              </IonLabel>
-                            </IonItem>
+                            <div className="time-calendar-people">
+                              <IonItem lines="none">
+                                <IonIcon icon={timeOutline} slot="start" className="time-icon" />
+                                <IonLabel>{formatDateTime(tripData.startingTime).formattedTime}</IonLabel>
+                                <IonIcon icon={calendarOutline} className="calendar-icon" style={{ marginRight: '0.5rem' }} />
+                                <IonLabel>{formatDateTime(tripData.startingTime).formattedDate}</IonLabel>
+                              </IonItem>
+                              <IonItem lines="none">
+                                <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
+                                <IonLabel>
+                                  {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' passengers'}
+                                </IonLabel>
+                              </IonItem>
+                            </div>
                             <div className="passengers-details">
                               <PassengersDetails passengers={tripData.tripPassengers} />
                             </div>
@@ -390,12 +398,26 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                         </IonCol>
                       </IonRow>
                     </IonGrid>
+                    <div className="vehicle-images">
+                      <IonLabel class="ion-text-center">Driver&apos;s vehicle images</IonLabel>
+                      <Swiper
+                        slidesPerView={1}
+                      >
+                        {
+                          vehicleImages.map((url, index) => (
+                            <SwiperSlide key={index} >
+                              <img src={url} alt="" style={{height: '100%', width: '100%'}}/>
+                            </SwiperSlide>
+                          ))
+                        }
+                      </Swiper>
+                    </div>
                   </div>
                 </IonContent>
                 {
                   page === "detailedInfo" && 
                     <div className="join-button">
-                      <IonButton disabled={userIsInTrip} shape="round" onClick={() => { setStopSelectModal(true) }}>
+                      <IonButton disabled={userIsInTrip} shape="round" color="secondary"  onClick={() => { setStopSelectModal(true) }}>
                           {availabilityMessage}
                       </IonButton>
                       <UserSelectStopModal

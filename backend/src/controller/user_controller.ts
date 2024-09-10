@@ -4,6 +4,8 @@ import { Request, Response, NextFunction } from "express";
 import { Transaction } from "sequelize";
 import sequelize from '../database/connect_to_db';
 import { updatedUserInterface } from "../interface/interface";
+import path from "path";
+import fs from "fs";
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
@@ -35,8 +37,6 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 };
 
 export const retrieveUserReviews = async (userId: string) : Promise<Review[]> => {
-    // console.log(user);
-    // console.log(user.userId);
     try {
         return await Review.findAll({
                 where: {
@@ -249,5 +249,45 @@ export const retrieveUserNameAndRating = async (req: Request, res: Response, nex
                 console.log(err.message); 
                 res.status(500).send('Error retrieving the user data: ' + err.message);
             }
+    }
+}
+
+export const retrieveVehicleImages = async (req: Request, res: Response, next: NextFunction ): Promise<void> => {
+    try {
+        const userId: string = req.params.userId;
+        const tripDriver = await User.findByPk(userId);
+        if(tripDriver !== null && tripDriver.role === 'driver'){
+            //get the path to the folder containing the images
+            const imageFolder = path.join(__dirname, `../../static/uploads/${tripDriver.username}`);
+            
+            if(!fs.existsSync(imageFolder)){
+                res.status(404).send('No images found');
+                return;
+            }
+            //reads the contents of the folder
+            const imageFilenames = fs.readdirSync(imageFolder);
+            //filter only the images
+            const jpgsFilenames = imageFilenames.filter(filename => filename.endsWith('.jpg') || filename.endsWith('.jpeg'));
+            //construct the urls that the client can use to access the images
+            const imageUrls = jpgsFilenames.map(filename => `${req.protocol}://${req.get('host')}/static/uploads/${tripDriver.username}/${filename}`);
+            if(imageUrls.length !== 0){
+                res.status(200).json(imageUrls);
+            } else {
+                res.status(404).send('No images found');
+                return;
+            }
+        } else {
+            res.status(404).send('User not found or user is not a driver');
+            return;
+        }
+    } catch (error) {
+        console.error(error);
+        if(typeof error === 'string'){
+            console.log("There was an error retrieving the vehicle images: " + error);
+            res.status(500).send('Error retrieving the vehicle images: ' + error);
+        } else if (error instanceof Error){
+            console.log(error.message); 
+            res.status(500).send('Error retrieving the vehicle images: ' + error.message);
+        }
     }
 }
