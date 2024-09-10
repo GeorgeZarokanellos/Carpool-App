@@ -15,27 +15,18 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [refreshTrips, setRefreshTrips] = useState<boolean>(true);
-  const userRole = localStorage.getItem('userRole');
+  const userRole = localStorage.getItem('role');
+  
 
   //screen dimensions
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRefreshTrips(!refreshTrips);
-    }, 10*60*1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if(refreshTrips){
+    if(refreshKey % 4 === 0){
       retrieveTrips();
-      setRefreshTrips(false);
     }
-  },[refreshKey,refreshTrips]);
+  },[refreshKey]);
 
   const retrieveTrips = async () => {
     try {
@@ -45,18 +36,26 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
     
         // console.log("query params", queryParams.toString());
         setIsLoading(true);
+        console.log("Set is loading to true from retrieve trips");
+        
         const response = await instance.get(`/trips?${queryParams.toString()}`)
         console.log("Response from server", response.data);
         if(response.data.length > 0){
           setTrips(response.data);
           setFilteredResults(response.data);
           setIsLoading(false);
+          console.log("Set is loading to false from retrieve trips");
+          
         } else {
           console.log("Empty response from server");
-        }
+          setIsLoading(false);
+        } 
         
     } catch (error) {
       console.log("Error retrieving trips", error);
+    } finally {
+      setIsLoading(false);
+      console.log("Set is loading to false from retrieve trips");
     }
   }
 
