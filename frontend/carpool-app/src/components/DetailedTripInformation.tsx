@@ -265,8 +265,12 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                 if(stop.stopId === selectedStop.stopId){
                     console.log('User selected stop is the same as an existing stop');
                     stopExists = true;
-                }
+                } 
             });
+
+            if(selectedStop.stopId === tripData.startLocationId){
+                stopExists = true;
+            }
 
             if(stopExists){
                 driverMessage += 'from the ' + selectedStop.stopLocation + ' stop';
