@@ -1,4 +1,4 @@
-import { IonPage } from "@ionic/react";
+import { IonHeader, IonPage, IonTitle } from "@ionic/react";
 import React, { useEffect} from "react";
 import { DetailedTripInformation } from "../components/DetailedTripInformation";
 import instance from "../AxiosConfig";
@@ -36,6 +36,9 @@ export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) =>
     return (
         
         <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
+            <IonHeader>
+                <IonTitle class="ion-text-center" style={{color: 'black'}}>Current Trip</IonTitle>
+            </IonHeader>
             <DetailedTripInformation clickedTripId={Number(currentTripId)} page="currentTrip"/>    
         </IonPage>
     )

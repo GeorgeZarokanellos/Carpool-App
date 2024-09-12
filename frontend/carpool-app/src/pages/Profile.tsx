@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IonAvatar, IonButton, IonContent, IonItem, IonLoading, IonPage, IonTitle} from '@ionic/react';
+import { IonAvatar, IonButton, IonContent, IonHeader, IonItem, IonLoading, IonPage, IonTitle} from '@ionic/react';
 import './Profile.scss';
 import instance from '../AxiosConfig';
 import { type ProfileData } from '../interfacesAndTypes/Types';
@@ -47,6 +47,9 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
   if(profileData !== undefined){
     return (
       <IonPage>
+        <IonHeader>
+          <IonTitle class='ion-text-center' style={{color: 'black'}}>Profile</IonTitle>
+        </IonHeader>
         <IonContent fullscreen>
           <IonContent >
               <div className='profile-container'>
