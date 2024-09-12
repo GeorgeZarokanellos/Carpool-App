@@ -1,5 +1,7 @@
-.ion-page{
+@import '../global.scss';
 
+.ion-page{
+    
     ion-card {
         ion-card-content{
             .trip-display-container{
@@ -7,6 +9,23 @@
                 *{
                     font-size: 0.95rem;
                 }
+            }
+        }
+    }
+
+    ion-content{
+        .no-notifications{
+            @include display-flex-center('both');
+            height: 100%;
+            width: 100%;
+            text-align: center;
+
+            ion-text{
+                width: 85%;
+                border-radius: 1rem;
+                background-color: var(--ionic-background-color);
+                color: $ionic-text-color;
+                padding: 0.4rem;
             }
         }
     }

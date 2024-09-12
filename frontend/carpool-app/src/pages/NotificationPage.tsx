@@ -13,6 +13,9 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
     const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
     const [filteredNotifications, setFilteredNotifications] = useState<NotificationInterface[]>([]);
 
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
     let queryParams = new URLSearchParams();
@@ -25,10 +28,9 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
     const retrieveNotifications = async () => {
 
         try {
-            console.log(`/notifications/${userId}?${queryParams.toString()}`);
             await instance.get(`/notifications/${userId}?${queryParams.toString()}`)
             .then(response => {
-                console.log(response.data);
+                // console.log(response.data);
                 setNotifications(response.data);
             })
             .catch(error => {
@@ -58,10 +60,9 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
 
         setFilteredNotifications(tempFilteredNotifications);
     }, [notifications]);
-
-
+        
     return (
-        <IonPage>
+        <IonPage style={{height: `${viewportHeight}`, width: `${viewportWidth}`}}>
             <IonHeader>
                 <IonTitle class='ion-text-center' style={{color: 'black'}}>Notifications</IonTitle>
             </IonHeader>
@@ -76,7 +77,7 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
                             }
                         )
                     ) : (
-                        <div style={{height: "100%", display: "flex", alignItems: "center"}}>
+                        <div className="no-notifications">
                             <IonText class='ion-text-center'>No new notifications at the moment.<br />Come back later!</IonText>
                         </div>
                     )
