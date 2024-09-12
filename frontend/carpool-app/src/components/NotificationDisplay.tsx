@@ -37,24 +37,27 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                         ' at ' + formattedDate + ' has been rejected.';
 
             const role: string = await checkIfRecipientIsDriver();
-            //* update notification to rejected
-            await instance.put(`/notifications/${notificationDetails.notificationId}`, {
-                status: 'declined'
-            });
+            const promises = [
+                //* update notification to rejected
+                instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                    status: 'declined'
+                }),
+                //* create notification for the user that requested to join the trip
+                instance.post(`/notifications`, {
+                    driverId: notificationDetails.driverId,
+                    passengerId: notificationDetails.passengerId,
+                    tripId: notificationDetails.tripId,    
+                    message: passengerMessage,
+                    stopId: notificationDetails.stopId,
+                    status: 'declined',
+                    recipient: role,
+                    type: 'request'
+                })
+            ];
             
-            //* create notification for the user that requested to join the trip
-            await instance.post(`/notifications`, {
-                driverId: notificationDetails.driverId,
-                passengerId: notificationDetails.passengerId,
-                tripId: notificationDetails.tripId,    
-                message: passengerMessage,
-                stopId: notificationDetails.stopId,
-                status: 'declined',
-                recipient: role,
-                type: 'request'
-            });
-        
-
+            //wait for all promises to resolve
+            await Promise.all(promises);
+            
             alert("You have rejected the request");
             window.location.reload();
 
@@ -66,48 +69,78 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const handleAccept = async () => {
         try {
             if(Number(userId) === notificationDetails.driverId && trip) {
+                let newStop = true;
+                const updatePromises = [];
                 const passengerMessage = 'Your request to join the trip of ' + 
                                             trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
                                             ' at ' + formattedDate + ' has been accepted!';
-
+                
+                const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);
                 const role: string = await checkIfRecipientIsDriver();
 
-                //* update notification to accepted
-                await instance.put(`/notifications/${notificationDetails.notificationId}`, {
-                    status: 'accepted'
-                });
-                
-                //* create notification for the user that requested to join the trip
-                await instance.post(`/notifications`, {
-                    driverId: notificationDetails.driverId,
-                    passengerId: notificationDetails.passengerId,
-                    tripId: notificationDetails.tripId,    
-                    message: passengerMessage,
-                    stopId: notificationDetails.stopId,
-                    status: 'accepted',
-                    recipient: role,
-                    type: 'request'
-                });
 
-                const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);
-                console.log("Notification details", notificationDetails);
-                
-                //* update trip with new passenger and stop
-                await instance.patch(`/trips/${notificationDetails.tripId}`, {
-                    userId: notificationDetails.driverId,
-                    addPassengers: [{
-                        firstName: passengerName.data.firstName,
-                        lastName: passengerName.data.lastName
-                    }],
-                    addStops: [
-                        notificationDetails.stopId
-                    ]
-                });
+                trip.tripStops.forEach( (stop) => {
+                    if(stop.stopId === notificationDetails.stopId){
+                        newStop = false;
+                    }
+                })
 
-                //* update user's current trip 
-                await instance.put(`/user/${notificationDetails.passengerId}`, {
-                    currentTripId: notificationDetails.tripId
-                });
+                if(notificationDetails.stopId === trip.startLocationId){
+                    newStop = false;
+                }
+
+                if(newStop){
+                    updatePromises.push(
+                        //* update trip with new passenger and stop
+                        instance.patch(`/trips/${notificationDetails.tripId}`, {
+                            userId: notificationDetails.driverId,
+                            addPassengers: [{
+                                firstName: passengerName.data.firstName,
+                                lastName: passengerName.data.lastName
+                            }],
+                            addStops: [
+                                notificationDetails.stopId
+                            ]
+                        })
+                    )
+                } else {
+                    updatePromises.push(
+                        //* update trip with new passenger
+                        instance.patch(`/trips/${notificationDetails.tripId}`, {
+                            userId: notificationDetails.driverId,
+                            addPassengers: [{
+                                firstName: passengerName.data.firstName,
+                                lastName: passengerName.data.lastName
+                            }]
+                        })
+                    )
+                }
+
+                updatePromises.push(
+                    //* update user's current trip 
+                    instance.put(`/user/${notificationDetails.passengerId}`, {
+                        currentTripId: notificationDetails.tripId
+                    }),
+    
+                    //* update notification to accepted
+                    instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                        status: 'accepted'
+                    }),
+                    
+                    //* create notification for the user that requested to join the trip
+                    instance.post(`/notifications`, {
+                        driverId: notificationDetails.driverId,
+                        passengerId: notificationDetails.passengerId,
+                        tripId: notificationDetails.tripId,    
+                        message: passengerMessage,
+                        stopId: notificationDetails.stopId,
+                        status: 'accepted',
+                        recipient: role,
+                        type: 'request'
+                    })
+                );
+
+                await Promise.all(updatePromises);
 
                 const tripIsFull = await checkTripCapacityAndUpdateStatus(notificationDetails.tripId);
                 if(tripIsFull === true){
@@ -121,7 +154,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
             
         } catch (error) {
             console.log("Error accepting notification", error);
-            throw new Error("One or more operations wasnt succesful" + error);
+            throw new Error("One or more operations wasn't successful" + error);
         }
     }
 
