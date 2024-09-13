@@ -46,7 +46,7 @@ const App: React.FC = () => {
         <Route exact path="/registration">
           <UserRegistration />
         </Route>
-        <Route path="/registration/driver">
+        <Route path="/registration/driver/:userId">
           <DriverVehicleRegistration />
         </Route>
       </IonReactRouter>

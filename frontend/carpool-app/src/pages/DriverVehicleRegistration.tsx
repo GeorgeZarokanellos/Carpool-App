@@ -12,18 +12,14 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import type { autoMaker } from "../interfacesAndTypes/Types";
 import "./DriverVehicleRegistration.scss";
 import { Swiper,SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import instance from "../AxiosConfig";
-import { useHistory, useLocation } from "react-router";
+import { useHistory } from "react-router";
 import { useParams } from 'react-router-dom';
-
-interface LocationState {
-  userId: number;
-}
 
 export const DriverVehicleRegistration: React.FC = () => {
   //#region states
