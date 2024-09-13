@@ -1,4 +1,4 @@
-import { IonButton, IonContent, IonDatetime, IonFooter, IonHeader, IonItem, IonPage, IonPicker, IonTitle, IonToolbar } from "@ionic/react";
+import { IonAlert, IonButton, IonContent, IonDatetime, IonHeader, IonItem, IonPage, IonPicker, IonTitle, IonToolbar } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import { Stop } from "../interfacesAndTypes/Types";
@@ -48,6 +48,11 @@ export const NewTrip: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     //additional stops
     const [stops, setStops] = useState<Stop[]>([]);
+    //alert
+    const [showTripCompletedAlert, setShowTripCompletedAlert] = useState(false);
+    const [tripCompletionMessage, setTripCompletionMessage] = useState<string>('');
+    const [showErrorAlert, setShowErrorAlert] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -83,7 +88,6 @@ export const NewTrip: React.FC = () => {
                 if(response){
                     console.log(response.data);
                     const newTripId = response.data.tripId;
-                    alert("Trip created successfully");
     
                     //update the current trip of the user to the newly created one
                     await instance.put(`/user/${userIdInt}`, {
@@ -95,17 +99,18 @@ export const NewTrip: React.FC = () => {
                     .catch((error) => {
                         console.log(error);
                     });
+                    setTripCompletionMessage("Trip created successfully");
+                    setShowTripCompletedAlert(true);
     
                 } else {
                     console.log("Trip creation failed");
                     setPassengerCredentials([]);
-                    alert("Trip creation failed");
+                    setErrorMessage("Trip creation failed. Check the fields and try again");
+                    setShowErrorAlert(true);
                 }
-
-                history.push('/main/search-trips');
-                window.location.reload();
             } else {
-                alert("Please fill in all the fields");
+                setErrorMessage("Please fill in all the fields");
+                setShowErrorAlert(true);
             }
 
         } catch (error) {
@@ -346,9 +351,26 @@ export const NewTrip: React.FC = () => {
                         </form>
                     </div>
                 </IonContent>
-                <IonFooter>
-
-                </IonFooter>
+                <IonAlert 
+                    isOpen={showTripCompletedAlert}
+                    onDidDismiss={() => {
+                        setShowTripCompletedAlert(false);
+                        history.push('/main/search-trips');
+                        window.location.reload();
+                    }}
+                    header={'Trip Creation'}
+                    message={tripCompletionMessage}
+                    buttons={['OK']}
+                />
+                <IonAlert 
+                    isOpen={showErrorAlert}
+                    onDidDismiss={() => {
+                        setShowErrorAlert(false);
+                    }}
+                    header={'Error'}
+                    message={errorMessage}
+                    buttons={['OK']}
+                />
             </IonPage>
         </div>
     );
