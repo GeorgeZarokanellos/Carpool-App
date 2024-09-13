@@ -45,6 +45,11 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
     //loading
     const [isLoading, setIsLoading] = useState(false);
+    //trip completion alert
+    const [tripCompletedAlert, setTripCompletedAlert] = useState(false);
+    const [tripCompletedMessage, setTripCompletedMessage] = useState('');
+    const [userConfirmed, setUserConfirmed] = useState(false);
+    const [confirmationAlert, setConfirmationAlert] = useState(false);
 
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
@@ -86,15 +91,17 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     }, [userIsInTrip, tripData]);
 
     useEffect(() => {
-      if(driverWantsToEndTrip){
-        const userConfirmed = window.confirm('Are you sure you want to end the trip;');
+      if(driverWantsToEndTrip)
+        setConfirmationAlert(true);
+    }, [driverWantsToEndTrip]);
+
+    useEffect(() => {
         if(userConfirmed){
           handleTripCompletion(userConfirmed);
         } else {
           setDriverWantsToEndTrip(false);
         }
-      }
-    }, [driverWantsToEndTrip]);
+    }, [userConfirmed]);
 
     const retrieveTripData = async () => {
         try {
@@ -190,9 +197,8 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
         });
 
         setReviewNotificationsSent(true);
-        alert('The trip has been completed successfully!');
-        history.push('/main/search-trips');
-        window.location.reload();
+        setTripCompletedMessage('The trip has been completed successfully!');
+        setTripCompletedAlert(true);
         
       } else {
         console.log('Review notifications already sent');
@@ -452,6 +458,45 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                       startingTime={tripData.startingTime} 
                       tripDriverCurrentUser={tripDriverCurrentUser}
                       setDriverWantsToEndTrip={setDriverWantsToEndTrip}/> 
+                }
+                {
+                  <>
+                    <IonAlert 
+                      isOpen={tripCompletedAlert}
+                      onDidDismiss={() => {
+                        setTripCompletedAlert(false);
+                        history.push('/main/search-trips');
+                        window.location.reload();
+                      }}
+                      message={tripCompletedMessage}
+                      buttons={['OK']}
+                      animated={true}
+                    />
+                    <IonAlert 
+                      isOpen={confirmationAlert}
+                      onDidDismiss={() => {
+                        setConfirmationAlert(false);
+                        
+                      }}
+                      header="End trip"
+                      message={'Are you sure you want to end the trip?'}
+                      buttons={[
+                        {
+                          text: 'No',
+                          role: 'cancel',
+                          handler: () => {
+                            setUserConfirmed(false);
+                          }
+                        },
+                        {
+                          text: 'Yes',
+                          handler: () => {
+                            setUserConfirmed(true);
+                          }
+                        }
+                      ]}
+                    />
+                  </>
                 }
             </>  
         )
