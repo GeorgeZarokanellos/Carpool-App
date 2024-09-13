@@ -14,7 +14,7 @@ interface searchTripProps {
 const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const [isLoading, setIsLoading] = useState<boolean>(false); //TODO find a way for the loading to work correctly
   const userRole = localStorage.getItem('role');
   
 
@@ -23,9 +23,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const viewportHeight = window.innerHeight;
 
   useEffect(() => {
-    if(refreshKey % 4 === 0){
       retrieveTrips();
-    }
   },[refreshKey]);
 
   const retrieveTrips = async () => {
@@ -34,27 +32,27 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
         userDate: new Date().toISOString(),
         });
     
-        // console.log("query params", queryParams.toString());
-        setIsLoading(true);
-        console.log("Set is loading to true from retrieve trips");
+        // if(isLoading === false)
+        //   setIsLoading(true);
+        // console.log("Set is loading to true from retrieve trips");
         
         const response = await instance.get(`/trips?${queryParams.toString()}`)
         console.log("Response from server", response.data);
         if(response.data.length > 0){
           setTrips(response.data);
           setFilteredResults(response.data);
-          setIsLoading(false);
+          // setIsLoading(false);
           console.log("Set is loading to false from retrieve trips");
           
         } else {
           console.log("Empty response from server");
-          setIsLoading(false);
+          // setIsLoading(false);
         } 
         
     } catch (error) {
       console.log("Error retrieving trips", error);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
       console.log("Set is loading to false from retrieve trips");
     }
   }
@@ -96,7 +94,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
                     filteredResults.map((trip) => {
                       return(
                         <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
-                          <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '17rem', margin: '1.5rem 0rem'}} >
+                          <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '0.1rem 0rem'}} >
                               <TripInformation 
                                 startingTime={formatDateTime(trip.startingTime).formattedTime} 
                                 dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
@@ -128,9 +126,8 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   } else {
     return (
       <IonPage style={{backgroundColor: 'white', color: 'black'}}>
-        <IonLoading isOpen={isLoading} message={"Retrieving available trips.."} />
-        {
-          !isLoading && 
+        {/* <IonLoading isOpen={isLoading} message={"Retrieving available trips.."} /> */}
+        { 
             <div className='no-trips-container'>
               <IonText>No trips available at the moment!</IonText>
             </div>
