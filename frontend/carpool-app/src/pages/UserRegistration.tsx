@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonCheckbox, IonFooter, IonAvatar, IonLabel } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonCheckbox, IonFooter, IonAvatar, IonAlert } from '@ionic/react';
 import './UserRegistration.scss';
 import { LabelInput } from '../components/LabelInput';
 import instance from '../AxiosConfig';
@@ -16,7 +16,15 @@ export const UserRegistration: React.FC = () => {
   const [phone, setPhone] = useState<string>('');
   const [profilePicture, setProfilePicture] = useState<Blob>();
   const [isDriver, setIsDriver] = useState(false);
-//   const [role, setRole] = useState<string>('');  //TODO check if needed
+  //alerts
+  const [showUserCreationAlert, setShowUserCreationAlert] = useState(false);
+  const [userCreationMessage, setUserCreationMessage] = useState('');
+  const [showDriverCreationAlert, setShowDriverCreationAlert] = useState(false);
+  const [driverCreationMessage, setDriverCreationMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorAlert, setErrorAlert] = useState(false);
+  const [userId, setUserId] = useState<number>();
+  // const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
@@ -59,18 +67,28 @@ export const UserRegistration: React.FC = () => {
     }).then((response) => {
       if(isDriver){
         console.log("response",response);
-        alert('You have successfully registered as a user. Please fill out the driver registration form.');
-        history.push(`/registration/driver/${response.data.userId}`, {userId: response.data.userId})
+        setUserId(response.data.userId);
+        setDriverCreationMessage('You have successfully registered as a user. Please fill out the driver registration form.');
+        // setIsLoading(true);
       }
       else{
-        alert('You have successfully registered as a user. Please log in.');
-        history.push('/');
+        setUserCreationMessage('You have successfully registered as a user. Please log in.');
+        setShowUserCreationAlert(true);
       }
     }).catch((error) => {
       console.log(error);
+      setErrorMessage('An error occurred while registering. Please try again.' + error.message);
+      setErrorAlert(true);
     });
     
   };
+
+  useEffect(() => {
+    if(userId !== undefined){
+      // setIsLoading(false);
+      setShowDriverCreationAlert(true);
+    } 
+  }, [userId]);
 
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
@@ -113,6 +131,39 @@ export const UserRegistration: React.FC = () => {
           </div>
         </IonToolbar>
       </IonFooter>
+      <IonAlert 
+        isOpen={showUserCreationAlert} 
+        onDidDismiss={() => {
+          setShowUserCreationAlert(false);
+          history.push('/');
+        }}
+        header={'User Registration'} 
+        message={userCreationMessage} 
+        buttons={['OK']}
+      />
+      <IonAlert 
+        isOpen={showDriverCreationAlert} 
+        onDidDismiss={() => {
+          setShowDriverCreationAlert(false);
+          if(userId !== undefined)
+            history.push(`/registration/driver/${userId}`);
+          else 
+            history.goBack();
+
+        }}
+        header={'Driver Registration'} 
+        message={driverCreationMessage} 
+        buttons={['OK']}
+      />
+      <IonAlert 
+        isOpen={errorAlert} 
+        onDidDismiss={() => {
+          setErrorAlert(false);
+        }}
+        header={'Error'} 
+        message={errorMessage} 
+        buttons={['OK']}
+      />
     </IonPage>
   );
 };
