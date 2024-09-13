@@ -1,4 +1,4 @@
-import { TextFieldTypes } from '../interfacesAndTypes/Types';
+import { TextFieldTypes } from './Types';
 
 enum Status {
     Pending = 'Pending',
