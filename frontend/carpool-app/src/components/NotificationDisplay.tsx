@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
-import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText } from "@ionic/react";
+import { IonAlert, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText } from "@ionic/react";
 import instance from "../AxiosConfig";
 import { ExtendedTrip} from "../interfacesAndTypes/Types";
 import { TripInformation } from "./TripInformation";
@@ -28,6 +28,12 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const [usersRating, setUsersRating] = useState<{participantId: number, rating: number}[]>([]);
     const [tripParticipants, setTripParticipants] = useState<{firstName: string, lastName: string, participantId: number, role: string}[]>([]);
     const [tripParticipantsSet, setTripParticipantsSet] = useState<boolean>(false);
+    const [ratingSubmitted, setRatingSubmitted] = useState<boolean>(false);
+    const [ratingSubmitMessage, setRatingSubmitMessage] = useState<string>('');
+    const [requestAcceptedRejectedAlert, setRequestAcceptedRejectedAlert] = useState<boolean>(false);
+    const [requestAlertMessage, setRequestAlertMessage] = useState<string>('');
+    const [showRatingAlert, setShowRatingAlert] = useState<boolean>(false);
+    const [ratingAlertMessage, setRatingAlertMessage] = useState<string>('');
     const userId = localStorage.getItem('userId');
 
     const handleReject = async () => {
@@ -58,11 +64,18 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
             //wait for all promises to resolve
             await Promise.all(promises);
             
-            alert("You have rejected the request");
-            window.location.reload();
+            setRequestAlertMessage("You have rejected the request");
+            setRequestAcceptedRejectedAlert(true);
 
         } catch (error) {
             console.log("Error rejecting notification", error);
+            if(error instanceof Error){
+                setRatingAlertMessage("Error rejecting notification" + error.message);
+                setShowRatingAlert(true);
+            } else {
+                setRatingAlertMessage("Error rejecting notification");
+                setShowRatingAlert(true);
+            }
         }
     }
 
@@ -144,17 +157,23 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
 
                 const tripIsFull = await checkTripCapacityAndUpdateStatus(notificationDetails.tripId);
                 if(tripIsFull === true){
-                    alert("You have accepted the request and the trip is now full!");
+                    setRequestAlertMessage("You have accepted the request and the trip is now full!");
+                    setRequestAcceptedRejectedAlert(true);
                 } else {
-                    alert("You have accepted the request!");
+                    setRequestAlertMessage("You have accepted the request!");
+                    setRequestAcceptedRejectedAlert(true);
                 } 
-
-                window.location.reload();
             }
             
         } catch (error) {
             console.log("Error accepting notification", error);
-            throw new Error("One or more operations wasn't successful" + error);
+            if(error instanceof Error){
+                setRatingAlertMessage("Error accepting notification" + error.message);
+                setShowRatingAlert(true);
+            } else {
+                setRatingAlertMessage("Error accepting notification");
+                setShowRatingAlert(true);
+            }
         }
     }
 
@@ -190,7 +209,6 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     const retrieveTripInfo = async () => {
         try {
             const tripMentioned = await instance.get(`/trips/${notificationDetails.tripId}`);
-            console.log(tripMentioned);
             setTrip(tripMentioned.data);
 
             const {formattedDate, formattedTime} = formatDateTime(tripMentioned.data.startingTime);
@@ -216,28 +234,29 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     })
                     .catch( (error) => {
                         console.log(`Error submitting review for user ${usersRating.participantId}`, error);
-                        throw error;
+                        setRatingAlertMessage("Error submitting reviews" + error.message);
+                        setShowRatingAlert(true);
                     })
                 })
                 
                 Promise.all(promises)
                 .then(async (response) => {
                     console.log("All reviews submitted", response);
-                    console.log("Promises", promises.length);
                     
                     //add 1 point to the user's overall points for each review submitted
                     await instance.put(`/user/${userId}?type=points`,{
                         overallPoints: promises.length
                     });
-                    alert(`Your reviews have been submitted and you have been awarded ${promises.length} points!`);
                     await instance.put(`/notifications/${notificationDetails.notificationId}`, {
                         status: 'reviewed'
                     });
-                    window.location.reload();
-                    
+                    setRatingSubmitMessage(`Your reviews have been submitted and you have been awarded ${promises.length} points!`);
+                    setRatingSubmitted(true);
                 })
                 .catch((error) => {
                     console.log("Error submitting reviews", error);
+                    setRatingAlertMessage("Error submitting reviews" + error.message);
+                    setShowRatingAlert(true);
                 })
             } else {
                 console.log("No users to rate");
@@ -325,108 +344,137 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     }, [trip]);
 
     return (
-        <IonCard color="primary">
-            <IonCardHeader>
-                <IonCardTitle class="ion-text-center" >
-                    {
-                        displayAppropriateTitle()
-                    }
-                </IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent className="card-content">
-                <div className="notification-message">
-                    {notificationDetails.message}
-                </div>
-                <div className="trip-display-container">
-                    {
-                        
-                        trip ? (
-                            <TripInformation 
-                                startingTime={formattedTime} 
-                                dateOfTrip={formattedDate} 
-                                startLocation={trip.startLocation.stopLocation}
-                                endLocation={trip.endLocation.stopLocation}
-                                noOfPassengers={trip.noOfPassengers}
-                                noOfStops={trip.noOfStops}
-                                driver={{
-                                        user: trip.driver? trip.driver.user : {
-                                            firstName: 'There is no driver yet',
-                                            lastName: '',
-                                            overallRating: '0'
-                                        },
-                                        vehicle: trip.driver? trip.driver.vehicle : {
-                                            noOfSeats: 0,
-                                            maker: '',
-                                            model: ''
+        <>
+            <IonCard color="primary">
+                <IonCardHeader>
+                    <IonCardTitle class="ion-text-center" >
+                        {
+                            displayAppropriateTitle()
+                        }
+                    </IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent className="card-content">
+                    <div className="notification-message">
+                        {notificationDetails.message}
+                    </div>
+                    <div className="trip-display-container">
+                        {
+                            
+                            trip ? (
+                                <TripInformation 
+                                    startingTime={formattedTime} 
+                                    dateOfTrip={formattedDate} 
+                                    startLocation={trip.startLocation.stopLocation}
+                                    endLocation={trip.endLocation.stopLocation}
+                                    noOfPassengers={trip.noOfPassengers}
+                                    noOfStops={trip.noOfStops}
+                                    driver={{
+                                            user: trip.driver? trip.driver.user : {
+                                                firstName: 'There is no driver yet',
+                                                lastName: '',
+                                                overallRating: '0'
+                                            },
+                                            vehicle: trip.driver? trip.driver.vehicle : {
+                                                noOfSeats: 0,
+                                                maker: '',
+                                                model: ''
+                                            }
                                         }
                                     }
-                                }
-                                tripCreator ={trip.tripCreator}
-                            />
-                        ) : ''
+                                    tripCreator ={trip.tripCreator}
+                                />
+                            ) : ''
+                        }
+                    </div>
+                    { 
+                        displayAcceptReject && notificationDetails.type === 'request' &&
+                            <div className="accept-reject-container" style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
+                                <IonButton className="accept" onClick={() => setAccepted(true)}>Accept</IonButton>
+                                <IonButton className="reject" onClick={() => setRejected(true)}>Reject</IonButton>
+                            </div>
                     }
-                </div>
-                { 
-                    displayAcceptReject && notificationDetails.type === 'request' &&
-                        <div className="accept-reject-container" style={{display: 'flex', alignItems: 'center' , justifyContent: 'center', }}>
-                            <IonButton className="accept" onClick={() => setAccepted(true)}>Accept</IonButton>
-                            <IonButton className="reject" onClick={() => setRejected(true)}>Reject</IonButton>
-                        </div>
-                }
-                {
-                    notificationDetails.type === 'review' &&
-                        <div className="rating-container">
-                            <IonText>How would you rate </IonText>
-                            <Swiper
-                                pagination={true}
-                                className="my-swiper"
-                                modules={[Pagination]}
-                            >
-                            {
-                                tripParticipants.map((participant, index) => (
-                                    <SwiperSlide key={index} style={{height: '4rem'}}>
-                                        <div
-                                            style={
-                                                {
-                                                    display: 'flex', 
-                                                    flexDirection: 'column', 
-                                                    alignItems: 'center',
-                                                    height: '100%',
-                                                }
-                                            }>
-                                            <IonText>{participant.firstName} {participant.lastName} {" (" + participant.role + ")"}</IonText>
-                                            <Rating
-                                                name="half-rating"
-                                                className="rating"
-                                                precision={0.5}
-                                                defaultValue={0}
-                                                value={usersRating.find((userRating) => userRating.participantId === participant.participantId)?.rating || 0}
-                                                onChange={(event, newValue) => {
-                                                    if(newValue !== null ){
-                                                        const index = usersRating.findIndex((userRating) => userRating.participantId === participant.participantId); 
-                                                        if(index !== -1){
-                                                            //updated version of the usersRating array
-                                                            const updatedUsersRating = [...usersRating];
-                                                            //update the rating of the user whose id is the same as the id of the user that was rated
-                                                            updatedUsersRating[index].rating = newValue;
-                                                            //update the state with the updated array
-                                                            setUsersRating(updatedUsersRating);
-                                                        } else {
-                                                            setUsersRating([...usersRating, {participantId: participant.participantId, rating: newValue}]); 
-                                                        }
+                    {
+                        notificationDetails.type === 'review' &&
+                            <div className="rating-container">
+                                <IonText>How would you rate </IonText>
+                                <Swiper
+                                    pagination={true}
+                                    className="my-swiper"
+                                    modules={[Pagination]}
+                                >
+                                {
+                                    tripParticipants.map((participant, index) => (
+                                        <SwiperSlide key={index} style={{height: '4rem'}}>
+                                            <div
+                                                style={
+                                                    {
+                                                        display: 'flex', 
+                                                        flexDirection: 'column', 
+                                                        alignItems: 'center',
+                                                        height: '100%',
                                                     }
-                                                }}
-                                                
-                                            />
-                                        </div>
-                                    </SwiperSlide>
-                                ))
-                            }
-                            </Swiper>                      
-                            <IonButton onClick={handleReviewSubmission}>Submit Review</IonButton>
-                        </div>  
-                }
-            </IonCardContent>
-        </IonCard>
+                                                }>
+                                                <IonText>{participant.firstName} {participant.lastName} {" (" + participant.role + ")"}</IonText>
+                                                <Rating
+                                                    name="half-rating"
+                                                    className="rating"
+                                                    precision={0.5}
+                                                    defaultValue={0}
+                                                    value={usersRating.find((userRating) => userRating.participantId === participant.participantId)?.rating || 0}
+                                                    onChange={(event, newValue) => {
+                                                        if(newValue !== null ){
+                                                            const index = usersRating.findIndex((userRating) => userRating.participantId === participant.participantId); 
+                                                            if(index !== -1){
+                                                                //updated version of the usersRating array
+                                                                const updatedUsersRating = [...usersRating];
+                                                                //update the rating of the user whose id is the same as the id of the user that was rated
+                                                                updatedUsersRating[index].rating = newValue;
+                                                                //update the state with the updated array
+                                                                setUsersRating(updatedUsersRating);
+                                                            } else {
+                                                                setUsersRating([...usersRating, {participantId: participant.participantId, rating: newValue}]); 
+                                                            }
+                                                        }
+                                                    }}
+                                                    
+                                                />
+                                            </div>
+                                        </SwiperSlide>
+                                    ))
+                                }
+                                </Swiper>                      
+                                <IonButton onClick={handleReviewSubmission}>Submit Review</IonButton>
+                            </div>  
+                    }
+                </IonCardContent>
+            </IonCard>
+            <IonAlert 
+                isOpen={requestAcceptedRejectedAlert}
+                onDidDismiss={() => {
+                    setRequestAcceptedRejectedAlert(false);
+                    window.location.reload();
+                    }}
+                header={'Join Request'}
+                message={requestAlertMessage}
+                buttons={['OK']}
+            />
+            <IonAlert 
+                isOpen={ratingSubmitted}
+                onDidDismiss={() => {
+                    setRatingSubmitted(false)
+                    window.location.reload();
+                }}
+                header={'Review Submitted'}
+                message={ratingSubmitMessage}
+                buttons={['OK']}
+            />
+            <IonAlert 
+                isOpen={showRatingAlert}
+                onDidDismiss={() => setShowRatingAlert(false)}
+                header={'Error'}
+                message={ratingAlertMessage}
+                buttons={['OK']}
+            />
+        </>
     );
 }
