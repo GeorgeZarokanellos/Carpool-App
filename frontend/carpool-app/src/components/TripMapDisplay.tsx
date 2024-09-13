@@ -37,7 +37,7 @@ export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops, startL
 
     return (
         <MapContainer 
-            center={[38.24368476508384, 21.73212381808353]} 
+            center={[startLocation.lat, startLocation.lng]} 
             zoom={14} 
             className='map' 
             style={{height: '100vh', width: '100wh'}}
