@@ -1,5 +1,6 @@
 
 import {
+  IonAlert,
   IonButton,
   IonContent,
   IonFooter,
@@ -11,13 +12,14 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { autoMaker } from "../interfacesAndTypes/Types";
 import "./DriverVehicleRegistration.scss";
 import { Swiper,SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import instance from "../AxiosConfig";
 import { useHistory, useLocation } from "react-router";
+import { useParams } from 'react-router-dom';
 
 interface LocationState {
   userId: number;
@@ -44,11 +46,16 @@ export const DriverVehicleRegistration: React.FC = () => {
   const [vehicleRegistrationFileName, setVehicleRegistrationFileName] = useState<string>("");
   const [vehicleImages, setVehicleImages] = useState<Blob[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  // const [userId, setUserId] = useState<{userId: string}>({userId: ''});
+  //alert message
+  const [alertMessage, setAlertMessage] = useState<string>('');
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [showErrorAlert, setShowErrorAlert] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   //#endregion
   
   const history = useHistory();
-  const location = useLocation();
-  const userId = (location.state as LocationState)?.userId;
+  const { userId } = useParams<{userId: string}>();
   //set width and height to the available screen size to bypass header and footer
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
@@ -103,13 +110,13 @@ export const DriverVehicleRegistration: React.FC = () => {
     })
     .then(response => {
       console.log("From driver multipart post request", response.data);
-      alert("Driver and vehicle registration successful");
-      history.push('/main/search-trips');
+      setAlertMessage("Driver and vehicle registration successful");
+      setShowAlert(true);
     })
     .catch(error => {
-      alert("Driver and vehicle registration failed");
       console.log("Error from driver multipart request", error);
-      
+      setErrorMessage("Driver and vehicle registration failed. Check your inputs and try again");
+      setShowErrorAlert(true);
     })
   }
 
@@ -174,7 +181,7 @@ export const DriverVehicleRegistration: React.FC = () => {
             >
               <div className="form-contents">
                 <div className="licenseId-container">
-                  <input type="text" placeholder="DRIVERS LICENSE ID" required value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
+                  <input type="number" placeholder="DRIVERS LICENSE ID" required value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
                 </div>
                 <div className="plate-number-container">
                   <input type="text" placeholder="VEHICLE NUMBER PLATE" required value={vehicleNumberPlate !== null ? vehicleNumberPlate : ''} onChange={updateVehicleNumberPlate}/>
@@ -336,6 +343,26 @@ export const DriverVehicleRegistration: React.FC = () => {
           </div>
         </IonToolbar>
       </IonFooter>
+      <IonAlert 
+        isOpen={showAlert}
+        onDidDismiss={() => {
+          setShowAlert(false);
+          history.push('/main/search-trips');
+        }}
+        header={'Registration status'}
+        message={alertMessage}
+        buttons={['OK']}
+      />
+      <IonAlert 
+        isOpen={showErrorAlert}
+        onDidDismiss={() => {
+          setShowErrorAlert(false);
+          setErrorMessage('');
+        }}
+        header={'Error'}
+        message={errorMessage}
+        buttons={['OK']}
+      />
     </IonPage>
   )
 };
