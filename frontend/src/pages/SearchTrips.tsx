@@ -14,17 +14,15 @@ interface searchTripProps {
 const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
+  const [userCurrentTripId , setUserCurrentTripId] = useState<number | null>();
   // const [isLoading, setIsLoading] = useState<boolean>(false); //TODO find a way for the loading to work correctly
   const userRole = localStorage.getItem('role');
+  const userId = localStorage.getItem('userId');
   
-
   //screen dimensions
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
-  useEffect(() => {
-      retrieveTrips();
-  },[refreshKey]);
 
   const retrieveTrips = async () => {
     try {
@@ -74,6 +72,25 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
     setFilteredResults(trips);
   }
 
+  const retrieveUserInfo = async () => {
+    try {
+      const response = await instance.get(`/user/${userId}`);
+      console.log("User info response", response.data);
+      setUserCurrentTripId(response.data.currentTripId);
+    } catch (error) {
+      console.log("Error retrieving user info", error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    retrieveTrips();
+  },[refreshKey]);
+
+  useEffect(() => {
+    retrieveUserInfo();
+  },[]); 
+
   if(trips.length !== 0 && filteredResults.length !== 0){
     return (
         <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
@@ -114,7 +131,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
             </IonGrid>
           </IonContent>
           {
-            userRole === 'driver' &&
+            userRole === 'driver' && userCurrentTripId === null &&
               <div className='create-trip-button-container'>
                   <IonButton shape='round' routerLink="/main/create-trip">
                     Create a new trip
@@ -133,7 +150,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
             </div>
         }
         {
-          userRole === 'driver' &&
+          userRole === 'driver' && 
             <div className='create-trip-button-container'>
                 <IonButton shape='round' routerLink="/main/create-trip">
                   Create a new trip

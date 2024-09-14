@@ -228,7 +228,7 @@ export const retrieveCurrentTrips = async (req: Request, res: Response, next: Ne
     }
 }
 
-export const retrieveUserNameAndRating = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const retrieveUserInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId: string = req.params.userId;
 
     try {
