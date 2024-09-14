@@ -62,15 +62,25 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
 
     useEffect(() => {
         if(tripData){
-            instance.get(`/stops`)
-            .then(response => {
-              console.log('Available stops', response.data);
-              
-                setAvailableStops(response.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
+          //filter the available stops based on the side of the start location
+          //if the start location is Prytaneia, then the available stops are based on the side of the end location
+            if(tripData.startLocation.stopLocation !== 'Prytaneia'){
+                instance.get(`/stops/${tripData.startLocation.side}`)
+                .then(response => {
+                    setAvailableStops(response.data);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            } else {
+              instance.get(`/stops/${tripData.endLocation.side}`)
+              .then(response => {
+                console.log('Available stops', response.data);
+              })
+              .catch(error => {
+                  console.log(error);
+              });
+            }
             checkIfUserIsInTrip();
         }
     }, [tripData]);
