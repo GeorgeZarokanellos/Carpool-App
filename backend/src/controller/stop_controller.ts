@@ -3,18 +3,23 @@ import Stop from "../model/stop"
 
 
 export const returnAvailableStops = async (req: Request, res: Response, next: NextFunction) => {
+    const side = req.params.side;
     try {
-        const availableStops: Stop[] = await Stop.findAll();  
+        const availableStops: Stop[] = await Stop.findAll(
+            {
+                where: {
+                    side
+                }
+            }
+        );  
         res.status(200).json(availableStops);  
     } catch (error) {
-        console.error(error);
-            if(typeof error === 'string'){
-                // console.log("There was an error retrieving the trips: " + error);
-                res.status(500).send('Error retrieving stops: ' + error);
-            } else if (error instanceof Error){
-                console.log(error.message); 
-                res.status(500).send('Error retrieving stops: ' + error.message);
-            }
+        if (error instanceof Error){
+            console.log(error.message); 
+            res.status(500).send('Error retrieving stops: ' + error.message);
+        } else {
+            res.status(500).send('Error retrieving stops');
+        }
     }
     
 }

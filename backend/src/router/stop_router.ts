@@ -3,6 +3,6 @@ import { returnAvailableStops } from "../controller/stop_controller";
 
 const router = express.Router();
 
-router.get('/', returnAvailableStops);
+router.get('/:side', returnAvailableStops);
 
 export default router;

@@ -53,9 +53,11 @@ export type Trip = {
     }
     startLocation: {
         stopLocation: string;  
+        side: number;
     }
     endLocation: {
         stopLocation: string;
+        side: number;
     }
 }
 
@@ -83,6 +85,7 @@ export type TripStops = {
         stopLocation: string;
         lat: number;
         lng: number;
+        side: number;
     }
 }[];
 
@@ -130,4 +133,5 @@ export type Stop = {
     stopLocation: string;
     lat: number;
     lng: number;
+    side: number;
 }

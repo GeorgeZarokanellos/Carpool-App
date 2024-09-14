@@ -43,6 +43,9 @@ CREATE TABLE Vehicle (
 CREATE TABLE Stops (
 	stop_id SERIAL,
 	loc start_stop_location NOT NULL,
+    lat DOUBLE PRECISION NOT NULL ,
+    lng DOUBLE PRECISION NOT NULL ,
+    side INTEGER,
 	PRIMARY KEY (stop_id)
 );
 
