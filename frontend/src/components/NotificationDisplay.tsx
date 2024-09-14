@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
-import { IonAlert, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText } from "@ionic/react";
+import { IonAlert, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonText } from "@ionic/react";
 import instance from "../AxiosConfig";
 import { ExtendedTrip} from "../interfacesAndTypes/Types";
 import { TripInformation } from "./TripInformation";
@@ -12,6 +12,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination} from 'swiper/modules';
 import { tripStatus } from "../interfacesAndTypes/Types";
+import CloseIcon from '@mui/icons-material/Close';
 
 interface NotificationProps {
     notificationDetails: NotificationInterface;
@@ -294,6 +295,18 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
         }
     }
 
+    const deleteNotification = async () => {
+        try {
+            const response = await instance.delete(`/notifications/${notificationDetails.notificationId}`);
+            if (response.status === 200) {
+                console.log("Notification deleted successfully");
+                window.location.reload();
+            }
+        } catch (error) {
+            console.log("Error deleting notification", error );
+        }
+    }
+
     useEffect(() => {
         if(accepted) {
             console.log('Accepted', accepted);
@@ -346,12 +359,19 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     return (
         <>
             <IonCard color="primary">
-                <IonCardHeader>
-                    <IonCardTitle class="ion-text-center" >
+                <IonCardHeader className="notification-header">
+                    <IonCardTitle class="ion-text-center" className="notification-title">
                         {
                             displayAppropriateTitle()
                         }
                     </IonCardTitle>
+                    <IonButton 
+                        className="delete-button" 
+                        title="Delete Notification"
+                        onClick={deleteNotification}
+                        >
+                        <CloseIcon />
+                    </IonButton>
                 </IonCardHeader>
                 <IonCardContent className="card-content">
                     <div className="notification-message">
