@@ -232,18 +232,16 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const checkAvailability = () => {
         if(tripData && page === 'detailedInfo'){
           if(tripData.driver !== null && !userIsInTrip){
-              setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Αιτηση για συμμετοχη' : 'Οχημα πληρες');
+              setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Request to join' : 'Vehicle Full');
           } else if (tripData.driver === null && !userIsInTrip){
             if(userRole === 'passenger'){
-              setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Αιτηση για συμμετοχη' : 'Αναμενεται οδηγος');
-            } else {
-              setAvailabilityMessage('Αίτηση για συμμετοχή ως οδηγός');
-            }
+              setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Request to join' : 'There is no driver yet');
+            } 
           } else if (userIsInTrip){
               if(currentTripId !== null && currentTripId === tripData.tripId){
-                  setAvailabilityMessage('Συμμετέχετε ηδη στο ταξιδι');
+                  setAvailabilityMessage('You re already participating in this trip');
               } else {
-                  setAvailabilityMessage('Συμμετέχετε ηδη σε αλλο ταξιδι');
+                  setAvailabilityMessage('You participate in another trip');
               }
           }
 

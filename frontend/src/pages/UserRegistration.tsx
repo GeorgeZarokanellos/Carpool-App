@@ -127,7 +127,7 @@ export const UserRegistration: React.FC = () => {
       <IonFooter>
         <IonToolbar>
           <div className='register-button-container'>
-            <IonButton form='userCredentials' expand="block" type="submit" shape='round'>Register</IonButton>
+            <IonButton form='userCredentials' expand="block" type="submit" shape='round'>Submit</IonButton>
           </div>
         </IonToolbar>
       </IonFooter>
