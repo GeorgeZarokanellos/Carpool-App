@@ -110,13 +110,13 @@ export const UserRegistration: React.FC = () => {
                       <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} />
                     </IonButton>
                   </div>  
-                  <LabelInput label='University ID' value={universityId ?? ''} type='number' onIonChange={value => setUniversityId(Number(value))} />
-                  <LabelInput label='First Name' value={firstName} type='text' onIonChange={value => setFirstName(String(value))} />
-                  <LabelInput label='Last Name' value={lastName} type='text' onIonChange={value => setLastName(String(value))} />
-                  <LabelInput label='Username' value={username} type='text' onIonChange={value => setUsername(String(value))} />
-                  <LabelInput label='Password' value={password} type='password' onIonChange={value => setPassword(String(value))} />
-                  <LabelInput label='Email' value={email} type='email' onIonChange={value => setEmail(String(value))} />
-                  <LabelInput label='Phone' value={phone} type='tel' onIonChange={value => setPhone(String(value))} />
+                  <LabelInput label='University ID' placeholder='12 digit registration number' value={universityId ?? ''} type='number' onIonChange={value => setUniversityId(Number(value))} />
+                  <LabelInput label='First Name' placeholder='' value={firstName} type='text' onIonChange={value => setFirstName(String(value))} />
+                  <LabelInput label='Last Name' placeholder='' value={lastName} type='text' onIonChange={value => setLastName(String(value))} />
+                  <LabelInput label='Username' placeholder='' value={username} type='text' onIonChange={value => setUsername(String(value))} />
+                  <LabelInput label='Password' placeholder='' value={password} type='password' onIonChange={value => setPassword(String(value))} />
+                  <LabelInput label='Email' placeholder='example@gmail.com' value={email} type='email' onIonChange={value => setEmail(String(value))} />
+                  <LabelInput label='Phone' placeholder='10 digit personal number' value={phone} type='tel' onIonChange={value => setPhone(String(value))} />
                   <IonCheckbox labelPlacement='stacked' alignment='center' onIonChange={e => setIsDriver(e.detail.checked)}>
                     <span style={{fontSize:'1.3rem'}}>Wanna register as a driver?</span>
                   </IonCheckbox>

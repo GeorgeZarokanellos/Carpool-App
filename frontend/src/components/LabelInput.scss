@@ -7,6 +7,9 @@
 
     ion-input{
         font-size: 1.35rem;
+        ::placeholder{
+            font-size: 1.1rem;
+        }
     }
 
     //remove increment/decrement arrows from number input
