@@ -129,7 +129,7 @@ export const DriverVehicleRegistration: React.FC = () => {
       }
     }
     //regular expression to split the id string in the first capital letter and then join the array with a space
-    const displayedName = fileName ? fileName : id.split(/(?=[A-Z])/).join(' ');
+    const displayedName = fileName ? fileName : id.split(/(?=[A-Z])/).join(' ') + '(PDF)';
     return (
       <IonButton onClick={() => document.getElementById(id)?.click()}>
         {displayedName}
@@ -308,8 +308,8 @@ export const DriverVehicleRegistration: React.FC = () => {
                 </div>
                 <div className="car-images-container">
                   <IonButton onClick={() => document.getElementById('vehicleImages')?.click()}>
-                    {vehicleImages.length ? 'Selected images' : 'Upload car images'}
-                    <input type="file" id="vehicleImages" name="vehicleImages" hidden required multiple accept="image/*" onChange={handleImagesUpload} />
+                    {vehicleImages.length ? 'Selected images' : 'Upload car images(JPEG/PNG)'}
+                    <input type="file" id="vehicleImages" name="vehicleImages" hidden required multiple accept="image/jpeg, image/png" onChange={handleImagesUpload} />
                   </IonButton>
                   <Swiper
                     spaceBetween={50}
