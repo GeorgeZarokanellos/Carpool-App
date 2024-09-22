@@ -13,11 +13,11 @@ const Login: React.FC = () => {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent the form from refreshing the page
     // Handle login logic here
     console.log(`Username: ${username}, Password: ${password}`);
-    instance.post('/login', {
+    await instance.post('/login', {
       username: username,
       password: password    
     })

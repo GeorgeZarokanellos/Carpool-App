@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
-import { IonAlert, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonText } from "@ionic/react";
+import { IonAlert, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText } from "@ionic/react";
 import instance from "../AxiosConfig";
 import { ExtendedTrip} from "../interfacesAndTypes/Types";
 import { TripInformation } from "./TripInformation";

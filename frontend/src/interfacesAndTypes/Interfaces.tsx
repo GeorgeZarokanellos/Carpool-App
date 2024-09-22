@@ -39,6 +39,7 @@ export interface TripProps {
 
 export interface LabelInputProps<T extends string | number > {
     label: string | undefined;
+    placeholder: string;
     value: T;
     type: TextFieldTypes;
     onIonChange: React.Dispatch<React.SetStateAction<T>>;

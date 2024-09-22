@@ -39,20 +39,21 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
                     reject(err);
                     console.warn("image wasn't uploaded");
                 } else {
-                    // console.log(req.file);  
-                    
-                    if(req.file !== undefined){
-                        // console.log("request body: ", req);  
+                    if (req.file !== undefined) {
+                        console.log("Image was uploaded");
                         resolve(req);
-                        next();
-                        console.log("image was uploaded");
-                    } 
+                    } else {
+                        console.warn("No file uploaded");
+                        reject(new Error("No file uploaded"));
+                    }
                     //TODO: add error handling
                 }
             });
-        })
+        });
+        next();
     } catch(error) {
         console.warn("Error in image upload", error);
+        res.status(500).json({ error: "Image upload failed", details: (error as Error).message });
     } 
 }
 
@@ -97,24 +98,15 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 return;
             }
             //check if req.file is populated
-            if(req.file !== undefined){
-                console.log(req.file);
+            if (req.file !== undefined) {
                 try {
-                    //store the uploaded image as a buffer
-                    console.log("Req.file.path: ", req.file.path);
                     fileBuffer = await readFileASync(req.file.path);
                 } catch (error) {
-                    console.warn("An error occurred when reading the file ", error);
+                    res.status(500).json({ error: 'Error reading the file' });
+                    return;
                 }
-                if(fileBuffer !== undefined)
-                    profilePicture = fileBuffer;
-                else 
-                    console.warn("File buffer undefined");
-                    
             }
-            else {
-                console.warn("The buffer is empty");
-            }
+
             await sequelize.transaction(async (transaction) => {
                 const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
                 const newUser = await User.create({
