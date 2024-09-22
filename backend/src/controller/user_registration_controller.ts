@@ -15,11 +15,14 @@ interface MulterFile {
     mimetype: string;
 }
 
+const localPath = '/home/george/Desktop/Carpool-App/backend/static/uploads';
+const remotePath = '/home/zaro/backend/static/uploads';
+
 export const uploadProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     //multer uses memory storage
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, '/home/george/Desktop/Carpool-App/backend/static/uploads');
+            cb(null, remotePath);
         },
         filename: (req, file, cb) => {
             cb(null, Date.now() + '-' + file.originalname);

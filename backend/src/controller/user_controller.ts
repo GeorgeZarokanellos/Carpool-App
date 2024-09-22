@@ -268,7 +268,7 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
             const imageFilenames = fs.readdirSync(imageFolder);
             //filter only the images
             const jpgsFilenames = imageFilenames.filter(filename => filename.endsWith('.jpg') || filename.endsWith('.jpeg'));
-            //construct the urls that the client can use to access the images
+            //construct the urls that the client can use to access the images (include /api for remote)
             const imageUrls = jpgsFilenames.map(filename => `${req.protocol}://${req.get('host')}/static/uploads/${tripDriver.username}/${filename}`);
             if(imageUrls.length !== 0){
                 res.status(200).json(imageUrls);
