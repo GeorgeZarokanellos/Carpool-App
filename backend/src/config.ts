@@ -8,9 +8,7 @@ interface Env{  // interface for environment variables
     DB_PASSWORD: string;
     DB_HOST: string;
     DB_PORT: number;
-    SESSION_SECRET: string;
-    // SSL_KEY_PATH: string;
-    // SSL_CERT_PATH: string;
+    JWT_SECRET: string;
 }
 
 function getEnv(): Env{ // checks if environment variables are set
@@ -20,7 +18,7 @@ function getEnv(): Env{ // checks if environment variables are set
         typeof process.env.DB_PASSWORD === 'undefined' ||
         typeof process.env.DB_HOST === 'undefined' ||
         typeof process.env.DB_PORT === 'undefined' ||
-        typeof process.env.SESSION_SECRET === 'undefined'){
+        typeof process.env.JWT_SECRET === 'undefined'){
             throw new Error('Environment variables not set');
     } else {
         return {    // returns an object with the environment variables
@@ -29,9 +27,7 @@ function getEnv(): Env{ // checks if environment variables are set
             DB_PASSWORD: process.env.DB_PASSWORD,
             DB_HOST: process.env.DB_HOST,
             DB_PORT: parseInt(process.env.DB_PORT),
-            SESSION_SECRET: process.env.SESSION_SECRET,
-            // SSL_KEY_PATH: process.env.SSL_KEY_PATH,
-            // SSL_CERT_PATH: process.env.SSL_CERT_PATH
+            JWT_SECRET: process.env.JWT_SECRET,
         }
     }        
 }
