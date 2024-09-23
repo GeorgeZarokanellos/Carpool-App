@@ -91,75 +91,55 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
     retrieveUserInfo();
   },[]); 
 
-  if(trips.length !== 0 && filteredResults.length !== 0){
-    return (
-        <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
-          <IonHeader className='ion-no-border'>
-            <IonSearchbar 
-              placeholder='Search available trips' 
-              animated={true}
-              onIonChange={handleSearch} 
-              onIonClear={handleClearSearch}
-              color={'primary'}
-              class='custom'
-            />
-          </IonHeader>
-          <IonContent >
-            <IonGrid >
-              <div className='trips-list-container'>
-                {
-                    filteredResults.map((trip) => {
-                      return(
-                        <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
-                          <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '0.1rem 0rem'}} >
-                              <TripInformation 
-                                startingTime={formatDateTime(trip.startingTime).formattedTime} 
-                                dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
-                                startLocation={trip.startLocation.stopLocation}
-                                endLocation={trip.endLocation.stopLocation}
-                                noOfPassengers={trip.noOfPassengers}
-                                noOfStops={trip.noOfStops}
-                                driver={trip.driver? {user: trip.driver.user, vehicle: trip.driver.vehicle} : undefined}
-                                tripCreator ={trip.tripCreator}
-                                />
-                          </IonRow>
-                        </Link>
-                      )
-                    })
-                }
-              </div>
-            </IonGrid>
-          </IonContent>
-          {
-            userRole === 'driver' && userCurrentTripId === null &&
-              <div className='create-trip-button-container'>
-                  <IonButton shape='round' routerLink="/main/create-trip">
-                    Create a new trip
-                  </IonButton>
-              </ div>
-          }
-        </IonPage>
-    );
-  } else {
-    return (
-      <IonPage style={{backgroundColor: 'white', color: 'black'}}>
-        {/* <IonLoading isOpen={isLoading} message={"Retrieving available trips.."} /> */}
-        { 
-            <div className='no-trips-container'>
-              <IonText>No trips available at the moment!</IonText>
+  return (
+    <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
+      <IonHeader className='ion-no-border'>
+        <IonSearchbar 
+          placeholder='Search available trips' 
+          animated={true}
+          onIonChange={handleSearch} 
+          onIonClear={handleClearSearch}
+          color={'primary'}
+          class='custom'
+        />
+      </IonHeader>
+      <IonContent>
+        {trips.length !== 0 && filteredResults.length !== 0 ? (
+          <IonGrid>
+            <div className='trips-list-container'>
+              {filteredResults.map((trip) => (
+                <Link to={{pathname: `./trip-info/${trip.tripId}`}} key={trip.tripId + 3} style={{textDecoration: "none"}}>
+                  <IonRow className='ion-justify-content-center ion-align-items-center' style={{maxHeight: '15rem', margin: '0.1rem 0rem'}}>
+                    <TripInformation 
+                      startingTime={formatDateTime(trip.startingTime).formattedTime} 
+                      dateOfTrip={formatDateTime(trip.startingTime).formattedDate} 
+                      startLocation={trip.startLocation.stopLocation}
+                      endLocation={trip.endLocation.stopLocation}
+                      noOfPassengers={trip.noOfPassengers}
+                      noOfStops={trip.noOfStops}
+                      driver={trip.driver ? {user: trip.driver.user, vehicle: trip.driver.vehicle} : undefined}
+                      tripCreator={trip.tripCreator}
+                    />
+                  </IonRow>
+                </Link>
+              ))}
             </div>
-        }
-        {
-          userRole === 'driver' && 
-            <div className='create-trip-button-container'>
-                <IonButton shape='round' routerLink="/main/create-trip">
-                  Create a new trip
-                </IonButton>
-            </ div>
-        }
-      </IonPage>
-    )
-  }
-};
+          </IonGrid>
+        ) : (
+          <div className='no-trips-container'>
+            <IonText>No trips available at the moment!</IonText>
+          </div>
+        )}
+      </IonContent>
+      {userRole === 'driver' && (
+        <div className='create-trip-button-container'>
+          <IonButton shape='round' routerLink="/main/create-trip">
+            Create a new trip
+          </IonButton>
+        </div>
+      )}
+    </IonPage>
+  );
+}
 
 export default SearchTrips;

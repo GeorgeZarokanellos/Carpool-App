@@ -52,12 +52,15 @@ const uploadFiles = async (
 //TODO check if the files to be uploaded are the same with existing ones
 const initializeUpload = async (req:Request, res:Response, next: NextFunction , username: string): Promise<void> => {
     // store the uploaded files in the uploads folder
+    const localPath = `/home/george/Desktop/Carpool-App/backend/static/uploads/${username}`;
+    const remotePath = `/home/zaro/backend/static/uploads/${username}`;
+    
     const Storage = multer.diskStorage({   
         destination: function(req,file,cb){    // cb is callback function that takes an error and a destination folder as parameters
             if(!username){
                 throw new Error('Username is missing');
             }
-            const dir = path.resolve(`/home/george/Desktop/Carpool-App/backend/static/uploads/${username}`);   // create a folder for each driver using the username
+            const dir = path.resolve(remotePath);   // create a folder for each driver using the username
             fs.access(dir, fs.constants.F_OK, (err) => {   // check if the folder already exists
                 if(err !== null){    // err here means that the folder doesn't exist
                     fs.mkdir(dir, {recursive:true}, (err)=>{  // create the folder

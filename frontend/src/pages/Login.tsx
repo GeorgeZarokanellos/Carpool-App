@@ -26,6 +26,7 @@ const Login: React.FC = () => {
       if(response.data.message === 'Login successful'){
         localStorage.setItem('userId', response.data.userId);
         localStorage.setItem('role', response.data.role);
+        localStorage.setItem('token', response.data.token);
         console.log(localStorage);
         history.push('/main/search-trips');
       } else {

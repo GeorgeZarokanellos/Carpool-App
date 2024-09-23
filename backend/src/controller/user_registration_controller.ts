@@ -15,11 +15,14 @@ interface MulterFile {
     mimetype: string;
 }
 
+const localPath = '/home/george/Desktop/Carpool-App/backend/static/uploads';
+const remotePath = '/home/zaro/backend/static/uploads';
+
 export const uploadProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     //multer uses memory storage
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, '/home/george/Desktop/Carpool-App/backend/static/uploads');
+            cb(null, remotePath);
         },
         filename: (req, file, cb) => {
             cb(null, Date.now() + '-' + file.originalname);
@@ -101,6 +104,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             if (req.file !== undefined) {
                 try {
                     fileBuffer = await readFileASync(req.file.path);
+                    profilePicture = fileBuffer;
                 } catch (error) {
                     res.status(500).json({ error: 'Error reading the file' });
                     return;
