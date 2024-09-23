@@ -104,6 +104,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             if (req.file !== undefined) {
                 try {
                     fileBuffer = await readFileASync(req.file.path);
+                    profilePicture = fileBuffer;
                 } catch (error) {
                     res.status(500).json({ error: 'Error reading the file' });
                     return;
