@@ -1,0 +1,78 @@
+@import '../global.scss';
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+}
+ion-grid{
+    height: 100%;
+    padding: 0;
+    @include display-flex-center('both');
+    flex-direction: column;
+    ion-row {
+        height: 90%;
+        width: 100%;
+    }
+
+    .filler{
+        height: 5%;
+    }
+}
+
+ion-content{
+
+    .custom-form {
+        width: 100%;
+        @include display-flex-center('justify');
+
+        .form-contents {
+            height: 100%;
+            width: 85%;
+            @include display-flex-center('both');
+            flex-direction: column;
+            *{
+                width: 100%;
+                max-width: 25rem;
+                margin-bottom: 0.5rem;
+                ion-button,
+                input{
+                    max-width: 95%;
+                }
+            }
+
+            .plate-number-container,
+            .licenseId-container{
+                height: 2.1rem;
+                input {
+                    background-color: #3880ff;
+                    text-align: center;
+                    font-size: 0.92rem;
+                    border-radius: 0.2rem;
+                    height: 100%;
+                    border: none;
+                    color: $ionic-text-color;
+                    font: $ionic-font;
+
+                    &::placeholder {
+                        color: $ionic-text-color;
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.register-button-container{
+    width: 100%;
+    @include display-flex-center('both');
+    ion-button{
+        width: 80%;
+        max-width: 15rem;
+    }
+}

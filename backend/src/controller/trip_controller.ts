@@ -3,7 +3,6 @@ import { Trip, TripPassenger, TripStop, Stop, User, Driver } from '../model/asso
 import { type passengerInterface, type updatedTripInterface , type tripInterface } from '../interface/interface';
 import sequelize from '../database/connect_to_db';
 import { Op, type Transaction } from 'sequelize';
-import logger from '../util/winston';
 import Vehicle from '../model/vehicle';
 import { tripStatus } from '../interface/interface';
 
@@ -128,7 +127,7 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                             {
                                 model: Stop,
                                 as: 'details',
-                                attributes: ['stopLocation', 'lat', 'lng']
+                                attributes: ['stopLocation', 'lat', 'lng', 'side']
                             }
                         ]
                     },
@@ -136,14 +135,14 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                         model: Stop,
                         as: 'startLocation',
                         foreignKey: 'startLocationId',
-                        attributes: ['stopLocation', 'lat', 'lng'],
+                        attributes: ['stopLocation', 'lat', 'lng', 'side'],
                         
                     },
                     {
                         model: Stop,
                         as: 'endLocation',
                         foreignKey: 'endLocationId',
-                        attributes: ['stopLocation', 'lat', 'lng'],
+                        attributes: ['stopLocation', 'lat', 'lng', 'side'],
                         
                     }
                 ]
@@ -291,7 +290,7 @@ export const deleteTrip = async(req: Request,res: Response, next: NextFunction):
  */
 const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, transaction: Transaction): Promise<void> => {
     if(passengers.length > 0){
-        logger.info("passengers: ", passengers, "from addPassengersToTrip");
+        console.log("passengers: ", passengers, "from addPassengersToTrip");
         const firstNames = passengers.map(passenger => passenger.firstName);    // returns an array of first names of the passengers to be added
         const lastNames = passengers.map(passenger => passenger.lastName);      // returns an array of last names of the passengers to be added
         const usersToBeAdded = await User.findAll({    // returns an array of user objects
@@ -301,11 +300,11 @@ const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, 
                 lastName: lastNames
             }
         });
-        logger.info("trip passengers names: ", usersToBeAdded);
+        console.log("trip passengers names: ", usersToBeAdded);
         if(usersToBeAdded.length !== passengers.length)
             throw new Error('One or more passengers were not found!');
         const userIdsToAdd = usersToBeAdded.map(passenger => passenger.userId);   // returns an array of the users ids to be added as passengers
-        logger.info("trip passengers ids: ", userIdsToAdd);        
+        console.log("trip passengers ids: ", userIdsToAdd);        
         const tripPassengersAddPromises = userIdsToAdd.map(async passengerId => {  // returns an array of promises for each TripPassenger entry
             return await TripPassenger.create({
                 tripId: Trip.tripId,
@@ -319,10 +318,10 @@ const addPassengersToTrip = async(passengers: passengerInterface[], Trip: Trip, 
         });
         const allPromises = [...tripPassengersAddPromises, ...updateCurrentTripIdPromises];
         await Promise.all(allPromises);    // wait for all the promises to be resolved
-        logger.debug("trip: " , Trip, "tripPassengersIds: ", userIdsToAdd);
-        logger.debug("trip passengers: ", Trip.noOfPassengers, "tripPassengersIds.length: ", userIdsToAdd.length);
+        console.log("trip: " , Trip, "tripPassengersIds: ", userIdsToAdd);
+        console.log("trip passengers: ", Trip.noOfPassengers, "tripPassengersIds.length: ", userIdsToAdd.length);
         Trip.noOfPassengers += userIdsToAdd.length;
-        logger.debug("trip passengers: ", Trip.noOfPassengers);
+        console.log("trip passengers: ", Trip.noOfPassengers);
         await Trip.save({transaction});  // save the updated trip
     } 
 }   
@@ -373,7 +372,7 @@ const removePassengersFromTrip = async(passengers: passengerInterface[], Trip: T
  */
 const addStopsToTrip = async(stops: number[], Trip: Trip, transaction: Transaction): Promise<void> => {
     if(stops.length > 0){
-        logger.debug("stops: ", stops, "from addStopsToTrip");
+        console.log("stops: ", stops, "from addStopsToTrip");
         const stopRecords = await Stop.findAll({   // returns an array of stop objects
             where: {
                 stopId: stops,  
@@ -384,7 +383,7 @@ const addStopsToTrip = async(stops: number[], Trip: Trip, transaction: Transacti
         if(stopRecords.length !== stops.length)
             throw new Error('One or more stops were not found!');
         // const tripStopIds = stopRecords.map(stop => stop.stopId); // iterates over the array of stop objects and returns an array of their ids
-        // logger.debug("trip stop ids: ", tripStopIds);
+        // console.log("trip stop ids: ", tripStopIds);
         
         const tripStopAddPromises = stopRecords.map(async stop => {   // create an array of promises for each TripsStop entry
                 return await TripStop.create({
@@ -395,10 +394,10 @@ const addStopsToTrip = async(stops: number[], Trip: Trip, transaction: Transacti
         
         // wait for all the promises to be resolved
         await Promise.all(tripStopAddPromises);
-        logger.debug("trip: " , Trip);
-        // logger.debug("trip stops: ", Trip.noOfStops, "tripStopIds.length: ", tripStopIds.length); 
+        console.log("trip: " , Trip);
+        // console.log("trip stops: ", Trip.noOfStops, "tripStopIds.length: ", tripStopIds.length); 
         Trip.noOfStops += stopRecords.length;
-        logger.debug("trip stops: ", Trip.noOfStops);
+        console.log("trip stops: ", Trip.noOfStops);
         await Trip.save({transaction});  // include the changes to the trip in the transaction
     }
       
@@ -413,7 +412,7 @@ const addStopsToTrip = async(stops: number[], Trip: Trip, transaction: Transacti
  * @returns A promise that resolves to void.
  */
 const removeStopsFromTrip = async(stops: number[], Trip: Trip, transaction: Transaction): Promise<void> => {
-    logger.debug("stops: ", stops, "from removeStopsFromTrip");
+    console.log("stops: ", stops, "from removeStopsFromTrip");
     if(stops.length > 0){
         const stopRecords = await Stop.findAll({   // returns an array of stop objects
             where: {

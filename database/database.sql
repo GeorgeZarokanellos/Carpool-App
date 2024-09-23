@@ -37,19 +37,21 @@ CREATE TABLE Vehicle (
 	model VARCHAR(50),
 	PRIMARY KEY (plate_number),
 	FOREIGN KEY (owner_id) REFERENCES Driver (driver_id)
--- 	color enum
 );
 
 CREATE TABLE Stops (
 	stop_id SERIAL,
 	loc start_stop_location NOT NULL,
+    lat DOUBLE PRECISION NOT NULL ,
+    lng DOUBLE PRECISION NOT NULL ,
+    side INTEGER,
 	PRIMARY KEY (stop_id)
 );
 
 CREATE TABLE Trip (
 	trip_id SERIAL,
     creator_id INT NOT NULL ,
-	driver_id INT,
+	driver_id INT NOT NULL ,
 	start_loc_id INT NOT NULL,
     end_loc_id INT NOT NULL,
     starting_time TIMESTAMP NOT NULL,

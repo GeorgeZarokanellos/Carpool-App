@@ -1,8 +1,6 @@
 import express from 'express';
 import { findUsernameAndInitializeUpload, addDriverAndVehicle } from '../controller/driver_vehicle_registration_controller';
 import { addUser, uploadProfilePicture } from '../controller/user_registration_controller';
-import {newUserValidationRules, newDriverAndVehicleValidationRules} from '../util/validator/registration_validator';
-import {validate} from '../util/common_functions';
 import { Request, Response, NextFunction } from 'express-serve-static-core';
 
 //TODO: add validation for driver-vehicle post request  
@@ -10,13 +8,12 @@ import { Request, Response, NextFunction } from 'express-serve-static-core';
 const router = express.Router();
 
 router.post('/user', 
-            // newUserValidationRules(), 
-            // validate, 
             async (req: Request, res: Response, next: NextFunction)  => {
                 try {
                     await uploadProfilePicture(req, res, next);
                 } catch(error) {
                     console.warn("Error in upload profile picture", error);
+                    res.status(500).json({ error: "Initialization of file upload failed", details: (error as Error).message });
                 }
             },
             addUser

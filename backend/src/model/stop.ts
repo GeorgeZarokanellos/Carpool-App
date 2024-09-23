@@ -4,6 +4,9 @@ import sequelize from '../database/connect_to_db';
 class Stop extends Model {
     declare stopId: number;
     declare stopLoc: string;
+    declare lat: number;
+    declare lng: number;
+    declare side: number;
 }
 
 const enum StopLocation {
@@ -35,6 +38,11 @@ Stop.init({
         type: DataTypes.DOUBLE,
         allowNull: false,
         field: 'lng'
+    },
+    side: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'side'
     }
 }, {
     sequelize,

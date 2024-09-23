@@ -1,0 +1,30 @@
+@import '../global.scss';
+
+.modal-content{
+    .title-container{
+        width: 100%; 
+        text-align: center; 
+        @include display-flex-center('justify');
+    }
+
+    ion-list{
+        @include display-flex-center('both');
+        flex-direction: column;
+
+        ion-item{
+            --color: white;
+            --border-radius: 1rem;
+            width: 80%;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .close-container{
+        width: 100%;
+        @include display-flex-center('justify');
+
+        .close-button{
+            --background: var(--danger-color);   
+        }
+    }
+}

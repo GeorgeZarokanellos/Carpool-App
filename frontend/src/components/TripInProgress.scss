@@ -1,0 +1,27 @@
+@import "../global.scss";
+
+
+.trip-in-progress,
+.trip-not-in-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    background-color: $trip-info-background-color;
+    ion-item{
+        --color: var(--ionic-text-color);     
+        border-radius: 1rem;
+    }
+    ion-text{
+        margin-bottom: 0.5rem;
+    }
+
+}
+
+.trip-in-progress{
+    .end-trip-button{
+        --background: var(--danger-color);
+    }
+}
+
