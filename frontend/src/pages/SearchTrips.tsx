@@ -1,5 +1,5 @@
 import React, { useEffect, useState} from 'react';
-import { IonButton, IonContent, IonGrid, IonHeader, IonLoading, IonPage, IonRow, IonSearchbar, IonText} from '@ionic/react';
+import { IonButton, IonContent, IonGrid, IonHeader, IonLabel, IonPage, IonRow, IonSearchbar} from '@ionic/react';
 import { TripInformation } from '../components/TripInformation';
 import { Trip } from '../interfacesAndTypes/Types';
 import './SearchTrips.scss';
@@ -30,29 +30,20 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
         userDate: new Date().toISOString(),
         });
     
-        // if(isLoading === false)
-        //   setIsLoading(true);
-        // console.log("Set is loading to true from retrieve trips");
-        
         const response = await instance.get(`/trips?${queryParams.toString()}`)
         console.log("Response from server", response.data);
         if(response.data.length > 0){
+          console.log("Response data", response.data);
           setTrips(response.data);
           setFilteredResults(response.data);
-          // setIsLoading(false);
-          console.log("Set is loading to false from retrieve trips");
           
         } else {
-          console.log("Empty response from server");
-          // setIsLoading(false);
+          console.log("No trips available");
         } 
         
     } catch (error) {
       console.log("Error retrieving trips", error);
-    } finally {
-      // setIsLoading(false);
-      console.log("Set is loading to false from retrieve trips");
-    }
+    } 
   }
 
   const handleSearch = (event: CustomEvent) => {
@@ -90,6 +81,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   useEffect(() => {
     retrieveUserInfo();
   },[]); 
+    
 
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
@@ -127,11 +119,11 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
           </IonGrid>
         ) : (
           <div className='no-trips-container'>
-            <IonText>No trips available at the moment!</IonText>
+            <IonLabel>No trips available <br/> Come back later!</IonLabel>
           </div>
         )}
       </IonContent>
-      {userRole === 'driver' && (
+      {userRole === 'driver' && userCurrentTripId === null &&(
         <div className='create-trip-button-container'>
           <IonButton shape='round' routerLink="/main/create-trip">
             Create a new trip
