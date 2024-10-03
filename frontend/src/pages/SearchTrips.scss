@@ -5,6 +5,7 @@ ion-searchbar.custom{
     --border-radius: 2rem;
     padding: 0.5rem;
     max-width: 35rem;
+    --placeholder-opacity: 1;
 }
 
 ion-header{
@@ -37,4 +38,11 @@ ion-header{
     height: 100%;
     width: 100%;
     text-align: center;
+    ion-label{
+        width: 70%;
+        border-radius: 2rem;
+        background-color: $ionic-background-color;
+        color: $ionic-text-color;
+        font-size: $font-size-medium;
+    }
 }
