@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { Stop, TripStops } from '../interfacesAndTypes/Types';
 import { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
+import './TripMapDisplay.scss';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -40,7 +41,6 @@ export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops, startL
             center={[startLocation.lat, startLocation.lng]} 
             zoom={14} 
             className='map' 
-            style={{height: '100vh', width: '100wh'}}
             scrollWheelZoom={false}
             >
             <TileLayer
