@@ -60,7 +60,7 @@ const initializeUpload = async (req:Request, res:Response, next: NextFunction , 
             if(!username){
                 throw new Error('Username is missing');
             }
-            const dir = path.resolve(remotePath);   // create a folder for each driver using the username
+            const dir = path.resolve(localPath);   // create a folder for each driver using the username
             fs.access(dir, fs.constants.F_OK, (err) => {   // check if the folder already exists
                 if(err !== null){    // err here means that the folder doesn't exist
                     fs.mkdir(dir, {recursive:true}, (err)=>{  // create the folder
