@@ -14,6 +14,7 @@ export const LabelInput: React.FC<LabelInputProps> = ({ label, placeholder, name
         name={name}
         autocomplete='new-password'
         onIonChange={onIonChange}
+        required
       />
     </div>
   );
