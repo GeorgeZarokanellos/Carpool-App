@@ -22,7 +22,7 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
     //multer uses memory storage
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, remotePath);
+            cb(null, localPath);
         },
         filename: (req, file, cb) => {
             cb(null, Date.now() + '-' + file.originalname);

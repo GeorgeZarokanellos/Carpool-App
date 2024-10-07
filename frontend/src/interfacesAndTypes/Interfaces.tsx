@@ -37,12 +37,12 @@ export interface TripProps {
     };
 }
 
-export interface LabelInputProps<T extends string | number > {
+export interface LabelInputProps {
     label: string | undefined;
-    placeholder: string;
-    value: T;
+    placeholder?: string;
+    name: string;
     type: TextFieldTypes;
-    onIonChange: React.Dispatch<React.SetStateAction<T>>;
+    onIonChange: (e: CustomEvent) => void;
 }
 
 export interface ProfilePictureBuffer {
