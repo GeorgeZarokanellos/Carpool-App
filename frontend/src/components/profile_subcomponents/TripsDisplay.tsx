@@ -1,8 +1,8 @@
 import React from "react";
-import { Trip } from "../interfacesAndTypes/Types";
+import { Trip } from "../../interfacesAndTypes/Types";
 import { IonItem, IonList, IonText, IonTitle } from "@ionic/react";
 import './TripsDisplay.scss';
-import { formatDateTime} from "../util/common_functions";
+import { formatDateTime} from "../../util/common_functions";
 
 interface TripsDisplayProps{
     tripsCompleted: Trip[];

@@ -108,7 +108,12 @@ ion-content{
     width: 100%;
     @include display-flex-center('justify');
     background-color: $trip-info-background-color;
-    
+    ion-button{
+        width: 90%;
+        white-space: normal; 
+        word-wrap: break-word; 
+        text-align: center;
+    }
 }
 
 .no-current-trip{

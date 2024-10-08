@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { IonButton, IonText } from "@ionic/react";
 import "./TripInProgress.scss";
-import instance from "../AxiosConfig";
+import instance from "../../AxiosConfig";
 
 interface TripInProgressProps {
     tripId: number;
@@ -9,9 +9,10 @@ interface TripInProgressProps {
 
     tripDriverCurrentUser: boolean;
     setDriverWantsToEndTrip: (value: boolean) => void;
+    setDriverWantsToAbortTrip: (value: boolean) => void;    
 }
 
-export const TripInProgress: React.FC<TripInProgressProps> = ({tripId, startingTime, tripDriverCurrentUser, setDriverWantsToEndTrip}) => {
+export const TripInProgress: React.FC<TripInProgressProps> = ({tripId, startingTime, tripDriverCurrentUser, setDriverWantsToEndTrip, setDriverWantsToAbortTrip}) => {
     const [tripInProgress, setTripInProgress] = useState(false);
     useEffect(() => {
         const currentTime = new Date().getTime();                
@@ -50,6 +51,12 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({tripId, startingT
                 <IonText className="message">
                     This trip hasn&apos;t started yet
                 </IonText>
+                {
+                    tripDriverCurrentUser &&
+                    <IonButton shape="round" className="abort-trip-button" onClick={() => setDriverWantsToAbortTrip(true)}>
+                        Cancel Trip
+                    </IonButton>
+                }
             </div>
         )
     );

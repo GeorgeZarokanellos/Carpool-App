@@ -1,8 +1,8 @@
 import { IonButton, IonItem, IonList, IonText, IonTitle } from "@ionic/react";
 import React, { useState } from "react";
-import { Review } from "../interfacesAndTypes/Types";
+import { Review } from "../../interfacesAndTypes/Types";
 import './ReviewsDisplay.scss';
-import { formatDateTime, StarRating } from "../util/common_functions";
+import { formatDateTime, StarRating } from "../../util/common_functions";
 
 interface SRReviewsDisplayProps {
     submittedReviews: Review[]; 

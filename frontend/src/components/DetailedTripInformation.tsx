@@ -1,28 +1,24 @@
-import { IonAlert, IonAvatar, IonButton, IonCol, IonContent, IonGrid, IonIcon, IonItem, IonLabel, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
+import { IonAlert, IonButton, IonCol, IonContent, IonGrid, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop } from "../interfacesAndTypes/Types";
-import { formatDateTime } from "../util/common_functions";
 import instance from "../AxiosConfig";
-import { TripMapDisplay } from "./TripMapDisplay";
 import './DetailedTripInformation.scss';
-import { PassengersDetails } from "./PassengersDetails";
-import { arrayBufferTo64String, StarRating } from "../util/common_functions";
-import { UserSelectStopModal } from "./UserSelectStopModal";
-import { calendarOutline, carOutline, peopleOutline, timeOutline } from "ionicons/icons";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import HailIcon from '@mui/icons-material/Hail';
-import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import { TripMapDisplay } from "./detailed_trip_info_subcomponents/TripMapDisplay";
+import { PassengersDetails } from "./detailed_trip_info_subcomponents/PassengersDetails";
 import { useHistory } from "react-router";
-import { TripInProgress } from "./TripInProgress";
-import { Swiper,SwiperSlide } from 'swiper/react';
-import 'swiper/css';
+import { TripInProgress } from "./detailed_trip_info_subcomponents/TripInProgress";
+import { TripDetails } from "./detailed_trip_info_subcomponents/TripDetails";
+import { DriverDetails } from "./detailed_trip_info_subcomponents/DriverDetails";
+import { StopsDisplay } from "./detailed_trip_info_subcomponents/StopsDisplay";
+import { JoinButton } from "./detailed_trip_info_subcomponents/JoinButton";
+import { VehicleImagesDisplay } from "./detailed_trip_info_subcomponents/VehicleImagesDisplay";
 
-interface detailedTripInfoProps {
+interface DetailedTripInfoProps {
     clickedTripId: number;
     page: string;
 }
 
-export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ clickedTripId, page }) => {
+export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ clickedTripId, page }) => {
     const [tripData, setTripData] = useState<ExtendedTrip>();
     const [vehicleImages, setVehicleImages] = useState<string[]>([]);
     //join request modal
@@ -42,6 +38,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [availabilityMessage, setAvailabilityMessage] = useState('');
     const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
     const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
+    const [driverWantsToCancelTrip, setDriverWantsToCancelTrip] = useState(false);
     const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
     //loading
     const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +47,7 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     const [tripCompletedMessage, setTripCompletedMessage] = useState('');
     const [userConfirmed, setUserConfirmed] = useState(false);
     const [confirmationAlert, setConfirmationAlert] = useState(false);
+    const [confirmationAlertMessage, setConfirmationAlertMessage] = useState('');
 
     const userId = localStorage.getItem('userId');
     const userRole = localStorage.getItem('role');
@@ -101,9 +99,14 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
     }, [userIsInTrip, tripData]);
 
     useEffect(() => {
-      if(driverWantsToEndTrip)
+      if(driverWantsToEndTrip){
+        setConfirmationAlertMessage('Are you sure you want to end the trip?');
         setConfirmationAlert(true);
-    }, [driverWantsToEndTrip]);
+      } else if(driverWantsToCancelTrip){
+        setConfirmationAlertMessage('Are you sure you want to cancel the trip?');
+        setConfirmationAlert(true);
+      }
+    }, [driverWantsToEndTrip, driverWantsToCancelTrip]);
 
     useEffect(() => {
         if(userConfirmed){
@@ -331,133 +334,32 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                       <IonRow>
                         <IonCol size="7" className="custom-col">
                           <div className="passenger-time-info">
-                            <div className="time-calendar-people">
-                              <IonItem lines="none">
-                                <IonIcon icon={timeOutline} slot="start" className="time-icon" />
-                                <IonLabel>{formatDateTime(tripData.startingTime).formattedTime}</IonLabel>
-                                <IonIcon icon={calendarOutline} className="calendar-icon" style={{ marginRight: '0.5rem' }} />
-                                <IonLabel>{formatDateTime(tripData.startingTime).formattedDate}</IonLabel>
-                              </IonItem>
-                              <IonItem lines="none">
-                                <IonIcon icon={peopleOutline} slot="start" className="people-icon" />
-                                <IonLabel>
-                                  {(tripData.driver ? tripData.noOfPassengers + 1 + '/' + tripData.driver?.vehicle.noOfSeats : tripData.noOfPassengers) + ' passengers'}
-                                </IonLabel>
-                              </IonItem>
-                            </div>
-                            <div className="passengers-details">
-                              <PassengersDetails passengers={tripData.tripPassengers} />
-                            </div>
-                            <div className="driver-details">
-                              <IonItem lines="none">
-                                <IonIcon icon={carOutline} slot="start" className="car-icon" />
-                                <IonLabel>Driver</IonLabel>
-                              </IonItem>
-                              <IonItem lines="none">
-                                <IonAvatar style={{ marginRight: '1rem', width: "50%" }}>
-                                  <img
-                                    src={tripData.driver ? arrayBufferTo64String(tripData.driver.user.profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg"}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                  />
-                                </IonAvatar>
-                                <div style={{ display: "flex", flexDirection: "column" }}>
-                                  <IonLabel>{tripData.driver? tripData.driver.user.firstName + ' ' + tripData.driver.user.lastName : 'Δεν υπαρχει οδηγός ακόμα'}</IonLabel>
-                                  <StarRating rating={Number(tripData.driver?.user.overallRating)} />
-                                </div>
-                              </IonItem>
-                            </div>
+                            <TripDetails startingTime={tripData.startingTime} driver={tripData.driver} noOfPassengers={tripData.noOfPassengers} />
+                            <PassengersDetails passengers={tripData.tripPassengers} />
+                            <DriverDetails driver={tripData.driver} />
                           </div>
                         </IonCol>
                         <IonCol size="5" className="custom-col">
-                          <div className="stops-display" style={{ overflowY: 'auto', maxHeight: '100%' }}>
-                            <LocationOnIcon />
-                            <IonText style={{textAlign: 'center'}}>{tripData.startLocation.stopLocation}</IonText>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                              <g transform="scale(1.4)">
-                                {/* used to scale only the arrow and not the rectangle around it */}
-                                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
-                              </g>
-                            </svg>
-                            <HailIcon />
-                            {
-                              tripData.tripStops.length > 0 ?
-                                tripData.tripStops.map((stop, index) => {
-                                  if(index === 0){
-                                    return (
-                                      <IonText key={index} style={{textAlign: 'center'}}>
-                                        {stop.details.stopLocation}
-                                      </IonText>
-                                    )
-                                  } else {
-                                    return (
-                                      <React.Fragment key={index}>
-                                        <HailIcon />
-                                        <IonText style={{textAlign: 'center'}}>
-                                          {stop.details.stopLocation}
-                                        </IonText>
-                                      </React.Fragment>
-                                    )
-                                  }
-                                }
-                                  
-                                )
-                              : 'No stops'
-                            }
-                            <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="80px" viewBox="6 6 20 20">
-                              <g transform="scale(1.4)">
-                                {/* used to scale only the arrow and not the rectangle around it */}
-                                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m8 18l4 4m0 0l4-4m-4 4V2" />
-                              </g>
-                            </svg>
-                            <SportsScoreIcon />
-                            <IonText style={{textAlign: 'center'}}>{tripData.endLocation.stopLocation}</IonText>
-                          </div>
+                          <StopsDisplay stopLocationStart={tripData.startLocation.stopLocation} stopLocationEnd={tripData.endLocation.stopLocation} tripStops={tripData.tripStops}/>
                         </IonCol>
                       </IonRow>
                     </IonGrid>
-                    <div className="vehicle-images">
-                      <IonLabel class="ion-text-center">Driver&apos;s vehicle images</IonLabel>
-                      <Swiper
-                        slidesPerView={1}
-                      >
-                        {
-                          vehicleImages.map((url, index) => (
-                            <SwiperSlide key={index} >
-                              <img src={url} alt="" style={{height: '100%', width: '100%'}}/>
-                            </SwiperSlide>
-                          ))
-                        }
-                      </Swiper>
-                    </div>
+                    <VehicleImagesDisplay vehicleImages={vehicleImages} />
                   </div>
                 </IonContent>
                 {
                   page === "detailedInfo" && 
-                    <div className="join-button">
-                      <IonButton disabled={userIsInTrip} shape="round" color="secondary"  onClick={() => { setStopSelectModal(true) }}>
-                          {availabilityMessage}
-                      </IonButton>
-                      <UserSelectStopModal
-                          isOpen={stopSelectModal}
-                          onClose={() => setStopSelectModal(false)}
-                          endLocationId={tripData.endLocationId}
-                          availableStops={availableStops}
-                          onSelectStop={(stop) => {
-                          setSelectedStop(stop);
-                          setStopSelectModal(false);
-                          }}
-                      />
-                      <IonAlert
-                          isOpen={joinRequestSentAlert}
-                          onDidDismiss={() => {
-                          setJoinRequestSentAlert(false);
-                          history.goBack();
-                          }}
-                          message={'Your request has been sent to the driver!'}
-                          buttons={['OK']}
-                          animated={true}
-                      />
-                    </div>
+                  <JoinButton 
+                    userIsInTrip={userIsInTrip}
+                    availabilityMessage={availabilityMessage}
+                    stopSelectModal={stopSelectModal}
+                    endLocationId={tripData.endLocationId}
+                    availableStops={availableStops}
+                    joinRequestSentAlert={joinRequestSentAlert}
+                    setStopSelectModal={setStopSelectModal}
+                    setSelectedStop={setSelectedStop}
+                    setJoinRequestSentAlert={setJoinRequestSentAlert}
+                  />
                 } 
                 {
                   page === "currentTrip" && 
@@ -465,7 +367,9 @@ export const DetailedTripInformation: React.FC<detailedTripInfoProps> = ({ click
                       tripId={tripData.tripId}
                       startingTime={tripData.startingTime} 
                       tripDriverCurrentUser={tripDriverCurrentUser}
-                      setDriverWantsToEndTrip={setDriverWantsToEndTrip}/> 
+                      setDriverWantsToEndTrip={setDriverWantsToEndTrip}
+                      setDriverWantsToAbortTrip={setDriverWantsToCancelTrip}  
+                    /> 
                 }
                 {
                   <>
