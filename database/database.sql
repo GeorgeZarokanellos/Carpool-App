@@ -2,7 +2,7 @@ CREATE TYPE user_role AS ENUM ('driver', 'passenger');
 CREATE TYPE start_stop_location AS ENUM ('King George Square', 'Plateia Olgas Square', 'Pyrosvesteio', 'Aretha', 'Erasmus Hostel UPatras', 'Prytaneia');
 CREATE TYPE notification_status AS ENUM ('accepted', 'pending', 'declined', 'reviewed');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
-CREATE TYPE notification_type AS ENUM ('request', 'review');
+CREATE TYPE notification_type AS ENUM ('request', 'review', 'info');
 
 CREATE TABLE App_user (
 	user_id SERIAL,
@@ -102,7 +102,7 @@ CREATE TABLE Notifications (
     stop_id INT ,
 	message TEXT NOT NULL,
 	time_sent TIMESTAMP DEFAULT NOW(),
-	status notification_status default 'pending',
+	status notification_status NOT NULL DEFAULT 'pending',
     recipient user_role NOT NULL,
     type notification_type NOT NULL,
 	PRIMARY KEY (notification_id),
