@@ -25,3 +25,9 @@
     }
 }
 
+.trip-not-in-progress{
+    .abort-trip-button{
+        --background: var(--danger-color);
+    }
+}
+

@@ -204,6 +204,8 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 return 'Request to join a trip';
         } else if (notificationDetails.type === 'review'){
             return 'Trip participants review';
+        } else {
+            return 'Trip Cancelled';
         }
     }
 
