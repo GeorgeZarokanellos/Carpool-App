@@ -167,26 +167,28 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       });
 
       //update current trip id of all passengers and send notification of cancellation
-      tripData.tripPassengers.forEach(async (passenger)=> {
-        await instance.put(`/user/${passenger.passengerId}`, {
-          currentTripId: null
-        }).then(response => {
-          console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`, response);
-        }).catch(error => {
-          console.log(`Error updating current trip id of passenger ${passenger.passengerId} to null`, error);
-        })
+      if(tripData.noOfPassengers > 0 && tripData.tripPassengers.length > 0){
+        tripData.tripPassengers.forEach(async (passenger)=> {
+          await instance.put(`/user/${passenger.passengerId}`, {
+            currentTripId: null
+          }).then(response => {
+            console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`, response);
+          }).catch(error => {
+            console.log(`Error updating current trip id of passenger ${passenger.passengerId} to null`, error);
+          })
+  
+          await instance.post('/notifications', {
+            driverId: tripData.driverId,
+            passengerId: passenger.passengerId,
+            tripId: tripData.tripId,    
+            stopId: null,
+            message: 'This trip has been cancelled by the driver!',
+            recipient: 'passenger',
+            type: 'info'
+          })
+        });
+      }
 
-        await instance.post('/notifications', {
-          driverId: tripData.driverId,
-          passengerId: passenger.passengerId,
-          tripId: tripData.tripId,    
-          stopId: null,
-          message: 'This trip has been cancelled by the driver!',
-          recipient: 'passenger',
-          type: 'info'
-        })
-
-      });
 
       //update current trip id of driver to null
       await instance.put(`/user/${tripData.driverId}`, {
