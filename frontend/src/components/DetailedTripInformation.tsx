@@ -375,10 +375,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
           <>
               <IonContent >
                 <div id="map" className="map-container">
-                  <TripMapDisplay 
-                    tripStops={tripData.tripStops} 
-                    startLocation={tripData.startLocation} 
-                    endLocation={tripData.endLocation}/>
+                  <TripMapDisplay tripStops={tripData.tripStops} startLocation={tripData.startLocation} endLocation={tripData.endLocation}/>
                 </div>
                 <div className="grid-contents">
                   <IonTitle class="ion-text-center">Trip Information</IonTitle>
@@ -416,9 +413,10 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
               {
                 page === "currentTrip" && 
                   <TripInProgress 
-                    tripId={tripData.tripId}
                     startingTime={tripData.startingTime} 
                     tripDriverCurrentUser={tripDriverCurrentUser}
+                    driverId={tripData.driverId}
+                    tripStatus={tripData.status}
                     setDriverWantsToEndTrip={setDriverWantsToEndTrip}
                     setDriverWantsToAbortTrip={setDriverWantsToCancelTrip}  
                   /> 
