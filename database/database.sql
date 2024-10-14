@@ -111,17 +111,35 @@ CREATE TABLE Notifications (
     FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
 );
 
--- CREATE TABLE Chat (
--- 	chat_id SERIAL,
--- 	trip_id INT NOT NULL,
--- 	PRIMARY KEY (chat_id),
--- 	FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
--- );
---
--- CREATE TABLE Chat_participants (
--- 	chat_id INT NOT NULL,
--- 	participant_id INT NOT NULL,
--- 	PRIMARY KEY (chat_id, participant_id),
--- 	FOREIGN KEY (chat_id) REFERENCES Chat (chat_id),
--- 	FOREIGN KEY (participant_id) REFERENCES App_user (user_id)
--- );
+CREATE EXTENSION pg_cron;
+grant usage on schema cron to postgres;
+grant all privileges on all tables in schema cron to postgres;
+
+CREATE OR REPLACE PROCEDURE check_and_update_trip_status()
+LANGUAGE plpgsql
+as $$
+    DECLARE currentTime TIMESTAMP;
+    BEGIN
+        currentTime := NOW();
+
+        --update trip status to in_progress if starting time has passed
+        --update trip status to cancelled if there are no additional passengers
+        UPDATE Trip
+        SET status = CASE
+            WHEN no_of_passengers = 0 AND status != 'in_progress' AND status != 'completed' THEN 'cancelled'::trip_status
+            ELSE 'in_progress'::trip_status
+        END
+        WHERE currentTime >= Trip.starting_time;
+    END
+$$;
+
+SELECT cron.schedule('check_trip_status', '*/1 * * * *', 'CALL check_and_update_trip_status()');
+
+SELECT * FROM cron.job;
+
+SELECT cron.unschedule('check_trip_status');
+
+UPDATE cron.job SET nodename = '';
+
+select * from cron.job_run_details;
+
