@@ -36,13 +36,13 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
                 {selectedList === "received" ? (
                     <IonList >
                         {userReviews.map((review, index) => {
-                            const { formattedDate, formattedTime } = formatDateTime(review.reviewDateTime);
+                            const { formattedDate } = formatDateTime(review.reviewDateTime);
                             return (
                                 <IonItem lines='none' key={index} className="review-container" color='primary'>
                                     <div className="item-contents">
                                         <IonText >
                                             Submitted by {review.reviewer.firstName + ' ' + review.reviewer.lastName} 
-                                            {' at ' + formattedTime + ' on ' + formattedDate}
+                                            {' on ' + formattedDate}
                                         </IonText>
                                         <StarRating rating={Number(review.reviewRating)} />
                                     </div>
@@ -53,13 +53,13 @@ export const SubmittedReceivedReviewsDisplay: React.FC<SRReviewsDisplayProps> = 
                 ):(
                     <IonList >
                         {submittedReviews.map((review, index) => {
-                            const { formattedDate, formattedTime } = formatDateTime(review.reviewDateTime);
+                            const { formattedDate } = formatDateTime(review.reviewDateTime);
                             return (
                                 <IonItem lines='none' key={index} className="review-container" color='primary'>
                                     <div className="item-contents">
                                         <IonText>
                                             Submitted by {review.reviewer.firstName + ' ' + review.reviewer.lastName} 
-                                            {' at '+ formattedTime + ' on ' + formattedDate}
+                                            {' on ' + formattedDate + ' for ' + review.reviewedUser.firstName + ' ' + review.reviewedUser.lastName}
                                         </IonText>
                                         <StarRating rating={Number(review.reviewRating)} />
                                     </div>

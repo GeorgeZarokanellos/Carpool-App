@@ -101,7 +101,11 @@ export type Review = {
     reviewDateTime: string;
     tripId: number;
     reviewedUserId: number;
-    // reviewerId: number;
+    reviewedUser: {
+        firstName: string;
+        lastName: string;
+    }
+    reviewerId: number;
     reviewer: {
         firstName: string;
         lastName: string;

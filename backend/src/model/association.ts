@@ -31,6 +31,8 @@ Vehicle.belongsTo(Driver, {foreignKey: 'ownerId', as: 'driver'});
 
 Review.belongsTo(User, {foreignKey: 'reviewerId', targetKey: 'userId', as: 'reviewer'});
 User.hasMany(Review, {foreignKey: 'reviewerId', as: 'reviewer'});
+Review.belongsTo(User, {foreignKey: 'reviewedUserId', targetKey: 'userId', as: 'reviewedUser'});
+User.hasMany(Review, {foreignKey: 'reviewedUserId', as: 'reviewedUser'});
 
 export {
     User,
