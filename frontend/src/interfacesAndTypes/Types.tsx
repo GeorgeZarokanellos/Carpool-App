@@ -23,17 +23,8 @@ export type User = {
     noOfReviews: number;
 }
 
-export type Trip = {
-    tripId: number;
-    tripCreatorId: number;
-    driverId: number | null;
-    startLocationId: number;
-    endLocationId: number;
-    startingTime: string;
-    noOfPassengers: number;
-    noOfStops: number;
-    status: string;
-    driver: {
+export type Driver = 
+    {
         licenseId?: number;
         user: {
             firstName: string;
@@ -46,7 +37,19 @@ export type Trip = {
             maker: string;
             model: string;
         }
-    } | null;
+    } 
+
+export type Trip = {
+    tripId: number;
+    tripCreatorId: number;
+    driverId: number | null;
+    startLocationId: number;
+    endLocationId: number;
+    startingTime: string;
+    noOfPassengers: number;
+    noOfStops: number;
+    status: string;
+    driver: Driver;
     tripCreator: {
         firstName: string;
         lastName: string;
@@ -98,7 +101,11 @@ export type Review = {
     reviewDateTime: string;
     tripId: number;
     reviewedUserId: number;
-    // reviewerId: number;
+    reviewedUser: {
+        firstName: string;
+        lastName: string;
+    }
+    reviewerId: number;
     reviewer: {
         firstName: string;
         lastName: string;

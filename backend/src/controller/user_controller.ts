@@ -74,6 +74,11 @@ export const retrieveUserSubmittedReviews = async (userId: string) : Promise<Rev
                     model: User,
                     as : 'reviewer',
                     attributes: ['firstName', 'lastName']  
+                },
+                {
+                    model: User,
+                    as: 'reviewedUser',
+                    attributes: ['firstName', 'lastName']
                 }
             ]
         })

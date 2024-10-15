@@ -1,7 +1,7 @@
 import React, { useLayoutEffect } from 'react';
 import { MapContainer , TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Stop, TripStops } from '../interfacesAndTypes/Types';
+import { Stop, TripStops } from '../../interfacesAndTypes/Types';
 import { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
 import './TripMapDisplay.scss';
@@ -49,7 +49,7 @@ export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops, startL
             {renderMap && (
                 <MapContainer 
                     center={[startLocation.lat, startLocation.lng]} 
-                    zoom={14} 
+                    zoom={13} 
                     className='map' 
                     scrollWheelZoom={false}
                 >
