@@ -1,4 +1,4 @@
-import { IonAlert, IonButton, IonCol, IonContent, IonGrid, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
+import { IonAlert, IonButton, IonCol, IonContent, IonGrid, IonLabel, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop } from "../interfacesAndTypes/Types";
 import instance from "../AxiosConfig";
@@ -490,20 +490,11 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
           {
             !isLoading && 
               <div className="no-current-trip">
-                <IonButton routerLink="/main/search-trips" shape="round" >
-                  <IonText>
-                  { userRole === 'driver' ? (
-                      <>
-                          No current trip.<br />
-                          Create one here!
-                      </>
-                    ) : (
-                      <>
-                          No current trip.<br />
-                          Search for one here!
-                      </>
-                    )}
-                  </IonText>
+                <IonButton routerLink="/main/search-trips" shape="round" fill="clear">
+                  <IonLabel >
+                    No current trip.<br />
+                  { userRole === 'driver' ?  'Create one here!': 'Search for one here!'}
+                  </IonLabel>
                 </IonButton>
               </div>
           }
