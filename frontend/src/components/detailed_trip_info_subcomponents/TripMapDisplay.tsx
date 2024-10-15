@@ -49,7 +49,7 @@ export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops, startL
             {renderMap && (
                 <MapContainer 
                     center={[startLocation.lat, startLocation.lng]} 
-                    zoom={14} 
+                    zoom={13} 
                     className='map' 
                     scrollWheelZoom={false}
                 >
