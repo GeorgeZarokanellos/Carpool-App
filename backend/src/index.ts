@@ -37,8 +37,8 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cors({
-    // origin: 'http://localhost:8100',
-    origin: 'http://node91.imslab.gr:3080/api/',
+    origin: 'http://localhost:8100',
+    // origin: 'http://node91.imslab.gr:3080/api/',
     // origin: 'http://192.168.1.3:8100',
     credentials: true,
     methods: 'GET, POST, PUT, PATCH, DELETE',

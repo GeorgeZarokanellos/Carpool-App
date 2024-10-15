@@ -3,8 +3,8 @@ import { IonAvatar, IonButton, IonContent, IonHeader, IonItem, IonLoading, IonPa
 import './Profile.scss';
 import instance from '../AxiosConfig';
 import { type ProfileData } from '../interfacesAndTypes/Types';
-import { SubmittedReceivedReviewsDisplay } from '../components/ReviewsDisplay';
-import { TripsDisplay } from '../components/TripsDisplay';
+import { SubmittedReceivedReviewsDisplay } from '../components/profile_subcomponents/ReviewsDisplay';
+import { TripsDisplay } from '../components/profile_subcomponents/TripsDisplay';
 import { arrayBufferTo64String } from '../util/common_functions';
 import { Rating } from '@mui/material';
 

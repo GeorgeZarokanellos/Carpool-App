@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput, IonButton, IonLabel, IonAlert } from '@ionic/react';
+import React, { useEffect, useState } from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput, IonButton, IonLabel, IonAlert, IonLoading } from '@ionic/react';
 import './Login.scss';
 import instance from '../AxiosConfig';
 import { useHistory } from 'react-router';
@@ -9,37 +9,48 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [bothStatesUpdated, setBothStatesUpdated] = useState(false);
   const history = useHistory();
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent the form from refreshing the page
-    // Handle login logic here
-    console.log(`Username: ${username}, Password: ${password}`);
-    await instance.post('/login', {
-      username: username,
-      password: password    
-    })
-    .then((response) => {
-      
-      if(response.data.message === 'Login successful'){
-        localStorage.setItem('userId', response.data.userId);
-        localStorage.setItem('role', response.data.role);
-        localStorage.setItem('token', response.data.token);
-        console.log(localStorage);
-        history.push('/main/search-trips');
-      } else {
-        setShowAlert(true);
-      }
-    })
-    .catch((error) => {      
-      if(error.response && error.response.status === 401){
-        setShowAlert(true);
-      }
-      console.log(error);
-    });
+    setIsLoading(true);
   };
+
+  useEffect(() => {
+    const login = async () => {
+      if(username && password){
+        setBothStatesUpdated(true);
+      }
+      if(bothStatesUpdated){
+        try {
+          const response = await instance.post('/login', {
+            username: username,
+            password: password    
+          });
+          console.log(response);
+          
+          if(response && response.data.message === 'Login successful'){
+            localStorage.setItem('userId', response.data.userId);
+            localStorage.setItem('role', response.data.role);
+            localStorage.setItem('token', response.data.token);
+            setIsLoading(false);
+            history.push('/main/search-trips');
+          } else {
+            setIsLoading(false);
+            setShowAlert(true);
+          }
+        } catch (error) {
+          console.log("An error occurred during login", error);
+          setIsLoading(false);
+        }
+      }
+    }
+    login();
+  }, [bothStatesUpdated, username, password]);
 
   return (
     <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
@@ -102,6 +113,10 @@ const Login: React.FC = () => {
           </form>
         </div>
       </IonContent>
+      <IonLoading
+        isOpen={isLoading}
+        message={'Please wait...'}
+      />
     </IonPage>
   );
 };
