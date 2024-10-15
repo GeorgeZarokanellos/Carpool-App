@@ -126,10 +126,10 @@ as $$
         --update trip status to cancelled if there are no additional passengers
         UPDATE Trip
         SET status = CASE
-            WHEN no_of_passengers = 0 AND status != 'in_progress' AND status != 'completed' THEN 'cancelled'::trip_status
+            WHEN no_of_passengers = 0 AND status = 'planning' THEN 'cancelled'::trip_status
             ELSE 'in_progress'::trip_status
         END
-        WHERE currentTime >= Trip.starting_time;
+        WHERE currentTime >= Trip.starting_time AND status = 'planning';
     END
 $$;
 
