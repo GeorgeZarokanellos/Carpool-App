@@ -1,4 +1,4 @@
-import { IonAlert, IonButton, IonCol, IonContent, IonGrid, IonLabel, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
+import { IonAlert, IonButton, IonCol, IonContent, IonGrid, IonLabel, IonLoading, IonRow, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop } from "../interfacesAndTypes/Types";
 import instance from "../AxiosConfig";
@@ -33,11 +33,12 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   //notification request checks
   const [userIsInTrip, setUserIsInTrip] = useState(false);
   const [requestMade, setRequestMade] = useState(false);
+  const [userPendingRequestTripId, setUserPendingRequestTripId] = useState<number | null>(null);
   //bottom section buttons and messages
   const [currentTripId, setCurrentTripId] = useState(null);
   const [availabilityMessage, setAvailabilityMessage] = useState('');
   const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
-  const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
+  const [driverWantsToCompleteTrip, setDriverWantsToCompleteTrip] = useState(false);
   const [driverWantsToCancelTrip, setDriverWantsToCancelTrip] = useState(false);
   const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
   //loading
@@ -204,14 +205,17 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
     }
   }
 
-  const fetchUsersFullName = async () => {
+  const fetchUsersInfo = async () => {
       try {
           const response = await instance.get(`/user/${userId}`);
           if(response.data){
+            console.log('User info', response.data);
+            
               setFirstName(response.data.firstName);
               setLastName(response.data.lastName);
               setOverallRating(response.data.overallRating);
               setCurrentTripId(response.data.currentTripId);
+              setUserPendingRequestTripId(response.data.pendingRequestTripId);
           }
       } catch (error) {
           console.log("Error fetching user's full name and rating", error);
@@ -220,13 +224,18 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
 
   const checkAvailability = () => {
       if(tripData && page === 'detailedInfo'){
-        if(tripData.driver !== null && !userIsInTrip){
-            setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Request to join' : 'Vehicle Full');
-        } else if (tripData.driver === null && !userIsInTrip){
-          if(userRole === 'passenger'){
-            setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Request to join' : 'There is no driver yet');
-          } 
-        } else if (userIsInTrip){
+        console.log('User is in trip', userIsInTrip);
+        console.log('Request made', requestMade);
+        
+         if (!userIsInTrip){
+          if(!requestMade && userPendingRequestTripId === null){
+            setAvailabilityMessage('Request to join');
+          } else if(userPendingRequestTripId === tripData.tripId){
+            setAvailabilityMessage('Request already sent. Waiting for driver response');
+          } else {
+            setAvailabilityMessage('You have a pending request in another trip');
+          }
+        } else {
             if(currentTripId !== null && currentTripId === tripData.tripId){
                 setAvailabilityMessage('You re already participating in this trip');
             } else {
@@ -236,6 +245,28 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
 
       }
       
+  }
+
+  const filterAvailableStops = async() => {
+    if(tripData){
+      if(tripData.startLocation.stopLocation !== 'Prytaneia'){
+        await instance.get(`/stops/${tripData.startLocation.side}`)
+        .then(response => {
+            setAvailableStops(response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+      } else {
+        await instance.get(`/stops/${tripData.endLocation.side}`)
+        .then(response => {
+            console.log('Available stops', response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+      }
+    }
   }
 
   const checkIfUserIsInTrip = () => {
@@ -259,8 +290,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       }
   }
 
-  const handleRequestForJoiningTrip = () => {      
-      
+  const handleRequestForJoiningTrip = async () => {      
       if(tripData && tripData.driver && selectedStop){
           let driverMessage: string =  firstName + ' ' + lastName + ' with a rating of ' + overallRating + ' wants to join your trip ';
           let stopExists = false;
@@ -281,10 +311,9 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
               driverMessage += 'from the new ' + selectedStop.stopLocation + ' stop';
           }
               
-          if(!userIsInTrip && !requestMade){ 
-              console.log('Notification created', userIsInTrip, requestMade);
-              
-              instance.post('/notifications', {
+          if(!userPendingRequestTripId){ 
+            try {
+              await instance.post('/notifications', {
                   driverId: tripData.driverId,
                   passengerId: Number(userId),
                   tripId: tripData.tripId,    
@@ -293,8 +322,16 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   recipient: 'driver',
                   type: 'request'
               });
+  
+              await instance.put(`/user/${userId}`, {
+                pendingRequestTripId: tripData.tripId
+              });
+
               setRequestMade(true);
               setJoinRequestSentAlert(true);
+            } catch (error) {
+              console.log('Error sending request to driver', error);
+            }
           } else {
               console.log('User is already in trip');
           }
@@ -304,41 +341,22 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   }
 
   useEffect(() => {
-    fetchUsersFullName();
+    fetchUsersInfo();
   }, []);
 
   useEffect(() => {
     checkAvailability();
-  }, [userIsInTrip, tripData]);
+    checkIfUserIsInTrip();
+    filterAvailableStops();
+  }, [userIsInTrip,requestMade, tripData]);
 
   useEffect(() => {
       retrieveTripData();
   }, [clickedTripId]);
 
-  useEffect(() => {
-    if(tripData){
-      //filter the available stops based on the side of the start location
-      //if the start location is Prytaneia, then the available stops are based on the side of the end location
-        if(tripData.startLocation.stopLocation !== 'Prytaneia'){
-            instance.get(`/stops/${tripData.startLocation.side}`)
-            .then(response => {
-                setAvailableStops(response.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-        } else {
-          instance.get(`/stops/${tripData.endLocation.side}`)
-          .then(response => {
-            console.log('Available stops', response.data);
-          })
-          .catch(error => {
-              console.log(error);
-          });
-        }
-        checkIfUserIsInTrip();
-    }
-  }, [tripData]);
+  // useEffect(() => {
+  //   checkIfUserIsInTrip();
+  // }, [tripData, requestMade]);
 
   useEffect(() => {
     if (selectedStop) {
@@ -347,16 +365,16 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   }, [selectedStop]);
 
   useEffect(() => {
-    if (driverWantsToEndTrip) {
+    if (driverWantsToCompleteTrip) {
       setCompletionAlertConfirmation(true);
     }
-  }, [driverWantsToEndTrip]);
+  }, [driverWantsToCompleteTrip]);
 
   useEffect(() => {
     if (userConfirmedCompletion) {
       handleTripCompletion();
     } else {
-      setDriverWantsToEndTrip(false);
+      setDriverWantsToCompleteTrip(false);
     }
   }, [userConfirmedCompletion]);
 
@@ -371,6 +389,13 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       handleTripCancellation();
     }
   }, [userConfirmedCancellation]);
+
+  useEffect(() => {
+    console.log('User is in trip', userIsInTrip);
+    console.log('Request made', requestMade);
+    console.log('User pending request', userPendingRequestTripId);
+  }, [userIsInTrip, requestMade, userPendingRequestTripId]);
+    
 
   if(tripData){
       return (
@@ -399,7 +424,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                 </div>
               </IonContent>
               {
-                page === "detailedInfo" && 
+                page === "detailedInfo" && userRole === 'passenger' &&
                 <JoinButton 
                   userIsInTrip={userIsInTrip}
                   availabilityMessage={availabilityMessage}
@@ -407,6 +432,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   endLocationId={tripData.endLocationId}
                   availableStops={availableStops}
                   joinRequestSentAlert={joinRequestSentAlert}
+                  userRequestedToJoinInTrip={userPendingRequestTripId !== null || userPendingRequestTripId === tripData.tripId}
                   setStopSelectModal={setStopSelectModal}
                   setSelectedStop={setSelectedStop}
                   setJoinRequestSentAlert={setJoinRequestSentAlert}
@@ -419,7 +445,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                     tripDriverCurrentUser={tripDriverCurrentUser}
                     driverId={tripData.driverId}
                     tripStatus={tripData.status}
-                    setDriverWantsToEndTrip={setDriverWantsToEndTrip}
+                    setDriverWantsToEndTrip={setDriverWantsToCompleteTrip}
                     setDriverWantsToAbortTrip={setDriverWantsToCancelTrip}  
                   /> 
               }

@@ -238,7 +238,7 @@ export const retrieveUserInfo = async (req: Request, res: Response, next: NextFu
 
     try {
         const userData = await User.findByPk(userId, {
-            attributes: ['firstName', 'lastName', 'overallRating', 'role', 'currentTripId']
+            attributes: ['firstName', 'lastName', 'overallRating', 'role', 'currentTripId', 'pendingRequestTripId']
         });
         if(userData !== null){
             res.status(200).json(userData);

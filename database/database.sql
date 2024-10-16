@@ -19,6 +19,7 @@ CREATE TABLE App_user (
     no_of_reviews INT DEFAULT 0,
     profile_picture bytea,
     current_trip_id INT,
+    pending_request_trip_id INT DEFAULT NULL,
 	PRIMARY KEY (user_id)
 );
 
