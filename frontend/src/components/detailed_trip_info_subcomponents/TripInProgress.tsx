@@ -52,8 +52,8 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                     </IonText>
                     {
                         tripDriverCurrentUser &&
-                        <IonButton shape="round" className="end-trip-button" onClick={() => setDriverWantsToEndTrip(true)}>
-                            End Trip
+                        <IonButton shape="round" className="complete-trip-button" onClick={() => setDriverWantsToEndTrip(true)}>
+                            Complete Trip
                         </IonButton>
                     }
                 </div>
