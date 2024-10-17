@@ -49,6 +49,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 instance.put(`/notifications/${notificationDetails.notificationId}`, {
                     status: 'declined'
                 }),
+                //* update user's pending request trip id to null
+                instance.put(`/user/${notificationDetails.passengerId}`, {
+                    pendingRequestTripId: null
+                }),
                 //* create notification for the user that requested to join the trip
                 instance.post(`/notifications`, {
                     driverId: notificationDetails.driverId,
@@ -131,9 +135,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 }
 
                 updatePromises.push(
-                    //* update user's current trip 
+                    //* update user's current trip and pending request trip id to null
                     instance.put(`/user/${notificationDetails.passengerId}`, {
-                        currentTripId: notificationDetails.tripId
+                        currentTripId: notificationDetails.tripId,
+                        pendingRequestTripId: null
                     }),
     
                     //* update notification to accepted
