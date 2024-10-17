@@ -354,10 +354,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       retrieveTripData();
   }, [clickedTripId]);
 
-  // useEffect(() => {
-  //   checkIfUserIsInTrip();
-  // }, [tripData, requestMade]);
-
   useEffect(() => {
     if (selectedStop) {
       handleRequestForJoiningTrip();
@@ -401,9 +397,14 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       return (
           <>
               <IonContent >
-                <div id="map" className="map-container">
-                  <TripMapDisplay tripStops={tripData.tripStops} startLocation={tripData.startLocation} endLocation={tripData.endLocation}/>
-                </div>
+                {/* <div id="map" className="map-container"> */}
+                  <TripMapDisplay 
+                    tripStops={tripData.tripStops} 
+                    startLocation={tripData.startLocation} 
+                    endLocation={tripData.endLocation}
+                    tripInProgress={tripData.status === 'in_progress'}  
+                  />
+                {/* </div> */}
                 <div className="grid-contents">
                   <IonTitle class="ion-text-center">Trip Information</IonTitle>
                   <IonGrid>
