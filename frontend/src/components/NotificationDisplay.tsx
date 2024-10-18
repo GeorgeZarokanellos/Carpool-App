@@ -252,7 +252,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     console.log("All reviews submitted", response);
                     
                     //add 1 point to the user's overall points for each review submitted
-                    await instance.put(`/user/${userId}?type=points`,{
+                    await instance.patch(`/user/${userId}`,{
                         overallPoints: promises.length
                     });
                     await instance.put(`/notifications/${notificationDetails.notificationId}`, {
