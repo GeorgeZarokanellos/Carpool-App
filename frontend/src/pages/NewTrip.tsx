@@ -7,6 +7,8 @@ import { useHistory } from "react-router";
 import { PassengerCredentials } from "../components/PassengerCredentials";
 import { tripStatus } from "../interfacesAndTypes/Types";
 
+//TODO nextScheduledTripId 
+
 interface requestBody {
     tripCreatorId: number,
     driverId: number | null,
@@ -24,10 +26,12 @@ export const NewTrip: React.FC = () => {
     //screen dimensions
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-
+    //local storage
     const userIdString = localStorage.getItem('userId');
     const userIdInt = parseInt(userIdString as string, 10);
-
+    //driver info
+    const [currentTripId, setCurrentTripId] = useState<number | null>(null);
+    const [nextScheduledTripId, setNextScheduledTripId] = useState<number | null>(null);
     const [startLocations, setStartLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
     //start end location picker
@@ -46,8 +50,6 @@ export const NewTrip: React.FC = () => {
     const [passengerCredentials, setPassengerCredentials] = useState<{firstName: string, lastName: string}[]>([]);
     //hour picker
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    //additional stops
-    const [stops, setStops] = useState<Stop[]>([]);
     //alert
     const [showTripCompletedAlert, setShowTripCompletedAlert] = useState(false);
     const [tripCompletionMessage, setTripCompletionMessage] = useState<string>('');
@@ -68,7 +70,7 @@ export const NewTrip: React.FC = () => {
                         startLocationId: selectedStartLocation.stopId,
                         endLocationId: selectedEndLocation.stopId,
                         startingTime: selectedDate.toISOString(),
-                        stops: stops,
+                        stops: [],
                         passengers: passengerCredentials
                     }
                 } else if (selectedPassengerNumber === 3) {
@@ -78,7 +80,7 @@ export const NewTrip: React.FC = () => {
                         startLocationId: selectedStartLocation.stopId,
                         endLocationId: selectedEndLocation.stopId,
                         startingTime: selectedDate.toISOString(),
-                        stops: stops,
+                        stops: [],
                         passengers: passengerCredentials,
                         status: tripStatus.LOCKED
                     }
@@ -88,17 +90,32 @@ export const NewTrip: React.FC = () => {
                 if(response){
                     console.log(response.data);
                     const newTripId = response.data.tripId;
-    
-                    //update the current trip of the user to the newly created one
-                    await instance.put(`/user/${userIdInt}`, {
-                        currentTripId: newTripId
-                    }).
-                    then((response) => {
-                        console.log(response.data);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
+                    console.log("Current trip id: ", currentTripId);
+                    console.log("Next scheduled trip id: ", nextScheduledTripId);
+                    
+                    if(currentTripId === null){
+                        //update the current trip of the user to the newly created one
+                        await instance.patch(`/user/${userIdInt}`, {
+                            currentTripId: newTripId
+                        }).
+                        then((response) => {
+                            console.log(response.data);
+                        })
+                        .catch((error) => {
+                            console.log("Failed to update current trip id of driver ",error);
+                        });
+                    } else if(nextScheduledTripId === null){
+                        //update the next scheduled trip of the driver to the newly created one if he has a current one already
+                        await instance.patch(`/driver/${userIdInt}`, {
+                            nextScheduledTripId: newTripId
+                        })
+                        .then((response) => {
+                            console.log(response.data);
+                        })
+                        .catch((error) => {
+                            console.log("Failed to update nextScheduledTripId of driver ",error);
+                        });
+                    }
                     setTripCompletionMessage("Trip created successfully");
                     setShowTripCompletedAlert(true);
     
@@ -115,11 +132,22 @@ export const NewTrip: React.FC = () => {
 
         } catch (error) {
             console.log("Error creating trip or updating user", error);
-            
         }
 
     }
     
+    const retrieveDriverInfo = async () => {
+        await instance.get(`/user/${userIdInt}`)
+        .then((response) => {
+            console.log("Driver info: ", response.data);
+            setCurrentTripId(response.data.currentTripId);
+            setNextScheduledTripId(response.data.nextScheduledTripId);
+        })
+        .catch((error) => {
+            console.log("Error retrieving driver info", error);
+        });
+    }
+
     const updatePassengerCredentials = (firstName: string, lastName: string) => {
         setPassengerCredentials([...passengerCredentials, {firstName: firstName, lastName: lastName}]);
     }
@@ -127,18 +155,19 @@ export const NewTrip: React.FC = () => {
     useEffect(() => {
         instance.get('/trips/start-locations')
         .then(response => {
-            console.log("Start locations: ", response.data);
             setStartLocations(response.data);
         })
     },[]);
-
-    useEffect(() => {
-        console.log("Request Body: ", requestBody);
-    }, [passengerCredentials]);
     
     useEffect(() => {
         setTripDriverId(userIdInt);
     }, [userIdInt]);
+
+    useEffect(() => {
+        if(userIdInt){
+            retrieveDriverInfo();
+        }
+    },[userIdInt]);
 
     return (
         <div>
@@ -193,8 +222,6 @@ export const NewTrip: React.FC = () => {
                                             text: "Confirm",
                                             role: "Confirm",
                                             handler: (value) => {
-                                                console.log("Selected stop:", value['Start Locations'].value);
-                                                
                                                 setSelectedStartLocation({loc: value['Start Locations'].text, stopId: value['Start Locations'].value});
                                                 if(value['Start Locations'].text !== 'Prytaneia'){
                                                     const prytaneia = startLocations.find(stop => stop.stopLocation === 'Prytaneia');
@@ -238,8 +265,6 @@ export const NewTrip: React.FC = () => {
                                             text: "Confirm",
                                             role: "Confirm",
                                             handler: (value) => {
-                                                console.log("Selected stop:", value['End Locations'].value);
-                                                
                                                 setSelectedEndLocation({loc: value['End Locations'].text, stopId: value['End Locations'].value});
                                                 setShowEndLocationPicker(false);
                                             }
@@ -323,7 +348,6 @@ export const NewTrip: React.FC = () => {
                                     {
                                         selectedDate ? (
                                             <p style={{margin: 0}}>
-                                                {/* {console.log(selectedDate.toString())} */}
                                                 {'At ' + selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
                                             </p>
                                         ) : "Select date and time below"
@@ -336,7 +360,6 @@ export const NewTrip: React.FC = () => {
                                     min={new Date(new Date().setHours(new Date().getHours())).toISOString()}
                                     hourCycle="h23"
                                     onIonChange={(e) => {
-                                        console.log(e.detail.value);
                                         if(typeof e.detail.value === 'string'){                                                                                        
                                             setSelectedDate(new Date(e.detail.value.toString()));
                                             console.log("Selected datetime: ", selectedDate);
