@@ -2,47 +2,88 @@ import React, { useEffect, useState } from "react";
 import { IonAlert, IonButton, IonText } from "@ionic/react";
 import "./TripInProgress.scss";
 import instance from "../../AxiosConfig";
+import { tripPassenger } from "../../interfacesAndTypes/Types";
 
 interface TripInProgressProps {
-    startingTime: string;    // const itemColor = "rgb(44, 110, 219)";
+    refreshKey: number | undefined;
+    tripId: number;
     tripDriverCurrentUser: boolean;
-    driverId: number | null;
+    driverId: number;
     tripStatus: string;
+    tripPassengers: tripPassenger[];
     setDriverWantsToEndTrip: (value: boolean) => void;
-    setDriverWantsToAbortTrip: (value: boolean) => void;    
+    setDriverWantsToAbortTrip: (value: boolean) => void;
+    checkForNextScheduledTrip: (userId: string | number, points? : number) => Promise<void>;  
 }
 
 export const TripInProgress: React.FC<TripInProgressProps> = ({
-    startingTime, 
+    refreshKey,
+    tripId,
     tripDriverCurrentUser,
     driverId, 
     tripStatus,
+    tripPassengers,
     setDriverWantsToEndTrip, 
-    setDriverWantsToAbortTrip
+    setDriverWantsToAbortTrip,
+    checkForNextScheduledTrip
 }) => {
-    // const [tripInProgress, setTripInProgress] = useState(false);
     const [tripCancelledAlert, setTripCancelledAlert] = useState(false);
-    
-    const checkTripTimeAndNoOfPassengers = async () => {
-        if(tripStatus === "cancelled"){
-            //update drivers current trip id to null
-            await instance.put(`/user/${driverId}`,{
-                currentTripId: null
-            })
-            .then(() => {
-                console.log("Driver's current trip id set to null");
+    const [currentTripStatus, setCurrentTripStatus] = useState<string>(tripStatus);
+    const [tripStatusUpdated, setTripStatusUpdated] = useState<boolean>(false);
+
+    const checkTripStatusAndUpdateCurrentTripId = async () => {
+        try {
+            console.log("Current trip status: ", currentTripStatus);
+            console.log(currentTripStatus === "cancelled");
+            
+            if(currentTripStatus === "cancelled" ){
+                console.log("Went into if cancelled");
+                
+                const promises: Promise<any>[] = [];
                 setTripCancelledAlert(true);
-            })
-            .catch((error) => {
-                console.log("Error when updating drivers current trip id: ",error);
-            });
+                //update current trip id of the driver according to next scheduled trip
+                await checkForNextScheduledTrip(driverId);
+                tripPassengers.forEach((passenger) => {
+                    promises.push(
+                        instance.patch(`/user/${passenger.passengerId}`, {
+                            currentTripId: null
+                        })
+                    );
+                });
+
+                await Promise.all(promises);
+                console.log("Passengers' current trip id set to null");
+            }
+        } catch (error) {
+            console.log("Error when trying to update current trip of driver and passengers due to cancelled trip: ", error);
         }
     }
     
+    const retrieveTripStatus = async () => {
+        try {
+            await instance.get(`/trips/status/${tripId}`)
+            .then((response) => {
+                console.log("Retrieving trip status", response.data.status);
+                setCurrentTripStatus(response.data.status);
+                setTripStatusUpdated(true);
+            });
+        } catch (error) {
+            console.log("Error retrieving trip status: ", error);
+        }
+    }
     
     useEffect(() => {
-        checkTripTimeAndNoOfPassengers();
-    }, [startingTime]);
+        if(refreshKey !== undefined){
+            retrieveTripStatus();
+        }
+    }, [refreshKey]);
+
+    useEffect(()=>{
+        if(tripStatusUpdated === true){
+            checkTripStatusAndUpdateCurrentTripId();
+            setTripStatusUpdated(false);
+        }
+    },[tripStatusUpdated])
     return (
         <>
             {tripStatus === "in_progress" ? (
