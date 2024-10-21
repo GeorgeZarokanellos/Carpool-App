@@ -18,6 +18,7 @@ import stop_router from './router/stop_router';
 import review_router from './router/review_router';
 import notification_router from './router/notification_router';
 import user_router from './router/user_router';
+import driver_router  from './router/driver_router';
 // #endregion
 
 const app = express();
@@ -37,9 +38,9 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cors({
-    origin: 'http://localhost:8100',
+    // origin: 'http://localhost:8100',
     // origin: 'http://node91.imslab.gr:3080/api/',
-    // origin: 'http://192.168.1.3:8100',
+    origin: 'http://192.168.1.3:8100',
     credentials: true,
     methods: 'GET, POST, PUT, PATCH, DELETE',
     AccessControlAllowCredentials: true,
@@ -129,6 +130,7 @@ app.use(`${basePath}/reviews`, review_router);
 app.use(`${basePath}/stops`, stop_router);
 app.use(`${basePath}/notifications`, notification_router);
 app.use(`${basePath}/user`, user_router);
+app.use(`${basePath}/driver`, driver_router);
 
 const httpServer = http.createServer(app);
 httpServer.listen(3000, () => {
