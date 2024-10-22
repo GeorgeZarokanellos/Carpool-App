@@ -20,6 +20,14 @@ import 'swiper/css';
 import instance from "../AxiosConfig";
 import { useHistory } from "react-router";
 import { useParams } from 'react-router-dom';
+import { object, string } from "yup";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+interface DriverVehicleRegistrationRequestBody {
+  driversLicenseId: string;
+  vehicleNumberPlate: string;
+}
 
 export const DriverVehicleRegistration: React.FC = () => {
   //#region states
@@ -30,10 +38,10 @@ export const DriverVehicleRegistration: React.FC = () => {
     maker: "",
     models: [],
   });
+  // const [licenseId, setLicenseId] = useState<number | null>(null);
+  // const [vehicleNumberPlate, setVehicleNumberPlate] = useState<string | null>(null);
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<string>("");
   const [noOfSeats, setNoOfSeats] = useState<string>('');
-  const [vehicleNumberPlate, setVehicleNumberPlate] = useState<string | null>(null);
-  const [licenseId, setLicenseId] = useState<number | null>(null);
   const [driversLicense, setDriversLicense] = useState<Blob>();
   const [driversLicenseFileName, setDriversLicenseFileName] = useState<string>(""); 
   const [vehicleInsurance, setVehicleInsurance] = useState<Blob>();
@@ -42,7 +50,6 @@ export const DriverVehicleRegistration: React.FC = () => {
   const [vehicleRegistrationFileName, setVehicleRegistrationFileName] = useState<string>("");
   const [vehicleImages, setVehicleImages] = useState<Blob[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  // const [userId, setUserId] = useState<{userId: string}>({userId: ''});
   //alert message
   const [alertMessage, setAlertMessage] = useState<string>('');
   const [showAlert, setShowAlert] = useState<boolean>(false);
@@ -66,14 +73,22 @@ export const DriverVehicleRegistration: React.FC = () => {
     { maker: "Seat", models: ["Ibiza", "Leon"] },
   ];
 
-  const handleDriverVehicleRegistration = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const requestBodyValidationSchema = object().shape({
+    driversLicenseId: string().required('Driver\'s license id is required').matches(/^[0-9]{6,15}$/, 'Driver\'s license must be between 6 and 15 digits'),
+    vehicleNumberPlate: string().required('Vehicle\'s number plate is required').min(6, 'Vehicle\'s number plate must be at least 6 characters long').max(10, 'Vehicle\'s number plate cannot exceed 10 characters')
+  })
+
+  const { control, handleSubmit, formState: {errors}} = useForm({
+    resolver: yupResolver(requestBodyValidationSchema),
+  });
+
+  const handleDriverVehicleRegistration = async (data: DriverVehicleRegistrationRequestBody) => {
 
     const formData = new FormData();
 
     const vehicleAndDriverData = {
-      licenseId: licenseId,
-      plateNumber: vehicleNumberPlate,
+      licenseId: data.driversLicenseId,
+      plateNumber: data.vehicleNumberPlate,
       maker: selectedVehicleMaker.maker,
       model: selectedVehicleModel,
       noOfSeats: noOfSeats,
@@ -147,14 +162,6 @@ export const DriverVehicleRegistration: React.FC = () => {
     }
   }, []);
 
-  const updateVehicleNumberPlate =  (event: React.ChangeEvent<HTMLInputElement>) => {
-    setVehicleNumberPlate(event.target.value);
-  }
-
-  const updateLicenseId = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLicenseId(parseInt(event.target.value));
-  }
-
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
       <IonHeader>
@@ -171,16 +178,49 @@ export const DriverVehicleRegistration: React.FC = () => {
           <IonRow className="filler"/>
           <IonRow>
             <form
-            onSubmit={handleDriverVehicleRegistration}
+            onSubmit={handleSubmit(handleDriverVehicleRegistration)}
               className="custom-form"
               encType="multipart/form-data"
             >
               <div className="form-contents">
                 <div className="licenseId-container">
-                  <input type="number" placeholder="DRIVERS LICENSE ID" required value={licenseId !== null ? licenseId : ''} onChange={updateLicenseId}/>  
+                  <Controller 
+                    name='driversLicenseId'
+                    control={control}
+                    render={({field}) => (
+                      <input 
+                        name="driversLicenseId" 
+                        type="number" 
+                        placeholder="DRIVERS LICENSE ID" 
+                        required 
+                        value={field.value !== null ? field.value : ''} 
+                        onChange={(e) => {
+                          const value = e.target.value ? parseInt(e.target.value) : null;
+                          field.onChange(value);
+                        }}/>  
+                    )}
+                  />
+                  {errors['driversLicenseId'] !== undefined && <p className="error-message">{errors['driversLicenseId']?.message}</p>}
                 </div>
                 <div className="plate-number-container">
-                  <input type="text" placeholder="VEHICLE NUMBER PLATE" required value={vehicleNumberPlate !== null ? vehicleNumberPlate : ''} onChange={updateVehicleNumberPlate}/>
+                  <Controller 
+                    name="vehicleNumberPlate"
+                    control={control}
+                    render={({field}) => (
+                      <input 
+                        name="vehicleNumberPlate"
+                        type="text" 
+                        placeholder="VEHICLE NUMBER PLATE" 
+                        required 
+                        value={field.value !== null ? field.value : ''} 
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value);
+                        }}
+                      />
+                    )}
+                    />
+                  {errors['vehicleNumberPlate'] !== undefined && <p className="error-message">{errors['vehicleNumberPlate']?.message}</p>}
                 </div>
                 <div className="pickers">
                     <IonButton onClick={() => setShowMakerPicker(true)}>
@@ -333,7 +373,7 @@ export const DriverVehicleRegistration: React.FC = () => {
       <IonFooter>
         <IonToolbar>
           <div className="register-button-container">
-            <IonButton className="register-button" expand="block" onClick={handleDriverVehicleRegistration} >
+            <IonButton className="register-button" expand="block" onClick={handleSubmit(handleDriverVehicleRegistration)} >
               Submit
             </IonButton>
           </div>
