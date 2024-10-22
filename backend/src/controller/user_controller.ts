@@ -266,7 +266,7 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
         const tripDriver = await User.findByPk(userId);
         if(tripDriver !== null && tripDriver.role === 'driver'){
             //get the path to the folder containing the images
-            const imageFolder = path.join(__dirname, `../../static/uploads/${tripDriver.username}`);
+            const imageFolder = path.join(__dirname, `../../static/uploads/${tripDriver.userId}`);
             
             if(!fs.existsSync(imageFolder)){
                 res.status(404).send('No images found');
@@ -277,7 +277,7 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
             //filter only the images
             const jpgsFilenames = imageFilenames.filter(filename => filename.endsWith('.jpg') || filename.endsWith('.jpeg'));
             //construct the urls that the client can use to access the images (include /api for remote)
-            const imageUrls = jpgsFilenames.map(filename => `${req.protocol}://${req.get('host')}/static/uploads/${tripDriver.username}/${filename}`);
+            const imageUrls = jpgsFilenames.map(filename => `${req.protocol}://${req.get('host')}/static/uploads/${tripDriver.userId}/${filename}`);
             if(imageUrls.length !== 0){
                 res.status(200).json(imageUrls);
             } else {
