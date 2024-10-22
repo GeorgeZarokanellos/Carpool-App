@@ -43,6 +43,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                 setTripCancelledAlert(true);
                 //update current trip id of the driver according to next scheduled trip
                 await checkForNextScheduledTrip(driverId);
+                //update trip id of passengers to null if trip is cancelled
                 tripPassengers.forEach((passenger) => {
                     promises.push(
                         instance.patch(`/user/${passenger.passengerId}`, {
