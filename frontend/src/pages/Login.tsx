@@ -37,6 +37,9 @@ const Login: React.FC = () => {
             localStorage.setItem('userId', response.data.userId);
             localStorage.setItem('role', response.data.role);
             localStorage.setItem('token', response.data.token);
+            if(response.data.role === 'driver'){
+              localStorage.setItem('nextScheduledTripId', response.data.nextScheduledTripId);
+            }
             setIsLoading(false);
             history.push('/main/search-trips');
           } else {

@@ -42,7 +42,7 @@ export type Driver =
 export type Trip = {
     tripId: number;
     tripCreatorId: number;
-    driverId: number | null;
+    driverId: number;
     startLocationId: number;
     endLocationId: number;
     startingTime: string;

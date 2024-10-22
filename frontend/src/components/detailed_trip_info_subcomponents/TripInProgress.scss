@@ -20,8 +20,8 @@
 }
 
 .trip-in-progress{
-    .end-trip-button{
-        --background: var(--danger-color);
+    .complete-trip-button{
+        --background: var(--success-color);
     }
 }
 

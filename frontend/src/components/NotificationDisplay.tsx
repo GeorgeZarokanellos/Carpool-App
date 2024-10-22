@@ -49,6 +49,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 instance.put(`/notifications/${notificationDetails.notificationId}`, {
                     status: 'declined'
                 }),
+                //* update user's pending request trip id to null
+                instance.put(`/user/${notificationDetails.passengerId}`, {
+                    pendingRequestTripId: null
+                }),
                 //* create notification for the user that requested to join the trip
                 instance.post(`/notifications`, {
                     driverId: notificationDetails.driverId,
@@ -131,9 +135,10 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 }
 
                 updatePromises.push(
-                    //* update user's current trip 
+                    //* update user's current trip and pending request trip id to null
                     instance.put(`/user/${notificationDetails.passengerId}`, {
-                        currentTripId: notificationDetails.tripId
+                        currentTripId: notificationDetails.tripId,
+                        pendingRequestTripId: null
                     }),
     
                     //* update notification to accepted
@@ -247,7 +252,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     console.log("All reviews submitted", response);
                     
                     //add 1 point to the user's overall points for each review submitted
-                    await instance.put(`/user/${userId}?type=points`,{
+                    await instance.patch(`/user/${userId}`,{
                         overallPoints: promises.length
                     });
                     await instance.put(`/notifications/${notificationDetails.notificationId}`, {
