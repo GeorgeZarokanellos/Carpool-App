@@ -62,7 +62,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
     
     const retrieveTripStatus = async () => {
         try {
-            await instance.get(`/trips/status/${tripId}`)
+            await instance.get(`/trips/info/${tripId}`)
             .then((response) => {
                 console.log("Retrieving trip status", response.data.status);
                 setCurrentTripStatus(response.data.status);
