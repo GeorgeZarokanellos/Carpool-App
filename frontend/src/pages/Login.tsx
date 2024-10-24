@@ -18,42 +18,42 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent the form from refreshing the page
     setIsLoading(true);
+    await instance.post('/login', {
+      username: username,
+      password: password    
+    }).then((response) => {
+      console.log(response);
+      if(response.status === 200 && response.data.message === 'Login successful'){
+        localStorage.setItem('userId', response.data.userId);
+        localStorage.setItem('role', response.data.role);
+        localStorage.setItem('token', response.data.token);
+        if(response.data.role === 'driver'){
+          localStorage.setItem('nextScheduledTripId', response.data.nextScheduledTripId);
+        }
+        setIsLoading(false);
+        history.push('/main/search-trips');
+      } else if(response.status === 401 || response.status === 402) {
+        setIsLoading(false);
+        setShowAlert(true);
+      } 
+    })
+    .catch((error) => {
+      if(error.status === 401 || error.status === 402){
+        setIsLoading(false);
+        setShowAlert(true);
+      }
+      console.log("Error during login", error);
+    });
   };
 
-  useEffect(() => {
-    const login = async () => {
-      if(username && password){
-        setBothStatesUpdated(true);
-      }
-      if(bothStatesUpdated){
-        try {
-          const response = await instance.post('/login', {
-            username: username,
-            password: password    
-          });
-          console.log(response);
-          
-          if(response && response.data.message === 'Login successful'){
-            localStorage.setItem('userId', response.data.userId);
-            localStorage.setItem('role', response.data.role);
-            localStorage.setItem('token', response.data.token);
-            if(response.data.role === 'driver'){
-              localStorage.setItem('nextScheduledTripId', response.data.nextScheduledTripId);
-            }
-            setIsLoading(false);
-            history.push('/main/search-trips');
-          } else {
-            setIsLoading(false);
-            setShowAlert(true);
-          }
-        } catch (error) {
-          console.log("An error occurred during login", error);
-          setIsLoading(false);
-        }
-      }
-    }
-    login();
-  }, [bothStatesUpdated, username, password]);
+  // const login = async () => {
+  //   if(bothStatesUpdated){
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   login();
+  // }, [bothStatesUpdated, username, password]);
 
   return (
     <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
