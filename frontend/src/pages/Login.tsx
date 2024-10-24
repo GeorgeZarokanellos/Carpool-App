@@ -3,6 +3,12 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput, IonButt
 import './Login.scss';
 import instance from '../AxiosConfig';
 import { useHistory } from 'react-router';
+import { Controller, useForm } from 'react-hook-form';
+
+interface LoginFormInterface {
+  username: string;
+  password: string;
+} 
 
 const Login: React.FC = () => {
 
@@ -10,17 +16,16 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [bothStatesUpdated, setBothStatesUpdated] = useState(false);
+  const { control, handleSubmit, formState: {errors}} = useForm<LoginFormInterface>();
   const history = useHistory();
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent the form from refreshing the page
+  const handleLogin = async (data : {username: string; password: string;}) => {
     setIsLoading(true);
     await instance.post('/login', {
-      username: username,
-      password: password    
+      username: data.username,
+      password: data.password    
     }).then((response) => {
       console.log(response);
       if(response.status === 200 && response.data.message === 'Login successful'){
@@ -44,16 +49,7 @@ const Login: React.FC = () => {
       }
       console.log("Error during login", error);
     });
-  };
-
-  // const login = async () => {
-  //   if(bothStatesUpdated){
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   login();
-  // }, [bothStatesUpdated, username, password]);
+  }
 
   return (
     <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
@@ -64,21 +60,26 @@ const Login: React.FC = () => {
       </IonHeader>
       <IonContent className="ion-padding" >
         <div className='login-container'>
-          <form onSubmit={handleLogin} className='custom-form'>
+          <form onSubmit={handleSubmit(handleLogin)} className='custom-form'>
             <div className='credentials-container'>
               <IonLabel className='custom'> Username </IonLabel>
               <div className='username'>
-                  <IonInput 
+                <Controller 
+                  name='username'
+                  control={control}
+                  render={({field}) => (
+                    <IonInput 
                       value={username} 
                       class='input-field' 
                       required = {true}
                       mode='md'
                       onIonChange={e => {
-                        if (e.detail.value != null) {
-                          setUsername(e.detail.value);
-                        }
+                        
+                        onchange()
                       }}
-                      />
+                    />
+                  )}
+                />
               </div>
               <IonLabel className='custom'> Password </IonLabel>
               <div className='password'>
