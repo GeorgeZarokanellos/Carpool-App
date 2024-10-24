@@ -489,10 +489,10 @@ export const retrieveAllStartLocations = async (req: Request, res: Response, nex
     }
 }
 
-export const retrieveTripStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const retrieveTripStatusAndStartingTime = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const response = await Trip.findByPk(req.params.id ,{
-            attributes: ['status']
+            attributes: ['status', 'startingTime']
         });
 
         if(response === null){
