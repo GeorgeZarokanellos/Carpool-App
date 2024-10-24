@@ -31,7 +31,7 @@ ion-content{
         @include display-flex-center('justify');
 
         .form-contents {
-            height: 100%;
+            // height: 100%;
             width: 85%;
             @include display-flex-center('both');
             flex-direction: column;
@@ -47,13 +47,16 @@ ion-content{
 
             .plate-number-container,
             .licenseId-container{
-                height: 2.1rem;
+                @include display-flex-center('both');
+                flex-direction: column;
+                width: 100%;
+                height: fit-content;
                 input {
+                    height: 2.5rem;
                     background-color: #3880ff;
                     text-align: center;
-                    font-size: 0.92rem;
                     border-radius: 0.2rem;
-                    height: 100%;
+                    font-size: 1rem;
                     border: none;
                     color: $ionic-text-color;
                     font: $ionic-font;
@@ -67,6 +70,10 @@ ion-content{
                         outline: none;
                         border: 2.5px solid black;
                     }
+                }
+                .error-message {
+                    @include error-message-style();
+                    height: 2.6rem;
                 }
             }
         }
