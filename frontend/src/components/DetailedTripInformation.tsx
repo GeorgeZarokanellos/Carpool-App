@@ -97,7 +97,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
         promises.push(instance.patch(`/user/${userId}`, updateDetails));
   
         //update the next scheduled trip of the user to null or the next closest trip
-        const userTripsResponse = await instance.get(`/user/trips/${userId}?nextScheduledTripId=${nextScheduledTripId}`);
+        const userTripsResponse = await instance.get(`/user/trips/${userId}?currentTripId=${currentTripId}&nextScheduledTripId=${nextScheduledTripId}`);
         console.log("User trips response", userTripsResponse);
         
         if(userTripsResponse.data.length === 0){
