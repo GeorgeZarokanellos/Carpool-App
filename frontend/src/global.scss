@@ -11,6 +11,26 @@
     }
 } 
 
+@mixin error-message-style {
+  background-color: $danger-color;
+  color: $ionic-text-color;
+  padding: 0.3rem;
+  border-radius: 1rem;
+  margin: 0rem;
+  position: relative;
+
+  &::before { //used to add child elements to the error message
+      content: '';
+      position: absolute; //positions the notch relative to the error message
+      top: -1rem; //positions the notch above the top edge of the error message
+      left: 50%; //positions the notch in the middle of the error message
+      transform: translateX(-50%); 
+      border-width: 0.5rem;
+      border-style: solid;
+      border-color: transparent transparent $danger-color transparent;
+    }
+}
+
 $font-size-large: 2rem;
 $font-size-medium: 1.1rem;
 $ionic-background-color: #3880ff;

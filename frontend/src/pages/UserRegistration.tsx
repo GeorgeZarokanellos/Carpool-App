@@ -6,7 +6,7 @@ import instance from '../AxiosConfig';
 import { useHistory } from 'react-router';
 import { useForm, Controller } from 'react-hook-form';
 import { TextFieldTypes } from '../interfacesAndTypes/Types';
-import { object, string } from 'yup';
+import { mixed, object, string } from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 //TODO add tooltip for profile image
@@ -21,7 +21,7 @@ interface UserRegistrationBody {
   email: string;
   phone: string;
   role?: string;
-  profilePicture?: Blob;
+  profilePicture: Blob;
 }
 
 export const UserRegistration: React.FC = () => {
@@ -47,7 +47,16 @@ export const UserRegistration: React.FC = () => {
     username: string().required('Username is required').max(50, 'Username cannot exceed 50 characters'),
     password: string().required('Password is required').min(3, 'Password cant be less than 3 characters').max(20, 'Password cannot exceed 20 characters').matches(/^[0-9A-Za-z!@#$%^&*_+]{3,20}$/, 'Password must be between 8 and 20 characters long'),
     email: string().required('Email is required').matches(/^[0-9A-Za-z._+]+@[0-9A-Za-z]+\.[a-zA-Z]{2,}$/, 'Email is invalid'),
-    phone: string().required('Phone number is required').matches(/^\d{10}$/, 'Phone number must be 10 digits long')
+    phone: string().required('Phone number is required').matches(/^\d{10}$/, 'Phone number must be 10 digits long'),
+    profilePicture: 
+    mixed<Blob>().
+    required('Profile picture is required')
+    .test('Is valid type', 'Image type is not valid', (value) => {
+      return value && ['image/jpeg', 'image/jpg', 'image/png'].includes((value as Blob).type);
+    })
+    .test('Filesize', 'The file is too large', (value) => {
+      return value && (value as Blob).size <= 5000000;  //in bytes
+    })
   });
   const { control, handleSubmit, formState: {errors} } = useForm({
     resolver: yupResolver(requestBodyValidationSchema),
@@ -136,12 +145,28 @@ export const UserRegistration: React.FC = () => {
               <div className='form-contents'>
                   <div className='profile-picture-container'>
                     {/* <IonLabel>Insert profile <br /> picture below</IonLabel> */}
-                    <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
-                        <IonAvatar >
-                          <img alt="Silhouette of a person's head" src={profilePicture? URL.createObjectURL(profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
-                        </IonAvatar>
-                      <input type='file' id='profilePicture' hidden required accept='image/*' onChange={e => setProfilePicture(e.target.files?.[0])} />
-                    </IonButton>
+                    <Controller
+                      name='profilePicture'
+                      control={control}
+                      render={({field}) => (
+                        <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
+                            <IonAvatar >
+                              <img alt="Silhouette of a person's head" src={profilePicture? URL.createObjectURL(profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
+                            </IonAvatar>
+                          <input 
+                            type='file' 
+                            id='profilePicture' 
+                            hidden 
+                            accept='image/*' 
+                            onChange={e => {
+                              const file = e.target.files?.[0] || null;
+                              setProfilePicture(e.target.files?.[0]);
+                              field.onChange(file); //to update the form state managed by the react hook form 
+                            }} />
+                        </IonButton>
+                      )}
+                    />
+                    {errors['profilePicture'] !== undefined && <p className='error-message'>{errors['profilePicture']?.message}</p>}
                   </div>  
                   {
                     inputFieldProperties.map((input_field, index) => {

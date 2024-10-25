@@ -82,12 +82,12 @@ app.post(`${basePath}/login`, async (req,res) => {
         const user = await User.findOne({where: {username}});
         if(user === null){
             console.log('Incorrect username!');
-            res.status(401).send('Incorrect username');
+            return res.status(401).send('Incorrect username');
         } else {
             const passwordsMatch = await bcrypt.compare(password, user.getDataValue('password'));
             if(!passwordsMatch){
                 console.log('Incorrect password!');
-                res.status(401).send('Incorrect password');
+                return res.status(401).send('Incorrect password');
             }
             //generate token and send it to the client
             const token = generateToken({
