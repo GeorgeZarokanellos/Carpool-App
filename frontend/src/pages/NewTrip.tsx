@@ -56,96 +56,173 @@ export const NewTrip: React.FC = () => {
     const [showErrorAlert, setShowErrorAlert] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
+    const retrieveDriverInfo = async () => {
+        try {
+            const response = await instance.get(`/user/${userIdInt}`);
+            setCurrentTripId(response.data.currentTripId);
+            setNextScheduledTripId(response.data.nextScheduledTripId);
+        } catch (error) {
+            console.log("Error retrieving driver info", error);
+        }
+    }
+
+    const retrieveStartingLocations = async () => {
+        try {
+            const response = await instance.get('/trips/start-locations')
+            setStartLocations(response.data);
+        } catch (error) {
+            console.log('Error retrieving start locations');
+        }
+    }
+
+    const compareDates = (tripDateToBeCompared: Date, tripDateToBeCreated: Date) => {
+        const differenceInMilliseconds = tripDateToBeCreated.getTime() - tripDateToBeCompared.getTime();
+        const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
+        if( differenceInMilliseconds >= twoHoursInMilliseconds)
+            return true
+        else 
+            return false
+    }
+
+    const startingHourOfNewTripIsValid = async () => {
+        if(currentTripId === null && nextScheduledTripId === null){
+            //if driver has no trips every hour is valid
+            return {isValid: true};
+        } else if (currentTripId !== null && nextScheduledTripId === null){
+            //if driver has current trip next trip should be at least 2 hours after current's trip starting time
+            try {
+                const currentTripInfo = await instance.get(`/trips/info/${currentTripId}`);
+                const tripDateToBeCompared = new Date(currentTripInfo.data.startingTime);
+                return {
+                    isValid: compareDates( tripDateToBeCompared, selectedDate),
+                    previousTripStartingTime: tripDateToBeCompared
+                }
+            } catch (error) {
+                console.log("Error retrieving current trip id info");
+            }
+
+        } else if(currentTripId !== null && nextScheduledTripId !== null){
+            //if driver has both current and next scheduled search for other trips 
+            try {
+                const userTrips = await instance.get(`/user/trips/${userIdInt}?currentTripId=${currentTripId}&nextScheduledTripId=${nextScheduledTripId}`)
+                console.log("User Trips", userTrips);
+                
+                if(userTrips.data.length === 0){
+                    //if no other trips exist next trip should be at least 2 hours after next scheduled trip's starting time
+                    const nextScheduledTripInfo = await instance.get(`/trips/info/${nextScheduledTripId}`);
+                    const tripDateToBeCompared = new Date(nextScheduledTripInfo.data.startingTime);
+                    return {
+                        isValid: compareDates(tripDateToBeCompared, selectedDate),
+                        previousTripStartingTime: tripDateToBeCompared
+                    }; 
+                } else {
+                    //if other trips exist the next trip should be at least 2 hours after the last trip of the user
+                    const length = userTrips.data.length;
+                    console.log("Last trip", userTrips.data[length - 1]);
+                    
+                    const tripDateToBeCompared = new Date(userTrips.data[length - 1].startingTime);
+                    return {
+                        isValid: compareDates(tripDateToBeCompared,selectedDate),
+                        previousTripStartingTime: tripDateToBeCompared
+                    };
+                }
+            } catch (error) {
+                console.log("Error retrieving next scheduled trip info or user trips");
+                
+            }
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             console.log("Check conditions: ", selectedStartLocation, selectedEndLocation, selectedDate, selectedPassengerNumber);
-            
-            if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate !== null ){
-                if(selectedPassengerNumber < 3){
-                    requestBody = {
-                        tripCreatorId: userIdInt,
-                        driverId: tripDriverId,
-                        startLocationId: selectedStartLocation.stopId,
-                        endLocationId: selectedEndLocation.stopId,
-                        startingTime: selectedDate.toISOString(),
-                        stops: [],
-                        passengers: passengerCredentials
-                    }
-                } else if (selectedPassengerNumber === 3) {
-                    requestBody = {
-                        tripCreatorId: userIdInt,
-                        driverId: tripDriverId,
-                        startLocationId: selectedStartLocation.stopId,
-                        endLocationId: selectedEndLocation.stopId,
-                        startingTime: selectedDate.toISOString(),
-                        stops: [],
-                        passengers: passengerCredentials,
-                        status: tripStatus.LOCKED
-                    }
-                }
-    
-                const response = await instance.post('/trips', requestBody);
-                if(response){
-                    console.log(response.data);
-                    const newTripId = response.data.tripId;
-                    console.log("Current trip id: ", currentTripId);
-                    console.log("Next scheduled trip id: ", nextScheduledTripId);
-                    
-                    if(currentTripId === null){
-                        //update the current trip of the user to the newly created one
-                        await instance.patch(`/user/${userIdInt}`, {
-                            currentTripId: newTripId
-                        }).
-                        then((response) => {
-                            console.log(response.data);
-                        })
-                        .catch((error) => {
-                            console.log("Failed to update current trip id of driver ",error);
-                        });
-                    } else if(nextScheduledTripId === null){
-                        //update the next scheduled trip of the driver to the newly created one if he has a current one already
-                        await instance.patch(`/driver/${userIdInt}`, {
-                            nextScheduledTripId: newTripId
-                        })
-                        .then((response) => {
-                            console.log(response.data);
-                        })
-                        .catch((error) => {
-                            console.log("Failed to update nextScheduledTripId of driver ",error);
-                        });
-                    }
-                    setTripCompletionMessage("Trip created successfully");
-                    setShowTripCompletedAlert(true);
-    
-                } else {
-                    console.log("Trip creation failed");
-                    setPassengerCredentials([]);
-                    setErrorMessage("Trip creation failed. Check the fields and try again");
-                    setShowErrorAlert(true);
-                }
+            const newHourIsValid = await startingHourOfNewTripIsValid();
+            if(newHourIsValid === undefined){
+                console.log("New hour is valid is undefined");
             } else {
-                setErrorMessage("Please fill in all the fields");
-                setShowErrorAlert(true);
+                if(!newHourIsValid.isValid){
+                    setErrorMessage(`The date and hour you have selected intersects with the starting time and duration of a previous trip(start's at ${newHourIsValid.previousTripStartingTime}).` + 
+                        ' Please create a trip that\'s at least 2 hours after the previous one!'
+                    );
+                    setShowErrorAlert(true);
+                } else {
+                    if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate !== null ){
+                        if(selectedPassengerNumber < 3){
+                            requestBody = {
+                                tripCreatorId: userIdInt,
+                                driverId: tripDriverId,
+                                startLocationId: selectedStartLocation.stopId,
+                                endLocationId: selectedEndLocation.stopId,
+                                startingTime: selectedDate.toISOString(),
+                                stops: [],
+                                passengers: passengerCredentials
+                            }
+                        } else if (selectedPassengerNumber === 3) {
+                            requestBody = {
+                                tripCreatorId: userIdInt,
+                                driverId: tripDriverId,
+                                startLocationId: selectedStartLocation.stopId,
+                                endLocationId: selectedEndLocation.stopId,
+                                startingTime: selectedDate.toISOString(),
+                                stops: [],
+                                passengers: passengerCredentials,
+                                status: tripStatus.LOCKED
+                            }
+                        }
+            
+                        const response = await instance.post('/trips', requestBody);
+                        if(response){
+                            console.log(response.data);
+                            const newTripId = response.data.tripId;
+                            console.log("Current trip id: ", currentTripId);
+                            console.log("Next scheduled trip id: ", nextScheduledTripId);
+                            
+                            if(currentTripId === null){
+                                //update the current trip of the user to the newly created one
+                                await instance.patch(`/user/${userIdInt}`, {
+                                    currentTripId: newTripId
+                                }).
+                                then((response) => {
+                                    console.log(response.data);
+                                })
+                                .catch((error) => {
+                                    console.log("Failed to update current trip id of driver ",error);
+                                });
+                            } else if(nextScheduledTripId === null){
+                                //update the next scheduled trip of the driver to the newly created one if he has a current one already
+                                await instance.patch(`/driver/${userIdInt}`, {
+                                    nextScheduledTripId: newTripId
+                                })
+                                .then((response) => {
+                                    console.log(response.data);
+                                })
+                                .catch((error) => {
+                                    console.log("Failed to update nextScheduledTripId of driver ",error);
+                                });
+                            }
+                            setTripCompletionMessage("Trip created successfully");
+                            setShowTripCompletedAlert(true);
+            
+                        } else {
+                            console.log("Trip creation failed");
+                            setPassengerCredentials([]);
+                            setErrorMessage("Trip creation failed. Check the fields and try again");
+                            setShowErrorAlert(true);
+                        }
+                    } else {
+                        setErrorMessage("Please fill in all the fields");
+                        setShowErrorAlert(true);
+                    }
+                }
             }
+            
 
         } catch (error) {
             console.log("Error creating trip or updating user", error);
         }
 
-    }
-    
-    const retrieveDriverInfo = async () => {
-        await instance.get(`/user/${userIdInt}`)
-        .then((response) => {
-            console.log("Driver info: ", response.data);
-            setCurrentTripId(response.data.currentTripId);
-            setNextScheduledTripId(response.data.nextScheduledTripId);
-        })
-        .catch((error) => {
-            console.log("Error retrieving driver info", error);
-        });
     }
 
     const updatePassengerCredentials = (firstName: string, lastName: string) => {
@@ -153,10 +230,7 @@ export const NewTrip: React.FC = () => {
     }
 
     useEffect(() => {
-        instance.get('/trips/start-locations')
-        .then(response => {
-            setStartLocations(response.data);
-        })
+        retrieveStartingLocations();
     },[]);
     
     useEffect(() => {
