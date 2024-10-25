@@ -46,11 +46,11 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
             const role: string = await checkIfRecipientIsDriver();
             const promises = [
                 //* update notification to rejected
-                instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                instance.patch(`/notifications/${notificationDetails.notificationId}`, {
                     status: 'declined'
                 }),
                 //* update user's pending request trip id to null
-                instance.put(`/user/${notificationDetails.passengerId}`, {
+                instance.patch(`/user/${notificationDetails.passengerId}`, {
                     pendingRequestTripId: null
                 }),
                 //* create notification for the user that requested to join the trip
@@ -136,13 +136,13 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
 
                 updatePromises.push(
                     //* update user's current trip and pending request trip id to null
-                    instance.put(`/user/${notificationDetails.passengerId}`, {
+                    instance.patch(`/user/${notificationDetails.passengerId}`, {
                         currentTripId: notificationDetails.tripId,
                         pendingRequestTripId: null
                     }),
     
                     //* update notification to accepted
-                    instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                    instance.patch(`/notifications/${notificationDetails.notificationId}`, {
                         status: 'accepted'
                     }),
                     
@@ -255,7 +255,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                     await instance.patch(`/user/${userId}`,{
                         overallPoints: promises.length
                     });
-                    await instance.put(`/notifications/${notificationDetails.notificationId}`, {
+                    await instance.patch(`/notifications/${notificationDetails.notificationId}`, {
                         status: 'reviewed'
                     });
                     setRatingSubmitMessage(`Your reviews have been submitted and you have been awarded ${promises.length} points!`);
