@@ -261,9 +261,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
 
   const checkAvailability = () => {
       if(tripData && page === 'detailedInfo'){
-        console.log('User is in trip', userIsInTrip);
-        console.log('Request made', requestMade);
-        
          if (!userIsInTrip){
           if(!requestMade && userPendingRequestTripId === null){
             setAvailabilityMessage('Request to join');
@@ -360,7 +357,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   type: 'request'
               });
   
-              await instance.put(`/user/${userId}`, {
+              await instance.patch(`/user/${userId}`, {
                 pendingRequestTripId: tripData.tripId
               });
 
@@ -379,11 +376,8 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
 
   useEffect(() => {
     fetchUsersInfo();
-  }, []);
-
-  useEffect(() => {
-    checkAvailability();
     checkIfUserIsInTrip();
+    checkAvailability();
     filterAvailableStops();
   }, [userIsInTrip,requestMade, tripData]);
 

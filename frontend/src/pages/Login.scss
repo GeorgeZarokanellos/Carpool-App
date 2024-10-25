@@ -24,6 +24,10 @@
                 .input-field {
                     font-size: 1.35rem;
                 }
+
+                .error-message {
+                    @include error-message-style();
+                }
                 
             }
     
