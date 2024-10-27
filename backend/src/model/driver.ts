@@ -16,8 +16,13 @@ Driver.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'license_id'
-    }
-    //TODO add license id field
+    },
+    nextScheduledTripId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: 'next_scheduled_trip_id',
+        defaultValue: null
+    },
 }, 
 {
     sequelize,

@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver } from "../model/association";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, response } from "express";
 import { Transaction } from "sequelize";
 import sequelize from '../database/connect_to_db';
 import { updatedUserInterface } from "../interface/interface";
@@ -11,27 +11,28 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     await sequelize.transaction(async (transaction: Transaction) => {
         const userId: string = req.params.userId;
         const updateDetails: updatedUserInterface = req.body;
-        const type = req.query.type;
-        const user = await User.findByPk(userId, {transaction});
-        if(user !== null ){
-            if (type === 'points' && updateDetails.overallPoints !== undefined){
-                const newOverallPoints = user.overallPoints + updateDetails.overallPoints;
-                updateDetails.overallPoints = newOverallPoints;
+        const user = await User.findByPk(userId, { transaction });
+
+        if (user !== null) {
+            // If overallPoints is provided, add it to the existing points
+            if (updateDetails.overallPoints !== undefined) {
+                updateDetails.overallPoints = user.overallPoints + updateDetails.overallPoints;
             }
-            await user.update(updateDetails, {transaction});
+
+            await user.update(updateDetails, { transaction });
             res.status(200).json({ message: 'User updated successfully', user });
         } else {
             res.status(404).send('User not found');
         }
     })
-    .catch((err) => {
-        console.error(err);
-        if(typeof err === 'string'){
-            console.log("There was an error updating the user: " + err);
-            res.status(500).send('Error updating user: ' + err);
-        } else if (err instanceof Error){
-            console.log(err.message); 
-            res.status(500).send('Error updating user: ' + err.message);
+    .catch((error) => {
+        console.error(error);
+        if (typeof error === 'string') {
+            console.log("There was an error updating the user: " + error);
+            res.status(500).send('Error updating user: ' + error);
+        } else if (error instanceof Error) {
+            console.log(error.message);
+            res.status(500).send('Error updating user: ' + error.message);
         }
     });
 };
@@ -178,57 +179,53 @@ export const retrieveParticipatedTrips = async (userId: string): Promise<Trip[]>
     }
 }
 
-export const retrieveCurrentTrips = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const retrieveUserTrips = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId: string = req.params.userId;
-
+    const currentTripId = req.query.currentTripId;
+    const nextScheduledTripId = req.query.nextScheduledTripId;
     try {
         const currentUserTrips = await Trip.findAll({
             where : {
                 [Op.and] : [
                     {
-                        [Op.or]: [
-                            {driverId: Number(userId)},
-                            {'$tripPassengers.passenger_id$': Number(userId)}
-                        ]
+                       driverId: Number(userId),
+                    },
+                    {
+                        tripId: {
+                            [Op.and]: [
+                                {
+                                    [Op.ne]: currentTripId
+                                },
+                                {
+                                    [Op.ne]: nextScheduledTripId
+                                }
+                            ]
+                        }
                     },
                     {
                         status: 'planning'
+                    },
+                    {
+                        //get trips that are scheduled to start after the current time
+                        startingTime: {
+                            [Op.gte]: new Date()
+                        }
                     }
                 ]
             },
-            include: [
-                {
-                    model: TripPassenger,
-                    as: 'tripPassengers',
-                    attributes: ['passengerId'],
-                },
-                {
-                    model: Driver,
-                    as: 'driver',
-                    include: [
-                        {
-                            model: User,
-                            as: 'user',
-                            attributes: ['firstName', 'lastName']
-                        }
-                    ]
-                },
-                {
-                    model :User,
-                    as: 'tripCreator',
-                    attributes: ['firstName', 'lastName']
-                }
+            order: [
+                ['startingTime', 'ASC']
             ]
         });
         res.status(200).json(currentUserTrips);
-    } catch (err) {
-        console.error(err);
-            if(typeof err === 'string'){
-                console.log("There was an error retrieving the current trips: " + err);
-                res.status(500).send('Error retrieving the current trips: ' + err);
-            } else if (err instanceof Error){
-                console.log(err.message); 
-                res.status(500).send('Error retrieving the current trips: ' + err.message);
+    } catch (error) {
+        console.error(error);
+            if(typeof error === 'string'){
+                console.log("There was an error retrieving the current trips: " + error);
+                res.status(500).send('Error retrieving the current trips: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving the current trips: ' + error.message);
             }
     }
 }
@@ -238,21 +235,35 @@ export const retrieveUserInfo = async (req: Request, res: Response, next: NextFu
 
     try {
         const userData = await User.findByPk(userId, {
-            attributes: ['firstName', 'lastName', 'overallRating', 'role', 'currentTripId']
+            attributes: ['firstName', 'lastName', 'overallRating', 'role', 'currentTripId', 'pendingRequestTripId']
         });
-        if(userData !== null){
-            res.status(200).json(userData);
+        if(userData){
+            let responseData = userData.toJSON();
+            let driverData;
+            if(userData.role === 'driver'){
+                driverData = await Driver.findByPk(userId, {
+                    attributes: ['nextScheduledTripId']
+                });
+            }
+            if(driverData){
+                responseData = {
+                    ...responseData,
+                    ...driverData.toJSON()
+                }
+            }
+            res.status(200).json(responseData);
         } else {
-            res.status(404).send('User not found');
+            res.send(404).send('User not found');
         }
-    } catch (err) {
-        console.error(err);
-            if(typeof err === 'string'){
-                console.log("There was an error retrieving the user data: " + err);
-                res.status(500).send('Error retrieving the user data: ' + err);
-            } else if (err instanceof Error){
-                console.log(err.message); 
-                res.status(500).send('Error retrieving the user data: ' + err.message);
+        
+    } catch (error) {
+        console.error(error);
+            if(typeof error === 'string'){
+                console.log("There was an error retrieving the user data: " + error);
+                res.status(500).send('Error retrieving the user data: ' + error);
+            } else if (error instanceof Error){
+                console.log(error.message); 
+                res.status(500).send('Error retrieving the user data: ' + error.message);
             }
     }
 }
@@ -263,7 +274,7 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
         const tripDriver = await User.findByPk(userId);
         if(tripDriver !== null && tripDriver.role === 'driver'){
             //get the path to the folder containing the images
-            const imageFolder = path.join(__dirname, `../../static/uploads/${tripDriver.username}`);
+            const imageFolder = path.join(__dirname, `../../static/uploads/${tripDriver.userId}`);
             
             if(!fs.existsSync(imageFolder)){
                 res.status(404).send('No images found');
@@ -274,7 +285,7 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
             //filter only the images
             const jpgsFilenames = imageFilenames.filter(filename => filename.endsWith('.jpg') || filename.endsWith('.jpeg'));
             //construct the urls that the client can use to access the images (include /api for remote)
-            const imageUrls = jpgsFilenames.map(filename => `${req.protocol}://${req.get('host')}/static/uploads/${tripDriver.username}/${filename}`);
+            const imageUrls = jpgsFilenames.map(filename => `${req.protocol}://${req.get('host')}/static/uploads/${tripDriver.userId}/${filename}`);
             if(imageUrls.length !== 0){
                 res.status(200).json(imageUrls);
             } else {

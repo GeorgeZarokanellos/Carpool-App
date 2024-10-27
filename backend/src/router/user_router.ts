@@ -1,9 +1,9 @@
 import express, { type Router } from "express";
-import { retrieveCurrentTrips, retrieveUserInfo, retrieveVehicleImages, updateUser } from "../controller/user_controller";
+import { retrieveUserTrips, retrieveUserInfo, retrieveVehicleImages, updateUser } from "../controller/user_controller";
 
 const router: Router = express.Router();
-router.get('/trips/:userId', retrieveCurrentTrips);
+router.get('/trips/:userId', retrieveUserTrips);
 router.get('/:userId', retrieveUserInfo);
 router.get('/vehicle/:userId', retrieveVehicleImages);
-router.put('/:userId', updateUser);
+router.patch('/:userId', updateUser);
 export default router;

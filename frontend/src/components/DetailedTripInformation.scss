@@ -7,14 +7,10 @@ ion-content{
     height: 100%;
 
     .map-container{
-        // height: 40%;
-        // max-height: 40%;        
-        flex: 0 0 40%;  //grow shrink basis
+        height: 40%;
     }
     
     .grid-contents{
-        // max-height: 65%;
-        // height: 65%;
         flex: 1;
         overflow-y: scroll;
         background-color: $trip-info-background-color;

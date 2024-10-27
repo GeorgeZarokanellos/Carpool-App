@@ -19,7 +19,6 @@ const localPath = '/home/george/Desktop/Carpool-App/backend/static/uploads';
 const remotePath = '/home/zaro/backend/static/uploads';
 
 export const uploadProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    //multer uses memory storage
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
             cb(null, localPath);
@@ -49,7 +48,6 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
                         console.warn("No file uploaded");
                         reject(new Error("No file uploaded"));
                     }
-                    //TODO: add error handling
                 }
             });
         });
@@ -67,9 +65,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             let fileBuffer;
             const {universityId, firstName, lastName, username, password, email, role, phone}: addUserRequestBodyInterface = req.body;
             const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role'];
-            // const uniIdInt = parseInt(universityId,10); //convert to int because multipart only sends strings
             let profilePicture: Buffer;
-            // console.log(req.body);
             for (const field of requiredFields){
                 if(req.body[field] === undefined || req.body[field] === null || req.body[field] === ''){
                     console.log(`${field}`);
@@ -77,8 +73,6 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                     return;
                 }
             }
-
-
             // check if the username|uniId|email already exists
             const existingUser = await User.findOne(
                 {where: {

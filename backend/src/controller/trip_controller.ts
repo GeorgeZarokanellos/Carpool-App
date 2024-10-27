@@ -488,4 +488,20 @@ export const retrieveAllStartLocations = async (req: Request, res: Response, nex
             }
     }
 }
+
+export const retrieveTripStatusAndStartingTime = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const response = await Trip.findByPk(req.params.id ,{
+            attributes: ['status', 'startingTime']
+        });
+
+        if(response === null){
+            throw new Error(`Trip with id ${req.params.id} not found!`);
+        } else {
+            res.status(200).send(response);
+        }
+    } catch (error) {
+        res.status(500).send('Error retrieving trip status: ' + error);
+    }
+}
 //#endregion

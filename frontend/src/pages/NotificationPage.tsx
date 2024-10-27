@@ -1,5 +1,5 @@
 import { IonContent, IonHeader, IonPage, IonText, IonTitle } from "@ionic/react";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import './NotificationPage.scss';
 import { NotificationDisplay } from "../components/NotificationDisplay";
@@ -7,9 +7,10 @@ import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 
 interface NotificationPageProps {
     refreshKey: number;
+    setNotificationsNumber: Dispatch<SetStateAction<number>>;
 }
 
-export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) => {
+export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey, setNotificationsNumber}) => {
     const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
     const [filteredNotifications, setFilteredNotifications] = useState<NotificationInterface[]>([]);
 
@@ -32,6 +33,7 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
             .then(response => {
                 // console.log(response.data);
                 setNotifications(response.data);
+                setNotificationsNumber(response.data.length);
             })
             .catch(error => {
                 console.log("Error retrieving notifications", error);

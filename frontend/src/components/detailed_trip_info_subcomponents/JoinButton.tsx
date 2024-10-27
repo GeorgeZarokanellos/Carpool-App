@@ -1,8 +1,7 @@
-import { IonAlert, IonButton, IonText } from "@ionic/react";
-import React from "react";
+import { IonAlert, IonButton } from "@ionic/react";
+import React, { useEffect } from "react";
 import { UserSelectStopModal } from "../UserSelectStopModal";
 import { Stop } from "../../interfacesAndTypes/Types";
-import { useHistory } from "react-router";
 
 interface JoinButtonProps {
     userIsInTrip: boolean;
@@ -11,6 +10,7 @@ interface JoinButtonProps {
     endLocationId: number;
     availableStops: Stop[];
     joinRequestSentAlert: boolean;
+    userRequestedToJoinInTrip: boolean;
     setStopSelectModal: (value: boolean) => void;
     setSelectedStop: (value: Stop) => void;
     setJoinRequestSentAlert: (value: boolean) => void;
@@ -23,14 +23,18 @@ export const JoinButton: React.FC<JoinButtonProps> = ({
     endLocationId,
     availableStops,
     joinRequestSentAlert,
+    userRequestedToJoinInTrip,
     setStopSelectModal,
     setSelectedStop,
     setJoinRequestSentAlert,
 }) => {
-    const history = useHistory();
+    useEffect(() => {
+        console.log("Message", availabilityMessage);
+    }, [availabilityMessage]);
+    
    return (
     <div className="join-button">
-        <IonButton disabled={userIsInTrip} shape="round" color="secondary"  onClick={() => { setStopSelectModal(true) }}>
+        <IonButton disabled={userIsInTrip || userRequestedToJoinInTrip} shape="round" color="secondary"  onClick={() => { setStopSelectModal(true) }}>
             {availabilityMessage}
         </IonButton>
         <UserSelectStopModal
@@ -47,7 +51,6 @@ export const JoinButton: React.FC<JoinButtonProps> = ({
             isOpen={joinRequestSentAlert}
             onDidDismiss={() => {
             setJoinRequestSentAlert(false);
-            history.goBack();
             }}
             message={'Your request has been sent to the driver!'}
             buttons={['OK']}
