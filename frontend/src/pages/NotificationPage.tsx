@@ -1,5 +1,5 @@
 import { IonContent, IonHeader, IonPage, IonText, IonTitle } from "@ionic/react";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import './NotificationPage.scss';
 import { NotificationDisplay } from "../components/NotificationDisplay";
@@ -7,6 +7,7 @@ import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 
 interface NotificationPageProps {
     refreshKey: number;
+    setNewNotificationsNumber: Dispatch<SetStateAction<number>>;
 }
 
 export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) => {

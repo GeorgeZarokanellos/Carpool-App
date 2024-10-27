@@ -181,7 +181,8 @@ export const retrieveParticipatedTrips = async (userId: string): Promise<Trip[]>
 
 export const retrieveUserTrips = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId: string = req.params.userId;
-    const nextScheduledTripId = req.params.nextScheduledTripId;
+    const currentTripId = req.query.currentTripId;
+    const nextScheduledTripId = req.query.nextScheduledTripId;
     try {
         const currentUserTrips = await Trip.findAll({
             where : {
@@ -191,7 +192,14 @@ export const retrieveUserTrips = async (req: Request, res: Response, next: NextF
                     },
                     {
                         tripId: {
-                            [Op.ne]: nextScheduledTripId
+                            [Op.and]: [
+                                {
+                                    [Op.ne]: currentTripId
+                                },
+                                {
+                                    [Op.ne]: nextScheduledTripId
+                                }
+                            ]
                         }
                     },
                     {
