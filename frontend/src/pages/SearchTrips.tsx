@@ -14,7 +14,6 @@ interface searchTripProps {
 const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
-  const [userCurrentTripId , setUserCurrentTripId] = useState<number | null>();
   // const [isLoading, setIsLoading] = useState<boolean>(false); //TODO find a way for the loading to work correctly
   const userRole = localStorage.getItem('role');
   const userId = localStorage.getItem('userId');
@@ -33,7 +32,6 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
         const response = await instance.get(`/trips?${queryParams.toString()}`)
         console.log("Response from server", response.data);
         if(response.data.length > 0){
-          console.log("Response data", response.data);
           setTrips(response.data);
           setFilteredResults(response.data);
           
@@ -48,14 +46,10 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
 
   const handleSearch = (event: CustomEvent) => {
     if(event.detail && event.detail.value === ""){
-      console.log("Event content empty", event.detail.value);
       setFilteredResults(trips);
-      // console.log("Filtered results", filteredResults);
     }
     else {
       setFilteredResults(trips.filter(trip => trip.startLocation.stopLocation.toLowerCase().includes(event.detail.value.toLowerCase())));
-      // console.log("filtered results", filteredResults);
-      
     }
   }
 
@@ -67,7 +61,6 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
     try {
       const response = await instance.get(`/user/${userId}`);
       console.log("User info response", response.data);
-      setUserCurrentTripId(response.data.currentTripId);
     } catch (error) {
       console.log("Error retrieving user info", error);
       return null;
@@ -123,7 +116,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
           </div>
         )}
       </IonContent>
-      {userRole === 'driver' && userCurrentTripId === null &&(
+      {userRole === 'driver' &&(
         <div className='create-trip-button-container'>
           <IonButton shape='round' routerLink="/main/create-trip">
             Create a new trip

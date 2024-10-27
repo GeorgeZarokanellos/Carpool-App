@@ -7,6 +7,8 @@ import { useHistory } from "react-router";
 import { PassengerCredentials } from "../components/PassengerCredentials";
 import { tripStatus } from "../interfacesAndTypes/Types";
 
+//TODO nextScheduledTripId 
+
 interface requestBody {
     tripCreatorId: number,
     driverId: number | null,
@@ -24,10 +26,12 @@ export const NewTrip: React.FC = () => {
     //screen dimensions
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-
+    //local storage
     const userIdString = localStorage.getItem('userId');
     const userIdInt = parseInt(userIdString as string, 10);
-
+    //driver info
+    const [currentTripId, setCurrentTripId] = useState<number | null>(null);
+    const [nextScheduledTripId, setNextScheduledTripId] = useState<number | null>(null);
     const [startLocations, setStartLocations] = useState<Stop[]>([]);
     const [tripDriverId, setTripDriverId] = useState<number | null>(null);
     //start end location picker
@@ -46,99 +50,198 @@ export const NewTrip: React.FC = () => {
     const [passengerCredentials, setPassengerCredentials] = useState<{firstName: string, lastName: string}[]>([]);
     //hour picker
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    //additional stops
-    const [stops, setStops] = useState<Stop[]>([]);
     //alert
     const [showTripCompletedAlert, setShowTripCompletedAlert] = useState(false);
     const [tripCompletionMessage, setTripCompletionMessage] = useState<string>('');
     const [showErrorAlert, setShowErrorAlert] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
+    const retrieveDriverInfo = async () => {
+        try {
+            const response = await instance.get(`/user/${userIdInt}`);
+            setCurrentTripId(response.data.currentTripId);
+            setNextScheduledTripId(response.data.nextScheduledTripId);
+        } catch (error) {
+            console.log("Error retrieving driver info", error);
+        }
+    }
+
+    const retrieveStartingLocations = async () => {
+        try {
+            const response = await instance.get('/trips/start-locations')
+            setStartLocations(response.data);
+        } catch (error) {
+            console.log('Error retrieving start locations');
+        }
+    }
+
+    const compareDates = (tripDateToBeCompared: Date, tripDateToBeCreated: Date) => {
+        const differenceInMilliseconds = tripDateToBeCreated.getTime() - tripDateToBeCompared.getTime();
+        const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
+        if( differenceInMilliseconds >= twoHoursInMilliseconds)
+            return true
+        else 
+            return false
+    }
+
+    const startingHourOfNewTripIsValid = async () => {
+        if(currentTripId === null && nextScheduledTripId === null){
+            //if driver has no trips every hour is valid
+            return {isValid: true};
+        } else if (currentTripId !== null && nextScheduledTripId === null){
+            //if driver has current trip next trip should be at least 2 hours after current's trip starting time
+            try {
+                const currentTripInfo = await instance.get(`/trips/info/${currentTripId}`);
+                const tripDateToBeCompared = new Date(currentTripInfo.data.startingTime);
+                return {
+                    isValid: compareDates( tripDateToBeCompared, selectedDate),
+                    previousTripStartingTime: tripDateToBeCompared
+                }
+            } catch (error) {
+                console.log("Error retrieving current trip id info");
+            }
+
+        } else if(currentTripId !== null && nextScheduledTripId !== null){
+            //if driver has both current and next scheduled search for other trips 
+            try {
+                const userTrips = await instance.get(`/user/trips/${userIdInt}?currentTripId=${currentTripId}&nextScheduledTripId=${nextScheduledTripId}`)
+                console.log("User Trips", userTrips);
+                
+                if(userTrips.data.length === 0){
+                    //if no other trips exist next trip should be at least 2 hours after next scheduled trip's starting time
+                    const nextScheduledTripInfo = await instance.get(`/trips/info/${nextScheduledTripId}`);
+                    const tripDateToBeCompared = new Date(nextScheduledTripInfo.data.startingTime);
+                    return {
+                        isValid: compareDates(tripDateToBeCompared, selectedDate),
+                        previousTripStartingTime: tripDateToBeCompared
+                    }; 
+                } else {
+                    //if other trips exist the next trip should be at least 2 hours after the last trip of the user
+                    const length = userTrips.data.length;
+                    console.log("Last trip", userTrips.data[length - 1]);
+                    
+                    const tripDateToBeCompared = new Date(userTrips.data[length - 1].startingTime);
+                    return {
+                        isValid: compareDates(tripDateToBeCompared,selectedDate),
+                        previousTripStartingTime: tripDateToBeCompared
+                    };
+                }
+            } catch (error) {
+                console.log("Error retrieving next scheduled trip info or user trips");
+                
+            }
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             console.log("Check conditions: ", selectedStartLocation, selectedEndLocation, selectedDate, selectedPassengerNumber);
-            
-            if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate !== null ){
-                if(selectedPassengerNumber < 3){
-                    requestBody = {
-                        tripCreatorId: userIdInt,
-                        driverId: tripDriverId,
-                        startLocationId: selectedStartLocation.stopId,
-                        endLocationId: selectedEndLocation.stopId,
-                        startingTime: selectedDate.toISOString(),
-                        stops: stops,
-                        passengers: passengerCredentials
-                    }
-                } else if (selectedPassengerNumber === 3) {
-                    requestBody = {
-                        tripCreatorId: userIdInt,
-                        driverId: tripDriverId,
-                        startLocationId: selectedStartLocation.stopId,
-                        endLocationId: selectedEndLocation.stopId,
-                        startingTime: selectedDate.toISOString(),
-                        stops: stops,
-                        passengers: passengerCredentials,
-                        status: tripStatus.LOCKED
-                    }
-                }
-    
-                const response = await instance.post('/trips', requestBody);
-                if(response){
-                    console.log(response.data);
-                    const newTripId = response.data.tripId;
-    
-                    //update the current trip of the user to the newly created one
-                    await instance.put(`/user/${userIdInt}`, {
-                        currentTripId: newTripId
-                    }).
-                    then((response) => {
-                        console.log(response.data);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-                    setTripCompletionMessage("Trip created successfully");
-                    setShowTripCompletedAlert(true);
-    
-                } else {
-                    console.log("Trip creation failed");
-                    setPassengerCredentials([]);
-                    setErrorMessage("Trip creation failed. Check the fields and try again");
-                    setShowErrorAlert(true);
-                }
+            const newHourIsValid = await startingHourOfNewTripIsValid();
+            if(newHourIsValid === undefined){
+                console.log("New hour is valid is undefined");
             } else {
-                setErrorMessage("Please fill in all the fields");
-                setShowErrorAlert(true);
+                if(!newHourIsValid.isValid){
+                    setErrorMessage(`The date and hour you have selected intersects with the starting time and duration of a previous trip(start's at ${newHourIsValid.previousTripStartingTime}).` + 
+                        ' Please create a trip that\'s at least 2 hours after the previous one!'
+                    );
+                    setShowErrorAlert(true);
+                } else {
+                    if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate !== null ){
+                        if(selectedPassengerNumber < 3){
+                            requestBody = {
+                                tripCreatorId: userIdInt,
+                                driverId: tripDriverId,
+                                startLocationId: selectedStartLocation.stopId,
+                                endLocationId: selectedEndLocation.stopId,
+                                startingTime: selectedDate.toISOString(),
+                                stops: [],
+                                passengers: passengerCredentials
+                            }
+                        } else if (selectedPassengerNumber === 3) {
+                            requestBody = {
+                                tripCreatorId: userIdInt,
+                                driverId: tripDriverId,
+                                startLocationId: selectedStartLocation.stopId,
+                                endLocationId: selectedEndLocation.stopId,
+                                startingTime: selectedDate.toISOString(),
+                                stops: [],
+                                passengers: passengerCredentials,
+                                status: tripStatus.LOCKED
+                            }
+                        }
+            
+                        const response = await instance.post('/trips', requestBody);
+                        if(response){
+                            console.log(response.data);
+                            const newTripId = response.data.tripId;
+                            console.log("Current trip id: ", currentTripId);
+                            console.log("Next scheduled trip id: ", nextScheduledTripId);
+                            
+                            if(currentTripId === null){
+                                //update the current trip of the user to the newly created one
+                                await instance.patch(`/user/${userIdInt}`, {
+                                    currentTripId: newTripId
+                                }).
+                                then((response) => {
+                                    console.log(response.data);
+                                })
+                                .catch((error) => {
+                                    console.log("Failed to update current trip id of driver ",error);
+                                });
+                            } else if(nextScheduledTripId === null){
+                                //update the next scheduled trip of the driver to the newly created one if he has a current one already
+                                await instance.patch(`/driver/${userIdInt}`, {
+                                    nextScheduledTripId: newTripId
+                                })
+                                .then((response) => {
+                                    console.log(response.data);
+                                })
+                                .catch((error) => {
+                                    console.log("Failed to update nextScheduledTripId of driver ",error);
+                                });
+                            }
+                            setTripCompletionMessage("Trip created successfully");
+                            setShowTripCompletedAlert(true);
+            
+                        } else {
+                            console.log("Trip creation failed");
+                            setPassengerCredentials([]);
+                            setErrorMessage("Trip creation failed. Check the fields and try again");
+                            setShowErrorAlert(true);
+                        }
+                    } else {
+                        setErrorMessage("Please fill in all the fields");
+                        setShowErrorAlert(true);
+                    }
+                }
             }
+            
 
         } catch (error) {
             console.log("Error creating trip or updating user", error);
-            
         }
 
     }
-    
+
     const updatePassengerCredentials = (firstName: string, lastName: string) => {
         setPassengerCredentials([...passengerCredentials, {firstName: firstName, lastName: lastName}]);
     }
 
     useEffect(() => {
-        instance.get('/trips/start-locations')
-        .then(response => {
-            console.log("Start locations: ", response.data);
-            setStartLocations(response.data);
-        })
+        retrieveStartingLocations();
     },[]);
-
-    useEffect(() => {
-        console.log("Request Body: ", requestBody);
-    }, [passengerCredentials]);
     
     useEffect(() => {
         setTripDriverId(userIdInt);
     }, [userIdInt]);
+
+    useEffect(() => {
+        if(userIdInt){
+            retrieveDriverInfo();
+        }
+    },[userIdInt]);
 
     return (
         <div>
@@ -193,8 +296,6 @@ export const NewTrip: React.FC = () => {
                                             text: "Confirm",
                                             role: "Confirm",
                                             handler: (value) => {
-                                                console.log("Selected stop:", value['Start Locations'].value);
-                                                
                                                 setSelectedStartLocation({loc: value['Start Locations'].text, stopId: value['Start Locations'].value});
                                                 if(value['Start Locations'].text !== 'Prytaneia'){
                                                     const prytaneia = startLocations.find(stop => stop.stopLocation === 'Prytaneia');
@@ -238,8 +339,6 @@ export const NewTrip: React.FC = () => {
                                             text: "Confirm",
                                             role: "Confirm",
                                             handler: (value) => {
-                                                console.log("Selected stop:", value['End Locations'].value);
-                                                
                                                 setSelectedEndLocation({loc: value['End Locations'].text, stopId: value['End Locations'].value});
                                                 setShowEndLocationPicker(false);
                                             }
@@ -323,7 +422,6 @@ export const NewTrip: React.FC = () => {
                                     {
                                         selectedDate ? (
                                             <p style={{margin: 0}}>
-                                                {/* {console.log(selectedDate.toString())} */}
                                                 {'At ' + selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
                                             </p>
                                         ) : "Select date and time below"
@@ -336,7 +434,6 @@ export const NewTrip: React.FC = () => {
                                     min={new Date(new Date().setHours(new Date().getHours())).toISOString()}
                                     hourCycle="h23"
                                     onIonChange={(e) => {
-                                        console.log(e.detail.value);
                                         if(typeof e.detail.value === 'string'){                                                                                        
                                             setSelectedDate(new Date(e.detail.value.toString()));
                                             console.log("Selected datetime: ", selectedDate);

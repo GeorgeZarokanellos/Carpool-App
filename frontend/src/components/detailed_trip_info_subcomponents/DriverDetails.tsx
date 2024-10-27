@@ -17,7 +17,7 @@ export const DriverDetails: React.FC<DriverDetailsProps> = ({driver}) => {
               <IonLabel>Driver</IonLabel>
             </IonItem>
             <IonItem lines="none">
-              <IonAvatar style={{ marginRight: '1rem', width: "50%" }}>
+              <IonAvatar style={{ marginRight: '1rem', width: "50%" , maxWidth: '3.5rem'}}>
                 <img
                   src={driver ? arrayBufferTo64String(driver.user.profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg"}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}

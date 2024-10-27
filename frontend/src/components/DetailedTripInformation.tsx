@@ -1,4 +1,4 @@
-import { IonAlert, IonButton, IonCol, IonContent, IonGrid, IonLabel, IonLoading, IonRow, IonText, IonTitle } from "@ionic/react";
+import { IonAlert, IonButton, IonCol, IonContent, IonGrid, IonLabel, IonLoading, IonRow, IonTitle } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import { ExtendedTrip, Stop } from "../interfacesAndTypes/Types";
 import instance from "../AxiosConfig";
@@ -16,9 +16,10 @@ import { VehicleImagesDisplay } from "./detailed_trip_info_subcomponents/Vehicle
 interface DetailedTripInfoProps {
     clickedTripId: number;
     page: string;
+    refreshKey?: number;
 }
 
-export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ clickedTripId, page }) => {
+export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ clickedTripId, page, refreshKey }) => {
   const [tripData, setTripData] = useState<ExtendedTrip>();
   const [vehicleImages, setVehicleImages] = useState<string[]>([]);
   //join request modal
@@ -33,11 +34,12 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   //notification request checks
   const [userIsInTrip, setUserIsInTrip] = useState(false);
   const [requestMade, setRequestMade] = useState(false);
+  const [userPendingRequestTripId, setUserPendingRequestTripId] = useState<number | null>(null);
   //bottom section buttons and messages
   const [currentTripId, setCurrentTripId] = useState(null);
   const [availabilityMessage, setAvailabilityMessage] = useState('');
   const [tripDriverCurrentUser, setTripDriverCurrentUser] = useState(false);
-  const [driverWantsToEndTrip, setDriverWantsToEndTrip] = useState(false);
+  const [driverWantsToCompleteTrip, setDriverWantsToCompleteTrip] = useState(false);
   const [driverWantsToCancelTrip, setDriverWantsToCancelTrip] = useState(false);
   const [reviewNotificationsSent, setReviewNotificationsSent] = useState(false);
   //loading
@@ -77,141 +79,180 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       }
   }
 
+  const checkForNextScheduledTrip = async (userId: string | number, points?: number) => {
+    try {
+      const userResponse = await instance.get(`/user/${userId}`);
+      console.log("User response from check for next scheduled trip ",userResponse);
+      
+      const {nextScheduledTripId} = userResponse.data;
+  
+      if(nextScheduledTripId !== null){
+        let updateDetails;
+        const promises = [];
+        if(points === undefined)  //trip cancellation case
+          updateDetails = {currentTripId: nextScheduledTripId};
+        else  //trip completion case
+          updateDetails = {currentTripId: nextScheduledTripId, overallPoints: points};
+        //update the current trip of the user to the next scheduled trip
+        promises.push(instance.patch(`/user/${userId}`, updateDetails));
+  
+        //update the next scheduled trip of the user to null or the next closest trip
+        const userTripsResponse = await instance.get(`/user/trips/${userId}?currentTripId=${currentTripId}&nextScheduledTripId=${nextScheduledTripId}`);
+        console.log("User trips response", userTripsResponse);
+        
+        if(userTripsResponse.data.length === 0){
+          promises.push(await instance.patch(`/driver/${userId}`, {nextScheduledTripId: null}));
+        } else {
+          promises.push(await instance.patch(`/driver/${userId}`, {nextScheduledTripId: userTripsResponse.data[0].tripId}));
+        }
+
+        const promiseResponse = await Promise.all(promises);
+        console.log("Driver's current and next scheduled trip have been updated!", promiseResponse);
+        
+      } else {
+        //if no next scheduled trip, set the current trip of the user to null
+        const updateUser = await instance.patch(`/user/${userId}`, {currentTripId: null});
+        console.log('User\'s current trip updated to null. No next scheduled trip', updateUser);
+      }
+    } catch (error) {
+      console.log('Error at checking for next scheduled trip', error);
+    }
+  }
+
   const handleTripCompletion = async () => {
-    if(tripData && !reviewNotificationsSent){
-        //update trip status to completed
-        await instance.patch(`/trips/${tripData.tripId}`, {
-          status: 'completed'
-        }).then(response => {
-          console.log('Trip ended', response);
-        }).catch(error => {
-          console.log('Error ending trip', error);
+    try {
+        if(tripData && !reviewNotificationsSent){
+        const reviewMessage = 'The trip has been completed successfully. Would you like to review the participants of the trip?';
+        const promises = []
+
+        promises.push(
+          //update trip status to completed
+          instance.patch(`/trips/${tripData.tripId}`, {status: 'completed'})
+        )
+
+        //update current trip id of all passengers and driver to null
+        //send review notification to all passengers  
+        tripData.tripPassengers.forEach((passenger) => {
+          promises.push(
+            instance.patch(`/user/${passenger.passengerId}`, {currentTripId: null})
+          );
+          promises.push(
+            instance.post('/notifications', {
+              driverId: tripData.driverId,
+              passengerId: passenger.passengerId,
+              tripId: tripData.tripId,    
+              stopId: null,
+              message: reviewMessage,
+              recipient: 'passenger',
+              type: 'review'
+            })
+          );
         });
 
-      //update current trip id of all passengers and driver to null
-      //send review notification to all passengers  
-      const reviewMessage = 'The trip has been completed successfully. Would you like to review the participants of the trip?';
-      tripData.tripPassengers.forEach(async (passenger) => {
-
-        await instance.put(`/user/${passenger.passengerId}`, {
-          currentTripId: null
-        }).then(response => {
-          console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`, response);
-        }).catch(error => {
-          console.log(`Error updating current trip id of passenger ${passenger.passengerId} to null`, error);
-        })
-
-        await instance.post('/notifications', {
+        promises.push(
+          //send review notification to driver
+          instance.post('/notifications', {
             driverId: tripData.driverId,
-            passengerId: passenger.passengerId,
+            passengerId: null,
             tripId: tripData.tripId,    
             stopId: null,
             message: reviewMessage,
-            recipient: 'passenger',
+            recipient: 'driver',
             type: 'review'
-        })
-        .then(response => {
-          console.log(`Review notification sent to passenger ${passenger.passengerId}`, response);
-        })
-        .catch(error => {
-          console.log(`Error sending review notification to passenger ${passenger.passengerId}`, error);
-        })
-      });
-      
-      //update current trip id of driver to null
-      await instance.put(`/user/${tripData.driverId}?type=points`, {
-        currentTripId: null,
-        overallPoints: 5
-      }).then(response => {
-        console.log(`Current trip id of driver ${tripData.driverId} updated to null`, response);
-      }).catch(error => {
-        console.log(`Error updating current trip id of driver ${tripData.driverId} to null`, error);
-      })
-      //send review notification to driver
-      await instance.post('/notifications', {
-        driverId: tripData.driverId,
-        passengerId: null,
-        tripId: tripData.tripId,    
-        stopId: null,
-        message: reviewMessage,
-        recipient: 'driver',
-        type: 'review'
-      })
-      .then(response => {
-        console.log(`Review notification sent to driver ${tripData.driverId}`, response);
-      })
-      .catch(error => {
-        console.log(`Error sending review notification to driver ${tripData.driverId}`, error);
-      });
+          })
+        )
 
-      setReviewNotificationsSent(true);
-      setTripStatusMessage('The trip has been completed successfully!');
-      setTripStatusAlert(true);
+        //await all promises
+        await Promise.all(promises);
+        setReviewNotificationsSent(true);
+        setTripStatusMessage('The trip has been completed successfully!');
+        setTripStatusAlert(true);
+        //TODO add alert messages for next scheduled trip
+        if(userId === null){
+          console.log("User id is null in local storage");
+        } else {
+          await checkForNextScheduledTrip(userId,5);
+        }
+
       
-    } else {
-      console.log('Review notifications already sent');
-    }
+        } else {
+          console.log('Review notifications already sent');
+        }
+      } catch (error) {
+        console.log('Error handling trip completion', error);
+      }
   }
 
   const handleTripCancellation = async () => {
-    if(tripData){
-      //update trip status to cancelled
-      await instance.patch(`/trips/${tripData.tripId}`, {
-        status: 'cancelled'
-      })
-      .then(response => {
-        console.log('Trip cancelled', response);
-      })
-      .catch(error => {
-        console.log('Error cancelling trip', error);
-      });
-
-      //update current trip id of all passengers and send notification of cancellation
-      if(tripData.noOfPassengers > 0 && tripData.tripPassengers.length > 0){
-        tripData.tripPassengers.forEach(async (passenger)=> {
-          await instance.put(`/user/${passenger.passengerId}`, {
-            currentTripId: null
-          }).then(response => {
-            console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`, response);
-          }).catch(error => {
-            console.log(`Error updating current trip id of passenger ${passenger.passengerId} to null`, error);
-          })
-  
-          await instance.post('/notifications', {
-            driverId: tripData.driverId,
-            passengerId: passenger.passengerId,
-            tripId: tripData.tripId,    
-            stopId: null,
-            message: 'This trip has been cancelled by the driver!',
-            recipient: 'passenger',
-            type: 'info'
-          })
-        });
+    if (tripData) {
+      try {
+        // Update trip status to 'cancelled'
+        await instance.patch(`/trips/${tripData.tripId}`, { status: 'cancelled' });
+        console.log('Trip cancelled');
+    
+        // Update current trip ID for passengers and send notifications
+        if (tripData.noOfPassengers > 0 && tripData.tripPassengers.length > 0) {
+          const passengerUpdates = tripData.tripPassengers.map(async (passenger) => {
+            try {
+              // Set passenger's current trip to null
+              await instance.patch(`/user/${passenger.passengerId}`, { currentTripId: null });
+              console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`);
+    
+              // Send notification to passenger
+              await instance.post('/notifications', {
+                driverId: tripData.driverId,
+                passengerId: passenger.passengerId,
+                tripId: tripData.tripId,
+                stopId: null,
+                message: 'This trip has been cancelled by the driver!',
+                recipient: 'passenger',
+                type: 'info'
+              });
+              console.log(`Notification sent to passenger ${passenger.passengerId}`);
+            } catch (error) {
+              console.error(`Error updating passenger ${passenger.passengerId}`, error);
+            }
+          });
+    
+          // Run all passenger updates concurrently
+          await Promise.all(passengerUpdates);
+        }
+    
+        // Update current trip ID of the driver to null
+        try {
+          await instance.patch(`/user/${tripData.driverId}`, { currentTripId: null });
+          console.log(`Current trip id of driver ${tripData.driverId} updated to null`);
+        } catch (error) {
+          console.error(`Error updating current trip id of driver ${tripData.driverId}`, error);
+        }
+    
+        // Set trip status message and alert
+        setTripStatusMessage('The trip has been cancelled successfully!');
+        setTripStatusAlert(true);
+        if(userId === null){
+          console.log("User id is null in local storage");
+        } else {
+          await checkForNextScheduledTrip(userId);
+        }
+    
+      } catch (error) {
+        console.error('Error during trip cancellation process', error);
       }
-
-
-      //update current trip id of driver to null
-      await instance.put(`/user/${tripData.driverId}`, {
-        currentTripId: null
-      }).then(response => {
-        console.log(`Current trip id of driver ${tripData.driverId} updated to null`, response);
-      }).catch(error => {
-        console.log(`Error updating current trip id of driver ${tripData.driverId} to null`, error);
-      });
-
-      setTripStatusMessage('The trip has been cancelled successfully!');
-      setTripStatusAlert(true);
     }
+    
   }
 
-  const fetchUsersFullName = async () => {
+  const fetchUsersInfo = async () => {
       try {
           const response = await instance.get(`/user/${userId}`);
           if(response.data){
+            console.log('User info', response.data);
+            
               setFirstName(response.data.firstName);
               setLastName(response.data.lastName);
               setOverallRating(response.data.overallRating);
               setCurrentTripId(response.data.currentTripId);
+              setUserPendingRequestTripId(response.data.pendingRequestTripId);
           }
       } catch (error) {
           console.log("Error fetching user's full name and rating", error);
@@ -220,13 +261,15 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
 
   const checkAvailability = () => {
       if(tripData && page === 'detailedInfo'){
-        if(tripData.driver !== null && !userIsInTrip){
-            setAvailabilityMessage(tripData.noOfPassengers + 1 < tripData.driver.vehicle.noOfSeats ? 'Request to join' : 'Vehicle Full');
-        } else if (tripData.driver === null && !userIsInTrip){
-          if(userRole === 'passenger'){
-            setAvailabilityMessage(tripData.noOfPassengers < 4 ? 'Request to join' : 'There is no driver yet');
-          } 
-        } else if (userIsInTrip){
+         if (!userIsInTrip){
+          if(!requestMade && userPendingRequestTripId === null){
+            setAvailabilityMessage('Request to join');
+          } else if(userPendingRequestTripId === tripData.tripId){
+            setAvailabilityMessage('Request already sent. Waiting for driver response');
+          } else {
+            setAvailabilityMessage('You have a pending request in another trip');
+          }
+        } else {
             if(currentTripId !== null && currentTripId === tripData.tripId){
                 setAvailabilityMessage('You re already participating in this trip');
             } else {
@@ -236,6 +279,28 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
 
       }
       
+  }
+
+  const filterAvailableStops = async() => {
+    if(tripData){
+      if(tripData.startLocation.stopLocation !== 'Prytaneia'){
+        await instance.get(`/stops/${tripData.startLocation.side}`)
+        .then(response => {
+            setAvailableStops(response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+      } else {
+        await instance.get(`/stops/${tripData.endLocation.side}`)
+        .then(response => {
+            console.log('Available stops', response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+      }
+    }
   }
 
   const checkIfUserIsInTrip = () => {
@@ -259,8 +324,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       }
   }
 
-  const handleRequestForJoiningTrip = () => {      
-      
+  const handleRequestForJoiningTrip = async () => {      
       if(tripData && tripData.driver && selectedStop){
           let driverMessage: string =  firstName + ' ' + lastName + ' with a rating of ' + overallRating + ' wants to join your trip ';
           let stopExists = false;
@@ -281,10 +345,9 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
               driverMessage += 'from the new ' + selectedStop.stopLocation + ' stop';
           }
               
-          if(!userIsInTrip && !requestMade){ 
-              console.log('Notification created', userIsInTrip, requestMade);
-              
-              instance.post('/notifications', {
+          if(!userPendingRequestTripId){ 
+            try {
+              await instance.post('/notifications', {
                   driverId: tripData.driverId,
                   passengerId: Number(userId),
                   tripId: tripData.tripId,    
@@ -293,8 +356,16 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   recipient: 'driver',
                   type: 'request'
               });
+  
+              await instance.patch(`/user/${userId}`, {
+                pendingRequestTripId: tripData.tripId
+              });
+
               setRequestMade(true);
               setJoinRequestSentAlert(true);
+            } catch (error) {
+              console.log('Error sending request to driver', error);
+            }
           } else {
               console.log('User is already in trip');
           }
@@ -304,41 +375,15 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   }
 
   useEffect(() => {
-    fetchUsersFullName();
-  }, []);
-
-  useEffect(() => {
+    fetchUsersInfo();
+    checkIfUserIsInTrip();
     checkAvailability();
-  }, [userIsInTrip, tripData]);
+    filterAvailableStops();
+  }, [userIsInTrip,requestMade, tripData]);
 
   useEffect(() => {
       retrieveTripData();
   }, [clickedTripId]);
-
-  useEffect(() => {
-    if(tripData){
-      //filter the available stops based on the side of the start location
-      //if the start location is Prytaneia, then the available stops are based on the side of the end location
-        if(tripData.startLocation.stopLocation !== 'Prytaneia'){
-            instance.get(`/stops/${tripData.startLocation.side}`)
-            .then(response => {
-                setAvailableStops(response.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-        } else {
-          instance.get(`/stops/${tripData.endLocation.side}`)
-          .then(response => {
-            console.log('Available stops', response.data);
-          })
-          .catch(error => {
-              console.log(error);
-          });
-        }
-        checkIfUserIsInTrip();
-    }
-  }, [tripData]);
 
   useEffect(() => {
     if (selectedStop) {
@@ -347,16 +392,16 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   }, [selectedStop]);
 
   useEffect(() => {
-    if (driverWantsToEndTrip) {
+    if (driverWantsToCompleteTrip) {
       setCompletionAlertConfirmation(true);
     }
-  }, [driverWantsToEndTrip]);
+  }, [driverWantsToCompleteTrip]);
 
   useEffect(() => {
     if (userConfirmedCompletion) {
       handleTripCompletion();
     } else {
-      setDriverWantsToEndTrip(false);
+      setDriverWantsToCompleteTrip(false);
     }
   }, [userConfirmedCompletion]);
 
@@ -376,9 +421,12 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       return (
           <>
               <IonContent >
-                <div id="map" className="map-container">
-                  <TripMapDisplay tripStops={tripData.tripStops} startLocation={tripData.startLocation} endLocation={tripData.endLocation}/>
-                </div>
+                  <TripMapDisplay 
+                    tripStops={tripData.tripStops} 
+                    startLocation={tripData.startLocation} 
+                    endLocation={tripData.endLocation}
+                    tripInProgress={tripData.status === 'in_progress'}  
+                  />
                 <div className="grid-contents">
                   <IonTitle class="ion-text-center">Trip Information</IonTitle>
                   <IonGrid>
@@ -399,7 +447,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                 </div>
               </IonContent>
               {
-                page === "detailedInfo" && 
+                page === "detailedInfo" && userRole === 'passenger' &&
                 <JoinButton 
                   userIsInTrip={userIsInTrip}
                   availabilityMessage={availabilityMessage}
@@ -407,6 +455,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   endLocationId={tripData.endLocationId}
                   availableStops={availableStops}
                   joinRequestSentAlert={joinRequestSentAlert}
+                  userRequestedToJoinInTrip={userPendingRequestTripId !== null || userPendingRequestTripId === tripData.tripId}
                   setStopSelectModal={setStopSelectModal}
                   setSelectedStop={setSelectedStop}
                   setJoinRequestSentAlert={setJoinRequestSentAlert}
@@ -415,12 +464,15 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
               {
                 page === "currentTrip" && 
                   <TripInProgress 
-                    startingTime={tripData.startingTime} 
+                    refreshKey={refreshKey}
+                    tripId={tripData.tripId}
                     tripDriverCurrentUser={tripDriverCurrentUser}
                     driverId={tripData.driverId}
                     tripStatus={tripData.status}
-                    setDriverWantsToEndTrip={setDriverWantsToEndTrip}
-                    setDriverWantsToAbortTrip={setDriverWantsToCancelTrip}  
+                    tripPassengers={tripData.tripPassengers}
+                    setDriverWantsToEndTrip={setDriverWantsToCompleteTrip}
+                    setDriverWantsToAbortTrip={setDriverWantsToCancelTrip}
+                    checkForNextScheduledTrip={checkForNextScheduledTrip}
                   /> 
               }
               {

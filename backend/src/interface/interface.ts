@@ -42,6 +42,7 @@ interface updatedTripInterface {
 interface updatedUserInterface {
     currentTripId?: number;
     overallPoints?: number;
+    pendingRequestTripId?: number;
 }
 
 

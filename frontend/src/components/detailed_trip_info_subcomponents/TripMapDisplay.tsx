@@ -1,21 +1,22 @@
 import React, { useLayoutEffect } from 'react';
-import { MapContainer , TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Stop, TripStops } from '../../interfacesAndTypes/Types';
 import { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
 import './TripMapDisplay.scss';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { useState } from 'react';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
+import "leaflet-routing-machine";
+import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
 interface TripMapDisplayProps {
-    // startLocation: LatLngExpression;
     tripStops: TripStops;
     startLocation: Stop;
     endLocation: Stop;
+    tripInProgress: boolean;
 }
 
 interface StopDetails {
@@ -30,60 +31,96 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({tripStops, startLocation, endLocation}) => {   
-    
+export const TripMapDisplay: React.FC<TripMapDisplayProps> = ({ tripStops, startLocation, endLocation, tripInProgress }) => {
     const [renderMap, setRenderMap] = useState(false);
-
     const stops: StopDetails[] = tripStops.map(stop => ({
         coordinates: [stop.details.lat, stop.details.lng],
         location: stop.details.stopLocation,
     }));
 
-    //delay rendering of map for the map to be displayed correctly
-    useLayoutEffect(() => { // runs before the browser renders the page
-        setTimeout(() => setRenderMap(true),10);
+    // delay rendering of map for the map to be displayed correctly
+    useLayoutEffect(() => {
+        setTimeout(() => setRenderMap(true), 10);
     }, []);
 
+    // useLayoutEffect(() => {
+    //     if (renderMap && !mapReference.current) {
+    //         const map = L.map('map').setView([startLocation.lat, startLocation.lng], 13);
+    //         console.log('map', map);
+            
+    //         mapReference.current = map;   // store map reference to not reinitialize in each render
+
+    //         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    //         }).addTo(map);
+
+    //         const waypoints = [
+    //             L.latLng(startLocation.lat, startLocation.lng),
+    //             ...stops.map(stop => L.latLng(stop.coordinates)),
+    //             L.latLng(endLocation.lat, endLocation.lng)
+    //         ];
+
+    //         const plan = L.Routing.plan(waypoints, {
+    //             draggableWaypoints: false,
+    //         });
+
+    //         L.Routing.control({
+    //             routeWhileDragging: false,
+    //             lineOptions: {
+    //                 styles: [{ color: '#3880ff' }],
+    //                 extendToWaypoints: true,
+    //                 missingRouteTolerance: 0,
+    //             },
+    //             plan
+    //         }).addTo(map);
+
+    //     }
+
+    //     return () => {
+    //         if(mapReference.current){
+    //             mapReference.current.remove();
+    //             mapReference.current = null;
+    //         }
+    //     }
+
+    // }, [renderMap, startLocation, endLocation, stops]);
+
+    const mapHeight = tripInProgress ? '85%' : '40%'
+
     return (
-        <>
-            {renderMap && (
-                <MapContainer 
-                    center={[startLocation.lat, startLocation.lng]} 
-                    zoom={13} 
-                    className='map' 
-                    scrollWheelZoom={false}
-                >
+        <> 
+            {
+                renderMap && 
+                (
+                    <MapContainer 
+                        center={[startLocation.lat, startLocation.lng]} 
+                        zoom={13} 
+                        style={{ height: mapHeight, width: '100%' }}
+                    >
                     <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
+                    <Marker position={[startLocation.lat, startLocation.lng]}>
+                        <Popup>
+                            Start Location : {startLocation.stopLocation}
+                        </Popup>
+                    </Marker>
                     {stops.map((stop, index) => (
-                        <Marker 
-                            key={index} 
-                            position={stop.coordinates} 
-                            eventHandlers={{
-                                click: () => {
-                                    console.log(`Marker ${index} clicked`); 
-                                },
-                            }}
-                        >
+                        <Marker key={index} position={stop.coordinates}>
                             <Popup>
                                 {stop.location}
                             </Popup>
                         </Marker>
                     ))}
-                    <Marker position={[startLocation.lat, startLocation.lng]}>
-                        <Popup>
-                            {"Start " + startLocation.stopLocation}
-                        </Popup>
-                    </Marker>
                     <Marker position={[endLocation.lat, endLocation.lng]}>
                         <Popup>
-                            {"Finish " + endLocation.stopLocation}
+                            End Location : {endLocation.stopLocation}
                         </Popup>
                     </Marker>
-                </MapContainer>
-            )}
+                    </MapContainer>
+                )
+            }
         </>
     );
 }

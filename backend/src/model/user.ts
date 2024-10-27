@@ -2,9 +2,6 @@ import { DataTypes, Model} from 'sequelize';
 import sequelize from '../database/connect_to_db';
 import { role } from '../interface/interface';
 
-// user id is not provided when creating a new user since the database will automatically generate it
-// interface UserCreationAttributes extends Optional<UserAttributes, 'userId'> {}  
-
 class User extends Model {
     declare userId: number;
     declare universityId: number;
@@ -20,6 +17,7 @@ class User extends Model {
     declare noOfReviews: number;
     declare profilePicture: Blob;
     declare currentTripId: number;
+    declare pendingRequestTripId: number;
 }
 
 User.init({ 
@@ -91,6 +89,11 @@ User.init({
         type: DataTypes.INTEGER,
         allowNull: true,
         field: 'current_trip_id'
+    },
+    pendingRequestTripId: {
+        type: DataTypes.INTEGER,
+        defaultValue: null,
+        field: 'pending_request_trip_id'
     }
 
 }, 

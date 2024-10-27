@@ -27,7 +27,7 @@ export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) =>
         });
     }
 
-    useEffect(() => {
+    useEffect(() => {        
         if(userIdInt){
             retrieveCurrentTripId();
         }
@@ -39,7 +39,7 @@ export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) =>
             <IonHeader>
                 <IonTitle class="ion-text-center" style={{color: 'black'}}>Current Trip</IonTitle>
             </IonHeader>
-            <DetailedTripInformation clickedTripId={Number(currentTripId)} page="currentTrip"/>    
+            <DetailedTripInformation clickedTripId={Number(currentTripId)} page="currentTrip" refreshKey={refreshKey}/>    
         </IonPage>
     )
 }

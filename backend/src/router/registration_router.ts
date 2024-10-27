@@ -1,5 +1,5 @@
 import express from 'express';
-import { findUsernameAndInitializeUpload, addDriverAndVehicle } from '../controller/driver_vehicle_registration_controller';
+import { retrieveUserAndInitializeUpload, addDriverAndVehicle } from '../controller/driver_vehicle_registration_controller';
 import { addUser, uploadProfilePicture } from '../controller/user_registration_controller';
 import { Request, Response, NextFunction } from 'express-serve-static-core';
 
@@ -22,7 +22,7 @@ router.post('/user',
 router.post('/driver/:id', 
     async (req,res, next) => {
         try {
-            await findUsernameAndInitializeUpload(req, res, next, Number(req.params.id))
+            await retrieveUserAndInitializeUpload(req, res, next, Number(req.params.id))
             console.log("find username success");
         } catch (error) {
             console.log("find username failed"); 
