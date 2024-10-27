@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { IonAlert, IonButton, IonText } from "@ionic/react";
+import { IonAlert, IonButton, IonModal, IonText } from "@ionic/react";
 import "./TripInProgress.scss";
 import instance from "../../AxiosConfig";
 import { tripPassenger } from "../../interfacesAndTypes/Types";
+import { InputGroup, FormControl, Button } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface TripInProgressProps {
     refreshKey: number | undefined;
@@ -30,6 +32,20 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
     const [tripCancelledAlert, setTripCancelledAlert] = useState(false);
     const [currentTripStatus, setCurrentTripStatus] = useState<string>(tripStatus);
     const [tripStatusUpdated, setTripStatusUpdated] = useState<boolean>(false);
+    const [timeToDelay, setTimeToDelay] = useState<number>(5);
+    const [openSelectTimeModal, setOpenSelectTimeModal] = useState<boolean>(false);
+    const [notificationsAlertMessage, setNotificationsAlertMessage] = useState<string>('');
+    const [openNotificationsAlert, setOpenNotificationsAlert] = useState<boolean>(false);
+
+    const incrementValue = () => {
+        if(timeToDelay + 5 <= 30)
+            setTimeToDelay(timeToDelay + 5);
+    }
+
+    const decrementValue = () => {
+        if(timeToDelay -5 > 0)
+            setTimeToDelay(timeToDelay - 5);
+    }
 
     const checkTripStatusAndUpdateCurrentTripId = async () => {
         try {
@@ -72,7 +88,35 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
             console.log("Error retrieving trip status: ", error);
         }
     }
-    
+
+    const sendNotificationsToUsers = async () => {
+        try {
+            const delayMessage = `The trip has been delayed by ${timeToDelay} minutes by the driver!`
+            const promises: Promise<any>[] = [];
+            tripPassengers.forEach((tripPassenger) => (
+                promises.push(
+                    instance.post('/notifications' , {
+                        driverId,
+                        passengerId: tripPassenger.passengerId,
+                        tripId,
+                        stopId: null,
+                        message: delayMessage,
+                        recipient: 'passenger',
+                        type: 'info'
+                    })
+                )
+            ));
+            setNotificationsAlertMessage('Delay notifications have been sent to the passengers');
+            await Promise.all(promises);
+            setOpenNotificationsAlert(true);
+
+        } catch (error) {
+            setNotificationsAlertMessage('Error sending delay notifications. Please try again!');
+            setOpenNotificationsAlert(true);
+            console.log("Error sending the delay notifications", error);
+        }
+    }
+
     useEffect(() => {
         if(refreshKey !== undefined){
             retrieveTripStatus();
@@ -100,16 +144,27 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                     }
                 </div>
             ) : (
-                <div className="trip-not-in-progress">
-                    <IonText className="message">
-                        This trip hasn&apos;t started yet
-                    </IonText>
+                <div className="trip-planning">
                     {
-                        tripDriverCurrentUser &&
-                        <IonButton shape="round" className="abort-trip-button" onClick={() => setDriverWantsToAbortTrip(true)}>
-                            Cancel Trip
-                        </IonButton>
+                        tripDriverCurrentUser && tripPassengers.length > 0 && 
+                            <div className="send-delay-notification">
+                                <IonText className="message">Gonna be late? Let the others know!</IonText>
+                                <IonButton shape="round" className="send-delay-notification-button" onClick={() => setOpenSelectTimeModal(true)}>
+                                    Alert Users
+                                </IonButton>
+                            </div>
                     }
+                    <div className="trip-not-in-progress">
+                        <IonText className="message">
+                            This trip hasn&apos;t started yet!
+                        </IonText>
+                        {
+                            tripDriverCurrentUser &&
+                            <IonButton shape="round" className="abort-trip-button" onClick={() => setDriverWantsToAbortTrip(true)}>
+                                Cancel Trip
+                            </IonButton>
+                        }
+                    </div>
                 </div>
             )}
             <IonAlert 
@@ -122,6 +177,44 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                 message="Your trip has been cancelled because no passengers have joined the trip"
                 buttons={["OK"]}
             />
+            <IonModal isOpen={openSelectTimeModal}>
+                <div className="close-modal">
+                    <IonButton 
+                        onClick={() => setOpenSelectTimeModal(false)}
+                    >Go Back</IonButton>
+                </div>
+                <div className="modal-contents">
+                    <h4 style={{textAlign: 'center'}}>Select how many minutes to delay the start of the trip</h4>
+                    <InputGroup className="input-group">
+                        <Button 
+                            variant='outline-secondary' 
+                            onClick={() => decrementValue()} 
+                        >-</Button>
+                        <FormControl 
+                            type='string' 
+                            value={`${timeToDelay} minutes`} 
+                            readOnly 
+                            className="form-control"
+                        />
+                        <Button 
+                            variant='outline-secondary' 
+                            onClick={() => incrementValue()}
+                        >+</Button>
+                    </InputGroup>
+                    <IonButton onClick={() => sendNotificationsToUsers()}>
+                        Send Notification To Users
+                    </IonButton>
+                </div>
+                <IonAlert 
+                    isOpen={openNotificationsAlert}
+                    message={notificationsAlertMessage}
+                    onDidDismiss={() => {
+                        setOpenNotificationsAlert(false);
+                        setOpenSelectTimeModal(false);
+                    }}
+                    buttons={['OK']}
+                />
+            </IonModal>
         </>
     );
 }
