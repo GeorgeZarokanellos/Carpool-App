@@ -23,7 +23,10 @@ export const getNotifications = async(req: Request, res: Response, next: NextFun
                     {status: 'pending'},
                     {recipient: userRole}
                 ]
-            }
+            },
+            order:[
+                ['timeSent', 'DESC']
+            ]
         });
         res.status(200).json(notifications);
     } catch (error) {
