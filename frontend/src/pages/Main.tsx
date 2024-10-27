@@ -17,7 +17,7 @@ export const Main: React.FC = () => {
   const [currentTripRefreshKey, setCurrentTripRefreshKey] = useState(0);
   const [notificationRefreshKey, setNotificationRefreshKey] = useState(0);
   const [profileRefreshKey, setProfileRefreshKey] = useState(0);
-  const [newNotificationsNumber, setNewNotificationsNumber] = useState<number>(0);
+  const [notificationsNumber, setNotificationsNumber] = useState<number>(0);
 
  return (
     <IonTabs>
@@ -25,7 +25,7 @@ export const Main: React.FC = () => {
           <Route path="/main/current-trip" render={() => <CurrentTripPage refreshKey={currentTripRefreshKey} />} />
           <Route path="/main/tab2" component={Tab2} />
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={searchTripsRefreshKey}/>}/>
-          <Route path="/main/notifications" render={() => <NotificationPage refreshKey={notificationRefreshKey} setNewNotificationsNumber={setNewNotificationsNumber}/> }/>
+          <Route path="/main/notifications" render={() => <NotificationPage refreshKey={notificationRefreshKey} setNotificationsNumber={setNotificationsNumber}/> }/>
           <Route path="/main/profile" render={() => <Profile refreshKey={profileRefreshKey} /> }/>
           <Route path="/main/create-trip" component={NewTrip} />
           <Route path="/main/trip-info/:tripId" component={DetailedTripInformationPage}/>
@@ -47,9 +47,9 @@ export const Main: React.FC = () => {
             <IonIcon aria-hidden="true" icon={notifications} />
             <IonLabel style={{fontSize: '0.6rem'}}>Notifications</IonLabel>
             {
-              newNotificationsNumber > 0 && (
-                <IonBadge color="danger">
-                  {newNotificationsNumber}
+              notificationsNumber > 0 && (
+                <IonBadge color="danger" style={{ position: 'absolute', top: '4px', right: '5px'}}>
+                  {notificationsNumber}
                 </IonBadge>
               )
             }

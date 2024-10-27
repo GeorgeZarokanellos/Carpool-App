@@ -7,10 +7,10 @@ import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
 
 interface NotificationPageProps {
     refreshKey: number;
-    setNewNotificationsNumber: Dispatch<SetStateAction<number>>;
+    setNotificationsNumber: Dispatch<SetStateAction<number>>;
 }
 
-export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) => {
+export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey, setNotificationsNumber}) => {
     const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
     const [filteredNotifications, setFilteredNotifications] = useState<NotificationInterface[]>([]);
 
@@ -33,6 +33,7 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({refreshKey}) =
             .then(response => {
                 // console.log(response.data);
                 setNotifications(response.data);
+                setNotificationsNumber(response.data.length);
             })
             .catch(error => {
                 console.log("Error retrieving notifications", error);
