@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { IonAlert, IonButton, IonModal, IonText } from "@ionic/react";
+import { IonAlert, IonButton, IonLoading, IonModal, IonText } from "@ionic/react";
 import "./TripInProgress.scss";
 import instance from "../../AxiosConfig";
 import { ExtendedTrip } from "../../interfacesAndTypes/Types";
@@ -41,6 +41,8 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
     const [notificationsAlertMessage, setNotificationsAlertMessage] = useState<string>('');
     const [openNotificationsAlert, setOpenNotificationsAlert] = useState<boolean>(false);
     const [passengerWantsToLeaveTrip , setPassengerWantsToLeaveTrip] = useState<boolean>(false);
+    const [leaveTripOperationLoading, setLeaveTripOperationLoading] = useState<boolean>(false);
+    const [issueReload, setIssueReload] = useState<boolean>(false);
 
     const incrementValue = () => {
         if(timeToDelay + 5 <= 30)
@@ -124,6 +126,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
 
     const removePassengerFromTrip = async () => {
         try {
+            setLeaveTripOperationLoading(true);
             const promises: Promise<any>[] = [];
             const response = await instance.get(`/user/notification/${userId}?tripId=${tripData.tripId}`);
             console.log("User notification retrieved", response.data);
@@ -155,6 +158,8 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
             await Promise.all(promises);
 
             await instance.delete(`/user/${userId}?tripId=${tripData.tripId}`);
+            setLeaveTripOperationLoading(false);
+            setIssueReload(true);
 
         } catch (error) {
             console.log("Error removing user from trip");
@@ -174,6 +179,12 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
             setTripStatusUpdated(false);
         }
     },[tripStatusUpdated]);
+
+    useEffect(() => {
+        if(issueReload === true){
+            window.location.reload();
+        }
+    }, [issueReload]);
 
     return (
         <>
@@ -244,7 +255,6 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                         handler: () => {
                             removePassengerFromTrip();
                             setPassengerWantsToLeaveTrip(false);
-                            // window.location.reload();
                         }
                     }
                 ]}
@@ -287,6 +297,10 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                     buttons={['OK']}
                 />
             </IonModal>
+            <IonLoading 
+                isOpen={leaveTripOperationLoading}
+                message={'Leaving trip please wait...'}
+            />
         </>
     );
 }
