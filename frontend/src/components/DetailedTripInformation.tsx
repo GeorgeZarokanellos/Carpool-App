@@ -206,7 +206,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                 stopId: null,
                 message: 'This trip has been cancelled by the driver!',
                 recipient: 'passenger',
-                type: 'info'
+                type: 'cancel'
               });
               console.log(`Notification sent to passenger ${passenger.passengerId}`);
             } catch (error) {

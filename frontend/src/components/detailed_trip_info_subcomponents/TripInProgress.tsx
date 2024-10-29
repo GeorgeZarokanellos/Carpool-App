@@ -109,11 +109,16 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                         stopId: null,
                         message: delayMessage,
                         recipient: 'passenger',
-                        type: 'info'
+                        type: 'delay'
                     })
                 )
             ));
-            setNotificationsAlertMessage('Delay notifications have been sent to the passengers');
+            promises.push(
+                instance.patch(`/trips/${tripData.tripId}`, {
+                    startingTime: new Date(new Date(tripData.startingTime).getTime() + timeToDelay * 60000).toISOString()
+                })
+            );
+            setNotificationsAlertMessage(`Trip's starting time has been pushed back by ${timeToDelay} minutes and delay notifications have been sent to the passengers!`);
             await Promise.all(promises);
             setOpenNotificationsAlert(true);
 
@@ -293,6 +298,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                     onDidDismiss={() => {
                         setOpenNotificationsAlert(false);
                         setOpenSelectTimeModal(false);
+                        setIssueReload(true);
                     }}
                     buttons={['OK']}
                 />

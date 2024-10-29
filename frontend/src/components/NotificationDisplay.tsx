@@ -198,15 +198,21 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     }
 
     const displayAppropriateTitle = () => {
-        if(notificationDetails.type === 'request'){
-            if(displayAcceptReject){
-                return 'Request to join your trip';
-            } else 
-                return 'Request to join a trip';
-        } else if (notificationDetails.type === 'review'){
-            return 'Trip participants review';
-        } else {
-            return 'Trip Cancelled';
+        switch(notificationDetails.type){
+            case 'request':
+                if(displayAcceptReject){
+                    return 'Request to join your trip';
+                } else {
+                    return 'Request to join a trip';
+                } 
+                case 'review':
+                    return 'Trip participants review';
+                case 'delay':
+                    return 'Your trip has been delayed';
+                case 'cancel':
+                    return 'Trip Cancelled';
+                default:
+                    return 'Unknown notification type';
         }
     }
 
@@ -312,14 +318,12 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
 
     useEffect(() => {
         if(accepted) {
-            console.log('Accepted', accepted);
             handleAccept();
         }
     }, [accepted]);
 
     useEffect(() => {
         if(rejected) {
-            console.log('Rejected', rejected);
             handleReject();
         }
     }, [rejected]);
