@@ -2,40 +2,45 @@ import React, { useEffect, useState } from "react";
 import { IonAlert, IonButton, IonModal, IonText } from "@ionic/react";
 import "./TripInProgress.scss";
 import instance from "../../AxiosConfig";
-import { tripPassenger } from "../../interfacesAndTypes/Types";
+import { ExtendedTrip } from "../../interfacesAndTypes/Types";
 import { InputGroup, FormControl, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface TripInProgressProps {
     refreshKey: number | undefined;
-    tripId: number;
+    tripData: ExtendedTrip;
     tripDriverCurrentUser: boolean;
-    driverId: number;
-    tripStatus: string;
-    tripPassengers: tripPassenger[];
+    userRole: string | null;
+    userId: string | null;
     setDriverWantsToEndTrip: (value: boolean) => void;
     setDriverWantsToAbortTrip: (value: boolean) => void;
     checkForNextScheduledTrip: (userId: string | number, points? : number) => Promise<void>;  
 }
 
+interface removePassengerUpdateTripRequestBody {
+    removePassengers: number[];
+    removeStops?: number[];
+    status?: string
+}
+
 export const TripInProgress: React.FC<TripInProgressProps> = ({
     refreshKey,
-    tripId,
+    tripData,
     tripDriverCurrentUser,
-    driverId, 
-    tripStatus,
-    tripPassengers,
+    userRole,
+    userId,
     setDriverWantsToEndTrip, 
     setDriverWantsToAbortTrip,
     checkForNextScheduledTrip
 }) => {
     const [tripCancelledAlert, setTripCancelledAlert] = useState(false);
-    const [currentTripStatus, setCurrentTripStatus] = useState<string>(tripStatus);
+    const [currentTripStatus, setCurrentTripStatus] = useState<string>(tripData.status);
     const [tripStatusUpdated, setTripStatusUpdated] = useState<boolean>(false);
     const [timeToDelay, setTimeToDelay] = useState<number>(5);
     const [openSelectTimeModal, setOpenSelectTimeModal] = useState<boolean>(false);
     const [notificationsAlertMessage, setNotificationsAlertMessage] = useState<string>('');
     const [openNotificationsAlert, setOpenNotificationsAlert] = useState<boolean>(false);
+    const [passengerWantsToLeaveTrip , setPassengerWantsToLeaveTrip] = useState<boolean>(false);
 
     const incrementValue = () => {
         if(timeToDelay + 5 <= 30)
@@ -58,9 +63,9 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                 const promises: Promise<any>[] = [];
                 setTripCancelledAlert(true);
                 //update current trip id of the driver according to next scheduled trip
-                await checkForNextScheduledTrip(driverId);
+                await checkForNextScheduledTrip(tripData.driverId);
                 //update trip id of passengers to null if trip is cancelled
-                tripPassengers.forEach((passenger) => {
+                tripData.tripPassengers.forEach((passenger) => {
                     promises.push(
                         instance.patch(`/user/${passenger.passengerId}`, {
                             currentTripId: null
@@ -78,7 +83,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
     
     const retrieveTripStatus = async () => {
         try {
-            await instance.get(`/trips/info/${tripId}`)
+            await instance.get(`/trips/info/${tripData.tripId}`)
             .then((response) => {
                 console.log("Retrieving trip status", response.data.status);
                 setCurrentTripStatus(response.data.status);
@@ -93,12 +98,12 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
         try {
             const delayMessage = `The trip has been delayed by ${timeToDelay} minutes by the driver!`
             const promises: Promise<any>[] = [];
-            tripPassengers.forEach((tripPassenger) => (
+            tripData.tripPassengers.forEach((tripPassenger) => (
                 promises.push(
                     instance.post('/notifications' , {
-                        driverId,
+                        driverId: tripData.driverId,
                         passengerId: tripPassenger.passengerId,
-                        tripId,
+                        tripId: tripData.tripId,
                         stopId: null,
                         message: delayMessage,
                         recipient: 'passenger',
@@ -117,6 +122,46 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
         }
     }
 
+    const removePassengerFromTrip = async () => {
+        try {
+            const promises: Promise<any>[] = [];
+            const response = await instance.get(`/user/notification/${userId}?tripId=${tripData.tripId}`);
+            console.log("User notification retrieved", response.data);
+            const responseNotification = response.data.notification; 
+            const deleteStop: boolean = response.data.deleteStop;
+            const requestBody: removePassengerUpdateTripRequestBody = {
+                removePassengers: [Number(userId)]
+            }
+            if(deleteStop && responseNotification.stopId !== tripData.startLocationId && responseNotification.stopId !== tripData.endLocationId){
+                console.log("Removing stop retrieved from notification");
+                requestBody.removeStops = [responseNotification.stopId];
+            } 
+            if(tripData.noOfPassengers === 3 && tripData.status === 'locked')
+                requestBody.status = 'planning';
+            console.log("Request body to remove passenger", requestBody);
+            
+            promises.push(
+                instance.patch(`/trips/${tripData.tripId}`, {
+                    ...requestBody
+                })
+            );
+
+            promises.push(
+                instance.patch(`/user/${userId}`, {
+                    currentTripId: null
+                })
+            );
+
+            await Promise.all(promises);
+
+            await instance.delete(`/user/${userId}?tripId=${tripData.tripId}`);
+
+        } catch (error) {
+            console.log("Error removing user from trip");
+            
+        }
+    }
+
     useEffect(() => {
         if(refreshKey !== undefined){
             retrieveTripStatus();
@@ -128,10 +173,11 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
             checkTripStatusAndUpdateCurrentTripId();
             setTripStatusUpdated(false);
         }
-    },[tripStatusUpdated])
+    },[tripStatusUpdated]);
+
     return (
         <>
-            {tripStatus === "in_progress" ? (
+            {tripData.status === "in_progress" ? (
                 <div className="trip-in-progress">
                     <IonText className="message">
                         Trip is in progress!
@@ -146,7 +192,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
             ) : (
                 <div className="trip-planning">
                     {
-                        tripDriverCurrentUser && tripPassengers.length > 0 && 
+                        tripDriverCurrentUser && tripData.tripPassengers.length > 0 && 
                             <div className="send-delay-notification">
                                 <IonText className="message">Gonna be late? Let the others know!</IonText>
                                 <IonButton shape="round" className="send-delay-notification-button" onClick={() => setOpenSelectTimeModal(true)}>
@@ -164,6 +210,12 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                                 Cancel Trip
                             </IonButton>
                         }
+                        {
+                            userRole === "passenger" && 
+                            <IonButton shape="round" className="leave-trip-button" onClick={() => setPassengerWantsToLeaveTrip(true)}>
+                                Leave Trip
+                            </IonButton>
+                        }
                     </div>
                 </div>
             )}
@@ -176,6 +228,26 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                 header="Trip Cancelled"
                 message="Your trip has been cancelled because no passengers have joined the trip"
                 buttons={["OK"]}
+            />
+            <IonAlert 
+                isOpen={passengerWantsToLeaveTrip}
+                header="Leave Trip"
+                message="Are you sure you want to leave this trip?"
+                buttons={[
+                    {
+                        text: 'No',
+                        role: 'cancel',
+                        handler: () => setPassengerWantsToLeaveTrip(false)
+                    },
+                    {
+                        text: 'Yes',
+                        handler: () => {
+                            removePassengerFromTrip();
+                            setPassengerWantsToLeaveTrip(false);
+                            // window.location.reload();
+                        }
+                    }
+                ]}
             />
             <IonModal isOpen={openSelectTimeModal}>
                 <div className="close-modal">
