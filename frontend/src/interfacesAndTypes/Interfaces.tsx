@@ -9,6 +9,8 @@ enum Status {
 enum NotificationType {
     Request = 'request',
     Review = 'review',
+    Delay = 'delay',
+    Cancel = 'cancel',
 }
 
 export interface TripProps {
