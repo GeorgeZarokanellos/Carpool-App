@@ -12,7 +12,18 @@ const enum NotificationType {
     REVIEW = 'review',
 }
 
-class Notification extends Model {}
+class Notification extends Model {
+    declare notificationId: number;
+    declare driverId: number;
+    declare passengerId: number;
+    declare tripId: number;
+    declare stopId: number;
+    declare message: string;
+    declare timeSent: Date;
+    declare status: Status;
+    declare recipient: string;
+    declare type: NotificationType;
+}
 
 Notification.init({
     // fields
