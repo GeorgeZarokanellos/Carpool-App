@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver } from "../model/association";
+import Notification from '../model/notification';
 import { Request, Response, NextFunction, response } from "express";
 import { Transaction } from "sequelize";
 import sequelize from '../database/connect_to_db';
@@ -305,5 +306,75 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
             console.log(error.message); 
             res.status(500).send('Error retrieving the vehicle images: ' + error.message);
         }
+    }
+}
+
+export const deleteUserNotifications = async (req: Request, res: Response, next: NextFunction) => {
+    await sequelize.transaction(async (transaction: Transaction) => {
+        const userId: string = req.params.userId;
+        const tripId: string = req.query.tripId as string;
+
+        const notifications = await Notification.findAll({
+            where: {
+                passengerId: userId,
+                tripId,
+                type: 'request'
+            },
+            transaction
+        });
+        console.log("Notifications to be deleted", notifications);
+        
+        if (notifications.length === 0) {
+            return res.status(404).send('Notifications not found');
+        }
+
+        await Promise.all(notifications.map(notification => notification.destroy({ transaction })));
+
+        res.status(200).send('Notifications deleted');
+    }).catch((err) => {
+        console.error(err);
+        if (typeof err === 'string') {
+            console.log("There was an error deleting the notifications: " + err);
+            res.status(500).send('Error deleting notifications: ' + err);
+        } else if (err instanceof Error) {
+            console.log(err.message);
+            res.status(500).send('Error deleting notifications: ' + err.message);
+        }
+    });
+}
+
+export const getUserRequestNotification = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId: string = req.params.userId;
+        const tripId: string = req.query.tripId as string;
+        let deleteStop = true;
+        const resultNotification = await Notification.findOne({
+            where: {
+                tripId: tripId,
+                passengerId: userId,
+                status: 'accepted',
+                type: 'request'
+            }
+        });
+        if(resultNotification !== null){
+            const similarNotifications = await Notification.findAll({
+                where: {
+                    notificationId : {
+                        [Op.ne]: resultNotification.notificationId
+                    },
+                    tripId,
+                    stopId: resultNotification.stopId,
+                    status: 'accepted',
+                    type: 'request'
+                }
+            });
+            if(similarNotifications.length > 0){
+                deleteStop = false;
+            }
+        res.status(200).json({notification: resultNotification, deleteStop});
+        } else  
+            res.status(404).send('Notification not found!');
+    } catch (error) {
+        res.status(500).send('Internal Server Error' + error);
     }
 }

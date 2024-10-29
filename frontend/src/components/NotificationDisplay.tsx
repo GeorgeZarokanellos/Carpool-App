@@ -93,9 +93,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                             trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
                                             ' at ' + formattedDate + ' has been accepted!';
                 
-                const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);
                 const role: string = await checkIfRecipientIsDriver();
-
 
                 trip.tripStops.forEach( (stop) => {
                     if(stop.stopId === notificationDetails.stopId){
@@ -112,10 +110,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         //* update trip with new passenger and stop
                         instance.patch(`/trips/${notificationDetails.tripId}`, {
                             userId: notificationDetails.driverId,
-                            addPassengers: [{
-                                firstName: passengerName.data.firstName,
-                                lastName: passengerName.data.lastName
-                            }],
+                            addPassengers: [
+                                notificationDetails.passengerId
+                            ],
                             addStops: [
                                 notificationDetails.stopId
                             ]
@@ -126,10 +123,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         //* update trip with new passenger
                         instance.patch(`/trips/${notificationDetails.tripId}`, {
                             userId: notificationDetails.driverId,
-                            addPassengers: [{
-                                firstName: passengerName.data.firstName,
-                                lastName: passengerName.data.lastName
-                            }]
+                            addPassengers: [
+                                notificationDetails.passengerId
+                            ]
                         })
                     )
                 }

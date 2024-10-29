@@ -16,11 +16,6 @@ export enum tripStatus {
     CANCELLED = 'cancelled'
 }
 
-interface passengerInterface {
-    firstName: string;
-    lastName: string;
-}
-
 interface tripInterface {
     tripCreatorId: number;
     driverId: number | null;
@@ -31,8 +26,8 @@ interface tripInterface {
 }
 
 interface updatedTripInterface {
-    addPassengers?: passengerInterface[];
-    removePassengers?: passengerInterface[];
+    addPassengers?: number[];
+    removePassengers?: number[];
     addStops?: number[];
     removeStops?: number[];
     updateStartingTime?: Date;
@@ -86,7 +81,6 @@ interface notificationInterface extends updatedNotificationInterface {
 }
 
 export type {
-    passengerInterface,
     updatedTripInterface ,
     addUserRequestBodyInterface,
     carRegisterRequestBodyInterface,

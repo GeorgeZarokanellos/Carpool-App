@@ -16,7 +16,7 @@ as $$
             WHEN no_of_passengers = 0 AND status = 'planning' THEN 'cancelled'::trip_status
             ELSE 'in_progress'::trip_status
         END
-        WHERE currentTime >= Trip.starting_time AND status = 'planning' OR status = 'locked';
+        WHERE currentTime >= Trip.starting_time AND (status = 'planning' OR status = 'locked');
     END
 $$;
 
@@ -28,4 +28,5 @@ SELECT cron.unschedule('check_trip_status');
 
 UPDATE cron.job SET nodename = '';
 
-select * from cron.job_run_details;
+select * from cron.job_run_details
+order by end_time DESC;

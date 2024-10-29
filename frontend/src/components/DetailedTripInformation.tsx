@@ -379,7 +379,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
     checkIfUserIsInTrip();
     checkAvailability();
     filterAvailableStops();
-  }, [userIsInTrip,requestMade, tripData]);
+  }, [userIsInTrip, requestMade, tripData]);
 
   useEffect(() => {
       retrieveTripData();
@@ -465,11 +465,10 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                 page === "currentTrip" && 
                   <TripInProgress 
                     refreshKey={refreshKey}
-                    tripId={tripData.tripId}
+                    tripData={tripData}
                     tripDriverCurrentUser={tripDriverCurrentUser}
-                    driverId={tripData.driverId}
-                    tripStatus={tripData.status}
-                    tripPassengers={tripData.tripPassengers}
+                    userRole={userRole}
+                    userId={userId}
                     setDriverWantsToEndTrip={setDriverWantsToCompleteTrip}
                     setDriverWantsToAbortTrip={setDriverWantsToCancelTrip}
                     checkForNextScheduledTrip={checkForNextScheduledTrip}
