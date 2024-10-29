@@ -28,4 +28,5 @@ SELECT cron.unschedule('check_trip_status');
 
 UPDATE cron.job SET nodename = '';
 
-select * from cron.job_run_details;
+select * from cron.job_run_details
+order by end_time DESC;
