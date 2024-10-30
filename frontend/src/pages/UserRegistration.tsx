@@ -41,7 +41,7 @@ export const UserRegistration: React.FC = () => {
   const viewportHeight = window.innerHeight;
 
   const requestBodyValidationSchema = object().shape({
-    universityId: string().required('University ID is required').matches(/^[0-9]{12}$/, 'University Id needs to be exactly 12 characters long'),
+    universityId: string().required('University ID is required').matches(/^[0-9]{7}$/, 'University Id needs to be exactly 7 characters long'),
     firstName: string().required('First name is required').max(50, 'First name cannot exceed 50 characters'),
     lastName: string().required('Last name is required').max(50, 'Last name cannot exceed 50 characters'),
     username: string().required('Username is required').max(50, 'Username cannot exceed 50 characters'),
