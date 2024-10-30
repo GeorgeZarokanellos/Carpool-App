@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route} from 'react-router-dom';
 import { IonRouterOutlet, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonBadge} from '@ionic/react';
 import { map, chatbox, notifications, person, search } from 'ionicons/icons';
@@ -9,6 +9,8 @@ import { NewTrip } from './NewTrip';
 import { CurrentTripPage } from './CurrentTripPage';
 import { NotificationPage } from './NotificationPage';
 import { DetailedTripInformationPage } from './DetailedTripInformationPage';
+import instance from '../AxiosConfig';
+import { NotificationInterface } from '../interfacesAndTypes/Interfaces';
 
 //TODO make the tab turn blue when user clicks on a trip from search trips tab
 
@@ -17,7 +19,39 @@ export const Main: React.FC = () => {
   const [currentTripRefreshKey, setCurrentTripRefreshKey] = useState(0);
   const [notificationRefreshKey, setNotificationRefreshKey] = useState(0);
   const [profileRefreshKey, setProfileRefreshKey] = useState(0);
+  const [userNotifications, setUserNotifications] = useState<NotificationInterface[]>([]);
   const [notificationsNumber, setNotificationsNumber] = useState<number>(0);
+
+  const userId = localStorage.getItem('userId');
+  const userRole = localStorage.getItem('role');
+  let queryParams = new URLSearchParams();
+  if(userId !== null && userRole !== null) {
+      queryParams = new URLSearchParams({
+          userRole
+      });
+  }
+
+  const retrieveNotifications = async () => {
+
+    try {
+        await instance.get(`/notifications/${userId}?${queryParams.toString()}`)
+        .then(response => {
+            // console.log(response.data);
+            setUserNotifications(response.data);
+            setNotificationsNumber(response.data.length);
+        })
+        .catch(error => {
+            console.log("Error retrieving notifications", error);
+        });
+    } catch (error) {
+        console.log("Error retrieving notifications", error);
+    }
+
+}
+
+useEffect(() => {
+    retrieveNotifications();
+}, [notificationRefreshKey]);
 
  return (
     <IonTabs>
@@ -25,7 +59,7 @@ export const Main: React.FC = () => {
           <Route path="/main/current-trip" render={() => <CurrentTripPage refreshKey={currentTripRefreshKey} />} />
           <Route path="/main/tab2" component={Tab2} />
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={searchTripsRefreshKey}/>}/>
-          <Route path="/main/notifications" render={() => <NotificationPage refreshKey={notificationRefreshKey} setNotificationsNumber={setNotificationsNumber}/> }/>
+          <Route path="/main/notifications" render={() => <NotificationPage notifications={userNotifications}/> }/>
           <Route path="/main/profile" render={() => <Profile refreshKey={profileRefreshKey} /> }/>
           <Route path="/main/create-trip" component={NewTrip} />
           <Route path="/main/trip-info/:tripId" component={DetailedTripInformationPage}/>

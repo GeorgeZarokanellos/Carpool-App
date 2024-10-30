@@ -93,9 +93,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                                             trip?.driver?.user.firstName + ' ' + trip?.driver?.user.lastName +
                                             ' at ' + formattedDate + ' has been accepted!';
                 
-                const passengerName = await instance.get(`/user/${notificationDetails.passengerId}`);
                 const role: string = await checkIfRecipientIsDriver();
-
 
                 trip.tripStops.forEach( (stop) => {
                     if(stop.stopId === notificationDetails.stopId){
@@ -112,10 +110,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         //* update trip with new passenger and stop
                         instance.patch(`/trips/${notificationDetails.tripId}`, {
                             userId: notificationDetails.driverId,
-                            addPassengers: [{
-                                firstName: passengerName.data.firstName,
-                                lastName: passengerName.data.lastName
-                            }],
+                            addPassengers: [
+                                notificationDetails.passengerId
+                            ],
                             addStops: [
                                 notificationDetails.stopId
                             ]
@@ -126,10 +123,9 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         //* update trip with new passenger
                         instance.patch(`/trips/${notificationDetails.tripId}`, {
                             userId: notificationDetails.driverId,
-                            addPassengers: [{
-                                firstName: passengerName.data.firstName,
-                                lastName: passengerName.data.lastName
-                            }]
+                            addPassengers: [
+                                notificationDetails.passengerId
+                            ]
                         })
                     )
                 }
@@ -202,15 +198,21 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     }
 
     const displayAppropriateTitle = () => {
-        if(notificationDetails.type === 'request'){
-            if(displayAcceptReject){
-                return 'Request to join your trip';
-            } else 
-                return 'Request to join a trip';
-        } else if (notificationDetails.type === 'review'){
-            return 'Trip participants review';
-        } else {
-            return 'Trip Cancelled';
+        switch(notificationDetails.type){
+            case 'request':
+                if(displayAcceptReject){
+                    return 'Request to join your trip';
+                } else {
+                    return 'Request to join a trip';
+                } 
+                case 'review':
+                    return 'Trip participants review';
+                case 'delay':
+                    return 'Your trip has been delayed';
+                case 'cancel':
+                    return 'Trip Cancelled';
+                default:
+                    return 'Unknown notification type';
         }
     }
 
@@ -316,14 +318,12 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
 
     useEffect(() => {
         if(accepted) {
-            console.log('Accepted', accepted);
             handleAccept();
         }
     }, [accepted]);
 
     useEffect(() => {
         if(rejected) {
-            console.log('Rejected', rejected);
             handleReject();
         }
     }, [rejected]);

@@ -36,13 +36,15 @@
 }
 
 .trip-in-progress{
+    background-color: $ionic-background-color;
     .complete-trip-button{
         --background: var(--success-color);
     }
 }
 
 .trip-not-in-progress{
-    .abort-trip-button{
+    .abort-trip-button,
+    .leave-trip-button{
         --background: var(--danger-color);
     }
 }

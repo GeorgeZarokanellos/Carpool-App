@@ -51,6 +51,7 @@ export const JoinButton: React.FC<JoinButtonProps> = ({
             isOpen={joinRequestSentAlert}
             onDidDismiss={() => {
             setJoinRequestSentAlert(false);
+            window.location.reload();
             }}
             message={'Your request has been sent to the driver!'}
             buttons={['OK']}
