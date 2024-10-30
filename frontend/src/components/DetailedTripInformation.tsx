@@ -33,7 +33,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   const [overallRating, setOverallRating] = useState('');
   //notification request checks
   const [userIsInTrip, setUserIsInTrip] = useState(false);
-  const [requestMade, setRequestMade] = useState(false);
   const [userPendingRequestTripId, setUserPendingRequestTripId] = useState<number | null>(null);
   //bottom section buttons and messages
   const [currentTripId, setCurrentTripId] = useState(null);
@@ -262,12 +261,15 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   const checkAvailability = () => {
       if(tripData && page === 'detailedInfo'){
          if (!userIsInTrip){
-          if(!requestMade && userPendingRequestTripId === null){
-            setAvailabilityMessage('Request to join');
-          } else if(userPendingRequestTripId === tripData.tripId){
-            setAvailabilityMessage('Request already sent. Waiting for driver response');
-          } else {
-            setAvailabilityMessage('You have a pending request in another trip');
+          switch(userPendingRequestTripId){
+            case null:
+              setAvailabilityMessage('Request to join');
+              break;
+            case tripData.tripId:
+              setAvailabilityMessage('Request already sent. Waiting for driver response');
+              break;
+            default: 
+              setAvailabilityMessage('You have a pending request in another trip');
           }
         } else {
             if(currentTripId !== null && currentTripId === tripData.tripId){
@@ -361,7 +363,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                 pendingRequestTripId: tripData.tripId
               });
 
-              setRequestMade(true);
               setJoinRequestSentAlert(true);
             } catch (error) {
               console.log('Error sending request to driver', error);
@@ -379,7 +380,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
     checkIfUserIsInTrip();
     checkAvailability();
     filterAvailableStops();
-  }, [userIsInTrip, requestMade, tripData]);
+  }, [userIsInTrip, tripData]);
 
   useEffect(() => {
       retrieveTripData();
