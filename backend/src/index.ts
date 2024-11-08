@@ -34,13 +34,13 @@ var option: StrategyOptions = {
 };
 
 app.use('/static/uploads', express.static(path.join(__dirname, '../static/uploads')));
-app.use(express.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(express.json({limit: '30mb'}));
+app.use(bodyParser.urlencoded({limit: '30mb',extended: false}));
 
 app.use(cors({
     // origin: 'http://localhost:8100',
     // origin: 'http://node91.imslab.gr:3080/api/',
-    origin: 'http://192.168.1.3:8100',
+    origin: 'http://192.168.1.3:8100', 
     credentials: true,
     methods: 'GET, POST, PUT, PATCH, DELETE',
     AccessControlAllowCredentials: true,
@@ -76,8 +76,6 @@ app.use(passport.initialize());
 // #region middleware
 app.post(`${basePath}/login`, async (req,res) => {
     const {username, password} = req.body;
-    console.log("Im in login");
-    
     try {
         const user = await User.findOne({where: {username}});
         if(user === null){
