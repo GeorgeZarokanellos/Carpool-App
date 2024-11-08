@@ -8,7 +8,6 @@ as $$
     DECLARE currentTime TIMESTAMP;
     BEGIN
         currentTime := NOW();
-
         --update trip status to in_progress if starting time has passed
         --update trip status to cancelled if there are no additional passengers
         UPDATE Trip
@@ -21,7 +20,7 @@ as $$
 $$;
 
 SELECT cron.schedule('check_trip_status', '*/1 * * * *', 'CALL check_and_update_trip_status()');
-
+SELECT cron.schedule('check_trip_status', '*/1 * * * *', $$SET TIME ZONE 'Europe/Athens'; CALL check_and_update_trip_status()$$);
 SELECT * FROM cron.job;
 
 SELECT cron.unschedule('check_trip_status');
@@ -30,3 +29,7 @@ UPDATE cron.job SET nodename = '';
 
 select * from cron.job_run_details
 order by end_time DESC;
+
+TRUNCATE TABLE cron.job_run_details;
+
+DROP EXTENSION IF EXISTS pg_cron CASCADE;
