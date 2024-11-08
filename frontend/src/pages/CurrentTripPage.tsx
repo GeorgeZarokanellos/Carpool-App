@@ -10,13 +10,12 @@ interface CurrentTripPageProps {
 export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) => {
     
     const userId = localStorage.getItem('userId');
-    const userIdInt = Number(userId);
     const [currentTripId, setCurrentTripId] = React.useState<number>(0);
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;      
 
     const retrieveCurrentTripId = async () => {
-        await instance.get(`/user/${userIdInt}`)
+        await instance.get(`/user/${userId}`)
         .then((response) => {
             console.log("response", response.data);
             setCurrentTripId(response.data.currentTripId);
@@ -28,9 +27,7 @@ export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) =>
     }
 
     useEffect(() => {        
-        if(userIdInt){
-            retrieveCurrentTripId();
-        }
+        retrieveCurrentTripId();
     }, [refreshKey]);
     
     return (
