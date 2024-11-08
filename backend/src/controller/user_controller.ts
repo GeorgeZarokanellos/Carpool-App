@@ -276,6 +276,7 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
         if(tripDriver !== null && tripDriver.role === 'driver'){
             //get the path to the folder containing the images
             const imageFolder = path.join(__dirname, `../../static/uploads/${tripDriver.userId}`);
+            // const imageFolder = `/static/uploads/${tripDriver.userId}`;
             
             if(!fs.existsSync(imageFolder)){
                 res.status(404).send('No images found');
@@ -318,7 +319,11 @@ export const deleteUserNotifications = async (req: Request, res: Response, next:
             where: {
                 passengerId: userId,
                 tripId,
-                type: 'request'
+                type: {
+                    [Op.or] : [
+                        'request',
+                        'delay'
+                ]}
             },
             transaction
         });
