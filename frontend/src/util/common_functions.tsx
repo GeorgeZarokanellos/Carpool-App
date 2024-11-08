@@ -33,8 +33,6 @@ export const formatDateTime = (dateString: string): {formattedDate: string, form
     const date = new Date(dateString);  
     const offset = date.getTimezoneOffset();    //take the offset of local from UTC in minutes
     const localDate = new Date(date.getTime() - (offset * 60 * 1000));  //convert to local time
-    // console.log("Local Date", localDate);
-    
     const dateTimeParts = localDate.toISOString().split('T');
     const timeParts = `${dateTimeParts[1]}`.split(':');
     if(dateTimeParts[0] && timeParts.length >= 2){
