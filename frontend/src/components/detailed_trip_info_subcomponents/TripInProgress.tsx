@@ -56,12 +56,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
 
     const checkTripStatusAndUpdateCurrentTripId = async () => {
         try {
-            console.log("Current trip status: ", currentTripStatus);
-            console.log(currentTripStatus === "cancelled");
-            
             if(currentTripStatus === "cancelled" ){
-                console.log("Went into if cancelled");
-                
                 const promises: Promise<any>[] = [];
                 setTripCancelledAlert(true);
                 //update current trip id of the driver according to next scheduled trip
@@ -74,20 +69,17 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                         })
                     );
                 });
-
                 await Promise.all(promises);
                 console.log("Passengers' current trip id set to null");
-            }
+            } 
         } catch (error) {
             console.log("Error when trying to update current trip of driver and passengers due to cancelled trip: ", error);
         }
     }
-    
     const retrieveTripStatus = async () => {
         try {
             await instance.get(`/trips/info/${tripData.tripId}`)
             .then((response) => {
-                console.log("Retrieving trip status", response.data.status);
                 setCurrentTripStatus(response.data.status);
                 setTripStatusUpdated(true);
             });
@@ -100,25 +92,29 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
         try {
             const delayMessage = `The trip has been delayed by ${timeToDelay} minutes by the driver!`
             const promises: Promise<any>[] = [];
-            tripData.tripPassengers.forEach((tripPassenger) => (
-                promises.push(
-                    instance.post('/notifications' , {
-                        driverId: tripData.driverId,
-                        passengerId: tripPassenger.passengerId,
-                        tripId: tripData.tripId,
-                        stopId: null,
-                        message: delayMessage,
-                        recipient: 'passenger',
-                        type: 'delay'
-                    })
-                )
-            ));
+            if(tripData.tripPassengers.length > 0){
+                tripData.tripPassengers.forEach((tripPassenger) => (
+                    promises.push(
+                        instance.post('/notifications' , {
+                            driverId: tripData.driverId,
+                            passengerId: tripPassenger.passengerId,
+                            tripId: tripData.tripId,
+                            stopId: null,
+                            message: delayMessage,
+                            recipient: 'passenger',
+                            type: 'delay'
+                        })
+                    )
+                ));
+                setNotificationsAlertMessage(`Trip's starting time has been pushed back by ${timeToDelay} minutes and delay notifications have been sent to the passengers!`);
+            } else {
+                setNotificationsAlertMessage(`Trip's starting time has been pushed back by ${timeToDelay} minutes!`);
+            }
             promises.push(
                 instance.patch(`/trips/${tripData.tripId}`, {
                     startingTime: new Date(new Date(tripData.startingTime).getTime() + timeToDelay * 60000).toISOString()
                 })
             );
-            setNotificationsAlertMessage(`Trip's starting time has been pushed back by ${timeToDelay} minutes and delay notifications have been sent to the passengers!`);
             await Promise.all(promises);
             setOpenNotificationsAlert(true);
 
@@ -134,19 +130,16 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
             setLeaveTripOperationLoading(true);
             const promises: Promise<any>[] = [];
             const response = await instance.get(`/user/notification/${userId}?tripId=${tripData.tripId}`);
-            console.log("User notification retrieved", response.data);
             const responseNotification = response.data.notification; 
             const deleteStop: boolean = response.data.deleteStop;
             const requestBody: removePassengerUpdateTripRequestBody = {
                 removePassengers: [Number(userId)]
             }
             if(deleteStop && responseNotification.stopId !== tripData.startLocationId && responseNotification.stopId !== tripData.endLocationId){
-                console.log("Removing stop retrieved from notification");
                 requestBody.removeStops = [responseNotification.stopId];
             } 
-            if(tripData.noOfPassengers === 3 && tripData.status === 'locked')
+            if(tripData.noOfPassengers < tripData.driver.vehicle.noOfSeats && tripData.status === 'locked')
                 requestBody.status = 'planning';
-            console.log("Request body to remove passenger", requestBody);
             
             promises.push(
                 instance.patch(`/trips/${tripData.tripId}`, {
@@ -172,18 +165,18 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
         }
     }
 
-    useEffect(() => {
-        if(refreshKey !== undefined){
-            retrieveTripStatus();
-        }
-    }, [refreshKey]);
-
     useEffect(()=>{
         if(tripStatusUpdated === true){
             checkTripStatusAndUpdateCurrentTripId();
             setTripStatusUpdated(false);
         }
     },[tripStatusUpdated]);
+
+    useEffect(() => {
+        if(refreshKey !== undefined){
+            retrieveTripStatus();
+        }
+    }, [refreshKey]);
 
     useEffect(() => {
         if(issueReload === true){
@@ -208,7 +201,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
             ) : (
                 <div className="trip-planning">
                     {
-                        tripDriverCurrentUser && tripData.tripPassengers.length > 0 && 
+                        tripDriverCurrentUser && 
                             <div className="send-delay-notification">
                                 <IonText className="message">Gonna be late? Let the others know!</IonText>
                                 <IonButton shape="round" className="send-delay-notification-button" onClick={() => setOpenSelectTimeModal(true)}>
