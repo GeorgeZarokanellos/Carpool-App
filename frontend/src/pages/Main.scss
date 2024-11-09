@@ -1,0 +1,32 @@
+@import '../global.scss';
+
+ion-menu{
+    .menu-content{
+        height: 90%;
+        width: 100%;
+        @include display-flex-center('both');
+        flex-direction: column;
+
+        .logout-button{
+            width: 50%;
+        }
+
+        .dropdown{
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .dropdown button{
+            background-color: $ionic-background-color;
+            width: 50%;
+        }
+
+        .instructions-list{
+            margin: 0.5rem; ;
+            background-color: $ionic-background-color;
+            color: $ionic-text-color;
+            border-radius: 0.5rem;
+        }
+    }
+}
