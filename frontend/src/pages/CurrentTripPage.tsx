@@ -2,6 +2,7 @@ import { IonHeader, IonPage, IonTitle } from "@ionic/react";
 import React, { useEffect} from "react";
 import { DetailedTripInformation } from "../components/DetailedTripInformation";
 import instance from "../AxiosConfig";
+import { MenuButton } from "../components/MenuButton";
 
 interface CurrentTripPageProps {
     refreshKey: number;
@@ -34,7 +35,8 @@ export const CurrentTripPage: React.FC<CurrentTripPageProps> = ({refreshKey}) =>
         
         <IonPage style={{ height: `${viewportHeight}`, width: `${viewportWidth}` }}>
             <IonHeader>
-                <IonTitle class="ion-text-center" style={{color: 'black'}}>Current Trip</IonTitle>
+                <MenuButton/>
+                <IonTitle  style={{color: 'black'}}>Current Trip</IonTitle>
             </IonHeader>
             <DetailedTripInformation clickedTripId={Number(currentTripId)} page="currentTrip" refreshKey={refreshKey}/>    
         </IonPage>

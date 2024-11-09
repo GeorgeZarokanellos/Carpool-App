@@ -7,6 +7,7 @@ import { SubmittedReceivedReviewsDisplay } from '../components/profile_subcompon
 import { TripsDisplay } from '../components/profile_subcomponents/TripsDisplay';
 import { arrayBufferTo64String } from '../util/common_functions';
 import { Rating } from '@mui/material';
+import { MenuButton } from '../components/MenuButton';
 
 interface profileProps {
   refreshKey: number;
@@ -48,7 +49,8 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
     return (
       <IonPage>
         <IonHeader>
-          <IonTitle class='ion-text-center' style={{color: 'black'}}>Profile</IonTitle>
+          <MenuButton/>
+          <IonTitle style={{color: 'black'}}>Profile</IonTitle>
         </IonHeader>
         <IonContent fullscreen>
           <IonContent >

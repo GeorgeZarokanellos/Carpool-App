@@ -6,6 +6,7 @@ import './SearchTrips.scss';
 import instance from '../AxiosConfig';
 import { Link} from 'react-router-dom';
 import { formatDateTime } from '../util/common_functions';
+import { MenuButton } from '../components/MenuButton';
 
 interface searchTripProps {
   refreshKey: number;
@@ -79,6 +80,7 @@ const SearchTrips: React.FC<searchTripProps> = ({refreshKey}) => {
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
       <IonHeader className='ion-no-border'>
+        <MenuButton/>
         <IonSearchbar 
           placeholder='Search available trips' 
           animated={true}
