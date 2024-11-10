@@ -6,6 +6,7 @@ import {
   IonFooter,
   IonGrid,
   IonHeader,
+  IonLoading,
   IonPage,
   IonPicker,
   IonRow,
@@ -55,6 +56,8 @@ export const DriverVehicleRegistration: React.FC = () => {
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [showErrorAlert, setShowErrorAlert] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  //loading
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   //#endregion
   
   const history = useHistory();
@@ -83,7 +86,7 @@ export const DriverVehicleRegistration: React.FC = () => {
   });
 
   const handleDriverVehicleRegistration = async (data: DriverVehicleRegistrationRequestBody) => {
-
+    setIsLoading(true);
     const formData = new FormData();
 
     const vehicleAndDriverData = {
@@ -121,12 +124,14 @@ export const DriverVehicleRegistration: React.FC = () => {
     })
     .then(response => {
       console.log("From driver multipart post request", response.data);
+      setIsLoading(false);
       setAlertMessage("Driver and vehicle registration successful");
       setShowAlert(true);
     })
     .catch(error => {
       console.log("Error from driver multipart request", error);
-      setErrorMessage("Driver and vehicle registration failed. Check your inputs and try again");
+      setIsLoading(false);
+      setErrorMessage("Driver and vehicle registration failed. Check your inputs and try again! " + error.response.data);
       setShowErrorAlert(true);
     })
   }
@@ -313,7 +318,6 @@ export const DriverVehicleRegistration: React.FC = () => {
                       {
                         name: 'Seats',
                         options: [
-                          { text: '1', value: 1 },
                           { text: '2', value: 2 },
                           { text: '3', value: 3 },
                           { text: '4', value: 4 },
@@ -383,7 +387,7 @@ export const DriverVehicleRegistration: React.FC = () => {
         isOpen={showAlert}
         onDidDismiss={() => {
           setShowAlert(false);
-          history.push('/main/search-trips');
+          history.push('/');
         }}
         header={'Registration status'}
         message={alertMessage}
@@ -398,6 +402,10 @@ export const DriverVehicleRegistration: React.FC = () => {
         header={'Error'}
         message={errorMessage}
         buttons={['OK']}
+      />
+      <IonLoading 
+        isOpen={isLoading}
+        message={'Please wait while the information you provided is being processed...'}
       />
     </IonPage>
   )

@@ -7,6 +7,7 @@ import { SubmittedReceivedReviewsDisplay } from '../components/profile_subcompon
 import { TripsDisplay } from '../components/profile_subcomponents/TripsDisplay';
 import { arrayBufferTo64String } from '../util/common_functions';
 import { Rating } from '@mui/material';
+import { MenuButton } from '../components/MenuButton';
 
 interface profileProps {
   refreshKey: number;
@@ -46,12 +47,13 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
   }
   if(profileData !== undefined){
     return (
-      <IonPage>
-        <IonHeader>
-          <IonTitle class='ion-text-center' style={{color: 'black'}}>Profile</IonTitle>
+      <IonPage >
+        <IonHeader style={{maxWidth: '25rem'}}>
+          <MenuButton/>
+          <IonTitle style={{color: 'black'}}>Profile</IonTitle>
         </IonHeader>
-        <IonContent fullscreen>
-          <IonContent >
+        <IonContent fullscreen >
+            <div className='center-container'>
               <div className='profile-container'>
                 <div className='profile-contents'>
                   <div className='profile-picture-container'>
@@ -77,7 +79,7 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
                   </IonItem>
                 </div>
               </div>
-          </IonContent>
+            </div>
         </IonContent>
       </IonPage>
     );

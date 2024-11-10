@@ -41,7 +41,7 @@ export const UserRegistration: React.FC = () => {
   const viewportHeight = window.innerHeight;
 
   const requestBodyValidationSchema = object().shape({
-    universityId: string().required('University ID is required').matches(/^[0-9]{12}$/, 'University Id needs to be exactly 12 characters long'),
+    universityId: string().required('University ID is required').matches(/^[0-9]{7}$/, 'University Id needs to be exactly 7 characters long'),
     firstName: string().required('First name is required').max(50, 'First name cannot exceed 50 characters'),
     lastName: string().required('Last name is required').max(50, 'Last name cannot exceed 50 characters'),
     username: string().required('Username is required').max(50, 'Username cannot exceed 50 characters'),
@@ -55,7 +55,7 @@ export const UserRegistration: React.FC = () => {
       return value && ['image/jpeg', 'image/jpg', 'image/png'].includes((value as Blob).type);
     })
     .test('Filesize', 'The file is too large', (value) => {
-      return value && (value as Blob).size <= 5000000;  //in bytes
+      return value && (value as Blob).size <= 6000000;  //in bytes
     })
   });
   const { control, handleSubmit, formState: {errors} } = useForm({
@@ -109,14 +109,14 @@ export const UserRegistration: React.FC = () => {
     }).catch((error) => {
       console.log(error);
       setIsLoading(false);
-      setErrorMessage('An error occurred while registering. Please try again.');
+      setErrorMessage('An error occurred while registering. Please try again.' + error.response.data);
       setErrorAlert(true);
     });
     
   };
 
   const inputFieldProperties: { label: string, type: TextFieldTypes, placeholder?: string, name: inputLabelNames}[] = [
-    { label: 'University ID', type: 'number' as TextFieldTypes, placeholder: '12 digit registration number', name: 'universityId' },
+    { label: 'University ID', type: 'number' as TextFieldTypes, placeholder: '7 digit registration number', name: 'universityId' },
     { label: 'First Name',  type: 'text' as TextFieldTypes, name: "firstName"},
     { label: 'Last Name', type: 'text' as TextFieldTypes, name: 'lastName'},
     { label: 'Username', type: 'text' as TextFieldTypes, name: 'username'},

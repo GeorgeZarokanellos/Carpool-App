@@ -3,6 +3,7 @@ import React, {useEffect, useState } from "react";
 import './NotificationPage.scss';
 import { NotificationDisplay } from "../components/NotificationDisplay";
 import { NotificationInterface } from "../interfacesAndTypes/Interfaces";
+import { MenuButton } from "../components/MenuButton";
 
 interface NotificationPageProps {
     notifications: NotificationInterface[];
@@ -33,7 +34,8 @@ export const NotificationPage:React.FC<NotificationPageProps> = ({ notifications
     return (
         <IonPage style={{height: `${viewportHeight}`, width: `${viewportWidth}`}}>
             <IonHeader>
-                <IonTitle class='ion-text-center' style={{color: 'black'}}>Notifications</IonTitle>
+                <MenuButton/>
+                <IonTitle  style={{color: 'black'}}>Notifications</IonTitle>
             </IonHeader>
             <IonContent>
                 {

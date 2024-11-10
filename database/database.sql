@@ -6,7 +6,7 @@ CREATE TYPE notification_type AS ENUM ('request', 'review', 'cancel', 'delay');
 
 CREATE TABLE App_user (
 	user_id SERIAL,
-	university_id INT,
+	university_id INT UNIQUE ,
 	first_name VARCHAR(50) NOT NULL,
 	last_name VARCHAR(50) NOT NULL,
 	username VARCHAR(50) UNIQUE NOT NULL,

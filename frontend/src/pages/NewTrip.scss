@@ -18,6 +18,13 @@
             @include display-flex-center('both');
             flex-direction: column;
 
+            .trip-date-time{
+                // background-color: $trip-info-background-color;
+                color: black;
+                text-align: center;
+                border-radius: 0.4rem;
+            }
+
             ion-item {
                 --background: transparent;
                 .passengers-credentials-container{

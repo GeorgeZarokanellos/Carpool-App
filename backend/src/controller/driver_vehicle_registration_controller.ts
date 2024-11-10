@@ -133,6 +133,19 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
         try {
             const driverId = Number(req.params.id);
             const {licenseId, plateNumber, maker, model, noOfSeats}: carRegisterRequestBodyInterface = req.body;            
+            let message = '';
+            const existingVehicle = await Vehicle.findOne({where: {plateNumber}});
+            const existingDriver = await Driver.findOne({where: {licenseId}});
+            if(existingDriver !== null){
+                message += 'Driver with the license ID you provided already exists';
+                res.status(400).send(message);
+                return;
+            }
+            if(existingVehicle !==null){
+                message +=  'Vehicle with the plate number you provided already exists';
+                res.status(400).send(message);
+                return;
+            }
             // create a new driver and vehicle in a transaction
             await sequelize.transaction(async (transaction) => {
                 const newDriver = await Driver.create({ 

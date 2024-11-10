@@ -1,8 +1,15 @@
 @import '../global.scss';
 
+.center-container{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
 .profile-container{
     @include display-flex-center('justify');
     width: 100%;
+    max-width: 25rem;
     overflow-y: auto;
     
     .profile-contents{

@@ -63,11 +63,11 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
             const response = await instance.get(`/trips/${clickedTripId}`);
             console.log('Trip data', response.data);
             const vehicleImageURLs = await instance.get(`/user/vehicle/${response.data.driverId}`);
-            // console.log('Vehicle images', vehicleImageURLs.data);
             if(response.data.length !== 0){
                 setIsLoading(false);
                 setTripData(response.data);
                 setVehicleImages(vehicleImageURLs.data);
+
             } else {
                 setIsLoading(false);
                 console.log('Empty response from server');
@@ -81,8 +81,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   const checkForNextScheduledTrip = async (userId: string | number, points?: number) => {
     try {
       const userResponse = await instance.get(`/user/${userId}`);
-      console.log("User response from check for next scheduled trip ",userResponse);
-      
       const {nextScheduledTripId} = userResponse.data;
   
       if(nextScheduledTripId !== null){
@@ -97,7 +95,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   
         //update the next scheduled trip of the user to null or the next closest trip
         const userTripsResponse = await instance.get(`/user/trips/${userId}?currentTripId=${currentTripId}&nextScheduledTripId=${nextScheduledTripId}`);
-        console.log("User trips response", userTripsResponse);
         
         if(userTripsResponse.data.length === 0){
           promises.push(await instance.patch(`/driver/${userId}`, {nextScheduledTripId: null}));
@@ -121,57 +118,59 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   const handleTripCompletion = async () => {
     try {
         if(tripData && !reviewNotificationsSent){
-        const reviewMessage = 'The trip has been completed successfully. Would you like to review the participants of the trip?';
-        const promises = []
+          const reviewMessage = 'The trip has been completed successfully. Would you like to review the participants of the trip?';
+          const promises = []
 
-        promises.push(
-          //update trip status to completed
-          instance.patch(`/trips/${tripData.tripId}`, {status: 'completed'})
-        )
-
-        //update current trip id of all passengers and driver to null
-        //send review notification to all passengers  
-        tripData.tripPassengers.forEach((passenger) => {
           promises.push(
-            instance.patch(`/user/${passenger.passengerId}`, {currentTripId: null})
-          );
-          promises.push(
-            instance.post('/notifications', {
-              driverId: tripData.driverId,
-              passengerId: passenger.passengerId,
-              tripId: tripData.tripId,    
-              stopId: null,
-              message: reviewMessage,
-              recipient: 'passenger',
-              type: 'review'
-            })
-          );
-        });
+            //update trip status to completed
+            instance.patch(`/trips/${tripData.tripId}`, {status: 'completed'})
+          )
 
-        promises.push(
-          //send review notification to driver
-          instance.post('/notifications', {
-            driverId: tripData.driverId,
-            passengerId: null,
-            tripId: tripData.tripId,    
-            stopId: null,
-            message: reviewMessage,
-            recipient: 'driver',
-            type: 'review'
-          })
-        )
+          //update current trip id of all passengers
+          //send review notification to all passengers  
+          if(tripData.tripPassengers.length > 0){
+            tripData.tripPassengers.forEach((passenger) => {
+              promises.push(
+                instance.patch(`/user/${passenger.passengerId}`, {currentTripId: null})
+              );
+              promises.push(
+                instance.post('/notifications', {
+                  driverId: tripData.driverId,
+                  passengerId: passenger.passengerId,
+                  tripId: tripData.tripId,    
+                  stopId: null,
+                  message: reviewMessage,
+                  recipient: 'passenger',
+                  type: 'review'
+                })
+              );
+            });
+          
+            promises.push(
+              //send review notification to driver
+              instance.post('/notifications', {
+                driverId: tripData.driverId,
+                passengerId: null,
+                tripId: tripData.tripId,    
+                stopId: null,
+                message: reviewMessage,
+                recipient: 'driver',
+                type: 'review'
+              })
+            )
+          }
 
-        //await all promises
-        await Promise.all(promises);
-        setReviewNotificationsSent(true);
-        setTripStatusMessage('The trip has been completed successfully!');
-        setTripStatusAlert(true);
-        //TODO add alert messages for next scheduled trip
-        if(userId === null){
-          console.log("User id is null in local storage");
-        } else {
-          await checkForNextScheduledTrip(userId,5);
-        }
+          //await all promises
+          await Promise.all(promises);
+          setReviewNotificationsSent(true);
+          setTripStatusMessage('The trip has been completed successfully!');
+          setTripStatusAlert(true);
+          //TODO add alert messages for next scheduled trip
+          if(userId === null){
+            console.log("User id is null in local storage");
+          } else {
+            await checkForNextScheduledTrip(userId,5);
+          }
 
       
         } else {
@@ -187,16 +186,12 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       try {
         // Update trip status to 'cancelled'
         await instance.patch(`/trips/${tripData.tripId}`, { status: 'cancelled' });
-        console.log('Trip cancelled');
-    
         // Update current trip ID for passengers and send notifications
         if (tripData.noOfPassengers > 0 && tripData.tripPassengers.length > 0) {
           const passengerUpdates = tripData.tripPassengers.map(async (passenger) => {
             try {
               // Set passenger's current trip to null
               await instance.patch(`/user/${passenger.passengerId}`, { currentTripId: null });
-              console.log(`Current trip id of passenger ${passenger.passengerId} updated to null`);
-    
               // Send notification to passenger
               await instance.post('/notifications', {
                 driverId: tripData.driverId,
@@ -207,7 +202,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                 recipient: 'passenger',
                 type: 'cancel'
               });
-              console.log(`Notification sent to passenger ${passenger.passengerId}`);
             } catch (error) {
               console.error(`Error updating passenger ${passenger.passengerId}`, error);
             }
@@ -220,7 +214,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
         // Update current trip ID of the driver to null
         try {
           await instance.patch(`/user/${tripData.driverId}`, { currentTripId: null });
-          console.log(`Current trip id of driver ${tripData.driverId} updated to null`);
         } catch (error) {
           console.error(`Error updating current trip id of driver ${tripData.driverId}`, error);
         }
@@ -245,8 +238,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       try {
           const response = await instance.get(`/user/${userId}`);
           if(response.data){
-            console.log('User info', response.data);
-            
               setFirstName(response.data.firstName);
               setLastName(response.data.lastName);
               setOverallRating(response.data.overallRating);
@@ -296,7 +287,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       } else {
         await instance.get(`/stops/${tripData.endLocation.side}`)
         .then(response => {
-            console.log('Available stops', response.data);
+            setAvailableStops(response.data);
         })
         .catch(error => {
             console.log(error);
@@ -332,7 +323,6 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
           let stopExists = false;
           tripData.tripStops.forEach((stop) => {
               if(stop.stopId === selectedStop.stopId){
-                  console.log('User selected stop is the same as an existing stop');
                   stopExists = true;
               } 
           });
@@ -384,7 +374,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
 
   useEffect(() => {
       retrieveTripData();
-  }, [clickedTripId]);
+  }, [clickedTripId, refreshKey]);
 
   useEffect(() => {
     if (selectedStop) {
@@ -426,7 +416,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                     tripStops={tripData.tripStops} 
                     startLocation={tripData.startLocation} 
                     endLocation={tripData.endLocation}
-                    tripInProgress={tripData.status === 'in_progress'}  
+                    tripInProgress={tripData.status === 'in_progress'} 
                   />
                 <div className="grid-contents">
                   <IonTitle class="ion-text-center">Trip Information</IonTitle>

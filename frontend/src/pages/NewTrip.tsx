@@ -1,13 +1,9 @@
-import { IonAlert, IonButton, IonContent, IonDatetime, IonHeader, IonItem, IonPage, IonPicker, IonTitle, IonToolbar } from "@ionic/react";
+import { IonAlert, IonButton, IonContent, IonDatetime, IonHeader, IonPage, IonPicker, IonText, IonTitle, IonToolbar } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import { Stop } from "../interfacesAndTypes/Types";
 import './NewTrip.scss';
 import { useHistory } from "react-router";
-import { PassengerCredentials } from "../components/PassengerCredentials";
-import { tripStatus } from "../interfacesAndTypes/Types";
-
-//TODO nextScheduledTripId 
 
 interface requestBody {
     tripCreatorId: number,
@@ -15,9 +11,7 @@ interface requestBody {
     startLocationId: number,
     endLocationId: number,
     startingTime: string,
-    stops: Stop[],
-    passengers: {firstName: string, lastName: string}[]
-    status?: tripStatus
+    noOfPassengers: number,
 }
 
 export const NewTrip: React.FC = () => {
@@ -40,14 +34,11 @@ export const NewTrip: React.FC = () => {
     const [showEndLocationPicker, setShowEndLocationPicker] = useState(false);
     const [selectedStartLocation, setSelectedStartLocation] = useState<{loc: string, stopId: number} | null>(null);
     const [selectedEndLocation, setSelectedEndLocation] = useState<{loc: string, stopId: number} | null>(null);
-    //passenger number picker
-    const [showPassengerNumberPicker ,setShowPassengerNumberPicker] = useState(false);
-    const [passengerNumberPickerKey, setPassengerNumberPickerKey] = useState<number>(10);
-    const [selectedPassengerNumber, setSelectedPassengerNumber] = useState<number>(0);
-    const [passengerCredentialsInputsKey, setPassengerCredentialsInputsKey] = useState<number>(20);
-    //passenger credentials
-    //TODO reset the passenger credentials when the user deletes a passenger
-    const [passengerCredentials, setPassengerCredentials] = useState<{firstName: string, lastName: string}[]>([]);
+    //free seats number picker
+    const [showFreeSeatsNumberPicker ,setShowFreeSeatsNumberPicker] = useState(false);
+    const [freeSeatsNumberPickerKey, setFreeSeatsNumberPickerKey] = useState<number>(10);
+    const [freeSeatsNumberSelectedOption, setFreeSeatsNumberSelectedOption] = useState<{text:string, value: number }>({text: '', value: 0});
+    const [freeSeatsNumberOptions, setFreeSeatsNumberOptions] = useState<{text: string, value: number}[]>([{text: '', value: 0}]);
     //hour picker
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     //alert
@@ -61,6 +52,14 @@ export const NewTrip: React.FC = () => {
             const response = await instance.get(`/user/${userIdInt}`);
             setCurrentTripId(response.data.currentTripId);
             setNextScheduledTripId(response.data.nextScheduledTripId);
+            //make an array that will display the free seats number but the value of each entry will be the extra passengers of driver that havent used the app
+            const maxIndex = response.data.noOfSeats - 1;
+            setFreeSeatsNumberSelectedOption({text: `${maxIndex}`, value: 0})
+            const seatOptions = Array.from({length: maxIndex}, (_, index) => ({
+                text: `${index + 1}`,
+                value: maxIndex - (index + 1)
+            }));
+            setFreeSeatsNumberOptions(seatOptions);
         } catch (error) {
             console.log("Error retrieving driver info", error);
         }
@@ -137,7 +136,7 @@ export const NewTrip: React.FC = () => {
         e.preventDefault();
 
         try {
-            console.log("Check conditions: ", selectedStartLocation, selectedEndLocation, selectedDate, selectedPassengerNumber);
+            console.log("Check conditions: ", selectedStartLocation, selectedEndLocation, selectedDate, freeSeatsNumberSelectedOption);
             const newHourIsValid = await startingHourOfNewTripIsValid();
             if(newHourIsValid === undefined){
                 console.log("New hour is valid is undefined");
@@ -149,35 +148,19 @@ export const NewTrip: React.FC = () => {
                     setShowErrorAlert(true);
                 } else {
                     if(selectedStartLocation !== null && selectedEndLocation !== null && selectedDate !== null ){
-                        if(selectedPassengerNumber < 3){
-                            requestBody = {
-                                tripCreatorId: userIdInt,
-                                driverId: tripDriverId,
-                                startLocationId: selectedStartLocation.stopId,
-                                endLocationId: selectedEndLocation.stopId,
-                                startingTime: selectedDate.toISOString(),
-                                stops: [],
-                                passengers: passengerCredentials
-                            }
-                        } else if (selectedPassengerNumber === 3) {
-                            requestBody = {
-                                tripCreatorId: userIdInt,
-                                driverId: tripDriverId,
-                                startLocationId: selectedStartLocation.stopId,
-                                endLocationId: selectedEndLocation.stopId,
-                                startingTime: selectedDate.toISOString(),
-                                stops: [],
-                                passengers: passengerCredentials,
-                                status: tripStatus.LOCKED
-                            }
+                        requestBody = {
+                            tripCreatorId: userIdInt,
+                            driverId: tripDriverId,
+                            startLocationId: selectedStartLocation.stopId,
+                            endLocationId: selectedEndLocation.stopId,
+                            startingTime: selectedDate.toISOString(),
+                            noOfPassengers: freeSeatsNumberSelectedOption.value,
                         }
             
                         const response = await instance.post('/trips', requestBody);
                         if(response){
                             console.log(response.data);
                             const newTripId = response.data.tripId;
-                            console.log("Current trip id: ", currentTripId);
-                            console.log("Next scheduled trip id: ", nextScheduledTripId);
                             
                             if(currentTripId === null){
                                 //update the current trip of the user to the newly created one
@@ -207,7 +190,6 @@ export const NewTrip: React.FC = () => {
             
                         } else {
                             console.log("Trip creation failed");
-                            setPassengerCredentials([]);
                             setErrorMessage("Trip creation failed. Check the fields and try again");
                             setShowErrorAlert(true);
                         }
@@ -223,10 +205,6 @@ export const NewTrip: React.FC = () => {
             console.log("Error creating trip or updating user", error);
         }
 
-    }
-
-    const updatePassengerCredentials = (firstName: string, lastName: string) => {
-        setPassengerCredentials([...passengerCredentials, {firstName: firstName, lastName: lastName}]);
     }
 
     useEffect(() => {
@@ -346,88 +324,40 @@ export const NewTrip: React.FC = () => {
                                     ]}
                                 />
                                 <IonButton onClick={() => {
-                                    setShowPassengerNumberPicker(true);
-                                    setPassengerNumberPickerKey(prevKey => prevKey + 1);
-                                    setPassengerCredentialsInputsKey(prevKey => prevKey + 1);
+                                    setShowFreeSeatsNumberPicker(true);
+                                    setFreeSeatsNumberPickerKey(prevKey => prevKey + 1);
                                 }}>
                                     {
-                                        selectedPassengerNumber > 0 ? (
-                                            <p style={{margin: 0}}>Number of passengers
-                                                {' ' + selectedPassengerNumber }
-                                            </p>
-                                        ) : "Add passengers"
+                                        <p style={{margin: 0}}>Free seats in the car: 
+                                            {' ' + freeSeatsNumberSelectedOption.text }
+                                        </p>
                                     }
                                 </IonButton>
                                 <IonPicker 
-                                    isOpen={showPassengerNumberPicker}
-                                    key={passengerNumberPickerKey}
+                                    isOpen={showFreeSeatsNumberPicker}
+                                    key={freeSeatsNumberPickerKey}
                                     columns={[
                                         {
-                                            name: 'Passenger Number',
-                                            options: [
-                                                {
-                                                    text: '0',
-                                                    value: 0
-                                                },
-                                                {
-                                                    text: '1',
-                                                    value: 1
-                                                },
-                                                {
-                                                    text: '2',
-                                                    value: 2
-                                                },
-                                                {
-                                                    text: '3',
-                                                    value: 3
-                                                },
-                                            ]
+                                            name: 'Free Seats Number',
+                                            options: freeSeatsNumberOptions
                                         }
                                     ]}
                                     buttons={[
                                         {
                                             text: "Cancel",
                                             role: "Cancel",
-                                            handler: () => setShowPassengerNumberPicker(false),
+                                            handler: () => setShowFreeSeatsNumberPicker(false),
                                         },
                                         {
                                             text: "Confirm",
                                             role: "Confirm",
                                             handler: (value) => {
-                                                setSelectedPassengerNumber(value['Passenger Number'].value);
+                                                const selectedOption = value['Free Seats Number'];
+                                                setFreeSeatsNumberSelectedOption({text:  selectedOption.text, value: selectedOption.value});
                                             }
                                         }
                                     ]}
                                 />
-                                {
-                                    selectedPassengerNumber > 0 ? (
-                                        <IonItem key={passengerCredentialsInputsKey}>
-                                            <div className="passengers-credentials-container">
-                                            {
-                                                Array.from({length: selectedPassengerNumber}, (_, i) => i).map((index) => {
-                                                    return(
-                                                        <PassengerCredentials 
-                                                            key={index} 
-                                                            index={index} 
-                                                            setPassengerCredentials={updatePassengerCredentials} 
-                                                        />
-                                                    );
-                                                })
-                                            }
-                                            </div>
-                                        </IonItem>
-                                    ) : null
-                                }
-                                <IonButton >
-                                    {
-                                        selectedDate ? (
-                                            <p style={{margin: 0}}>
-                                                {'At ' + selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
-                                            </p>
-                                        ) : "Select date and time below"
-                                    
-                                    }
-                                </IonButton>
                                 <IonDatetime 
                                     presentation="date-time"
                                     showDefaultButtons={true}
@@ -441,8 +371,18 @@ export const NewTrip: React.FC = () => {
                                     }}
                                 >
                                 </IonDatetime>
+                                <IonText className="trip-date-time">
+                                    {
+                                        selectedDate ? (
+                                            <p style={{margin: 0}}>
+                                                {'Scheduled time: ' + selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
+                                            </p>
+                                        ) : "Select date and time below"
+                                    
+                                    }
+                                </IonText>
                             </div>
-                            <IonButton type="submit" shape="round">
+                            <IonButton type="submit" shape="round" style={{marginTop: '1rem'}}>
                                 Submit Trip
                             </IonButton>
                         </form>

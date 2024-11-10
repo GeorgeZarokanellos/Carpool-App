@@ -15,11 +15,12 @@ export const VehicleImagesDisplay: React.FC<VehicleImagesDisplayProps> = ({vehic
               slidesPerView={1}
             >
               {
-                vehicleImages.map((url, index) => (
+                vehicleImages.map((url, index) => {
+                  return (
                   <SwiperSlide key={index} >
                     <img src={url} alt="" style={{height: '100%', width: '100%'}}/>
                   </SwiperSlide>
-                ))
+                )})
               }
             </Swiper>
         </div>

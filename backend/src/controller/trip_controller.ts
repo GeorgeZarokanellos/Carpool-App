@@ -168,30 +168,17 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
 export const createTrip = async(req: Request,res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
         console.log(req.body); 
-        const {tripCreatorId, driverId, startLocationId, endLocationId, startingTime, status}: tripInterface = req.body;
-        const stops: number[] = req.body.stops;
-        const passengerIds: number[] = req.body.passengers;
+        const {tripCreatorId, driverId, startLocationId, endLocationId, startingTime, noOfPassengers }: tripInterface = req.body;
         let newTrip: Trip;
-        if(status !== undefined){   //if status is provided
-            newTrip = await Trip.create({
-                tripCreatorId,
-                driverId,
-                startLocationId,
-                endLocationId,
-                startingTime,
-                status
-            },{transaction});
-        } else {    //if status is not provided set it to db default
-            newTrip = await Trip.create({
-                tripCreatorId,
-                driverId,
-                startLocationId,
-                endLocationId,
-                startingTime
-            },{transaction});
-        }
-        await addStopsToTrip(stops, newTrip, transaction);
-        await addPassengersToTrip(passengerIds, newTrip, transaction);
+        newTrip = await Trip.create({
+            tripCreatorId,
+            driverId,
+            startLocationId,
+            endLocationId,
+            startingTime,
+            noOfPassengers
+        },{transaction});
+        
         await newTrip.save({transaction});
         res.status(200).send(newTrip);
     }).catch((err) => {

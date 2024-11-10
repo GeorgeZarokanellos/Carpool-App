@@ -7,6 +7,7 @@ import sequelize from '../database/connect_to_db';
 import { updatedUserInterface } from "../interface/interface";
 import path from "path";
 import fs from "fs";
+import Vehicle from "../model/vehicle";
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
@@ -241,15 +242,23 @@ export const retrieveUserInfo = async (req: Request, res: Response, next: NextFu
         if(userData){
             let responseData = userData.toJSON();
             let driverData;
+            let vehicleData;
             if(userData.role === 'driver'){
                 driverData = await Driver.findByPk(userId, {
                     attributes: ['nextScheduledTripId']
                 });
+                vehicleData = await Vehicle.findOne({
+                    where: {
+                        ownerId: userId
+                    },
+                    attributes: ['noOfSeats']
+                })
             }
             if(driverData){
                 responseData = {
                     ...responseData,
-                    ...driverData.toJSON()
+                    ...driverData.toJSON(),
+                    ...vehicleData?.toJSON()
                 }
             }
             res.status(200).json(responseData);
@@ -276,6 +285,7 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
         if(tripDriver !== null && tripDriver.role === 'driver'){
             //get the path to the folder containing the images
             const imageFolder = path.join(__dirname, `../../static/uploads/${tripDriver.userId}`);
+            // const imageFolder = `/static/uploads/${tripDriver.userId}`;
             
             if(!fs.existsSync(imageFolder)){
                 res.status(404).send('No images found');
@@ -318,7 +328,11 @@ export const deleteUserNotifications = async (req: Request, res: Response, next:
             where: {
                 passengerId: userId,
                 tripId,
-                type: 'request'
+                type: {
+                    [Op.or] : [
+                        'request',
+                        'delay'
+                ]}
             },
             transaction
         });

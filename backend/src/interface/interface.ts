@@ -22,7 +22,7 @@ interface tripInterface {
     startLocationId: number;
     endLocationId: number;
     startingTime: Date;
-    status?: tripStatus;
+    noOfPassengers: number;
 }
 
 interface updatedTripInterface {
