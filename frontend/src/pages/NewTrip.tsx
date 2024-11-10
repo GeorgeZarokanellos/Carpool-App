@@ -1,4 +1,4 @@
-import { IonAlert, IonButton, IonContent, IonDatetime, IonHeader, IonPage, IonPicker, IonTitle, IonToolbar } from "@ionic/react";
+import { IonAlert, IonButton, IonContent, IonDatetime, IonHeader, IonPage, IonPicker, IonText, IonTitle, IonToolbar } from "@ionic/react";
 import React, { useEffect, useState } from "react";
 import instance from "../AxiosConfig";
 import { Stop } from "../interfacesAndTypes/Types";
@@ -358,16 +358,6 @@ export const NewTrip: React.FC = () => {
                                         }
                                     ]}
                                 />
-                                <IonButton >
-                                    {
-                                        selectedDate ? (
-                                            <p style={{margin: 0}}>
-                                                {'At ' + selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
-                                            </p>
-                                        ) : "Select date and time below"
-                                    
-                                    }
-                                </IonButton>
                                 <IonDatetime 
                                     presentation="date-time"
                                     showDefaultButtons={true}
@@ -381,8 +371,18 @@ export const NewTrip: React.FC = () => {
                                     }}
                                 >
                                 </IonDatetime>
+                                <IonText className="trip-date-time">
+                                    {
+                                        selectedDate ? (
+                                            <p style={{margin: 0}}>
+                                                {'Scheduled time: ' + selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
+                                            </p>
+                                        ) : "Select date and time below"
+                                    
+                                    }
+                                </IonText>
                             </div>
-                            <IonButton type="submit" shape="round">
+                            <IonButton type="submit" shape="round" style={{marginTop: '1rem'}}>
                                 Submit Trip
                             </IonButton>
                         </form>
