@@ -47,13 +47,13 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
   }
   if(profileData !== undefined){
     return (
-      <IonPage>
-        <IonHeader>
+      <IonPage >
+        <IonHeader style={{maxWidth: '25rem'}}>
           <MenuButton/>
           <IonTitle style={{color: 'black'}}>Profile</IonTitle>
         </IonHeader>
-        <IonContent fullscreen>
-          <IonContent >
+        <IonContent fullscreen >
+            <div className='center-container'>
               <div className='profile-container'>
                 <div className='profile-contents'>
                   <div className='profile-picture-container'>
@@ -79,7 +79,7 @@ const Profile: React.FC<profileProps> = ({refreshKey}) => {
                   </IonItem>
                 </div>
               </div>
-          </IonContent>
+            </div>
         </IonContent>
       </IonPage>
     );
