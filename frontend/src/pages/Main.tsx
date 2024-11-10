@@ -65,30 +65,64 @@ export const Main: React.FC = () => {
               <ol className='instructions-list'>
                 <li>On the search trips screen. Click on a trip that suits your needs.</li>
                 <li>A screen displaying detailed information about the trip will show up.</li>
-                <li>Click on the request to join button at the bottom.</li>
-                <li>A popup message will arise that will display the available stops that the driver can make.</li>
-                <li>Choose the stop that is closer to you.</li>
-                <li>A join request notification will be sent to the driver and once he/she accepts it you will join the trip!</li>
+                <li>At the bottom of the screen, tap the Request to Join button.</li>
+                <li>A popup will appear showing the available stops where the driver can pick you up.</li>
+                <li>Choose the stop that&apos;s most convenient for you.</li>
+                <li>A join request notification will be sent to the driver. Once they accept, you&apos;ll officially be added to the trip!</li>
               </ol>
         );
       case 'leaveTrip':
         return(
           <ol className='instructions-list'>
             <li>Navigate to the current trip screen from the navigation bar in the bottom.</li>
-            <li>If the trip hasn&apos;t started, at the bottom of the the screen you are going to see a leave trip button.</li>
-            <li>Press it and you will be removed from the trip.</li>
-            <li>Now you can join another trip if you wish!</li>
+            <li>If the trip hasn&apos;t started yet, a Leave Trip button will appear at the bottom of the screen.</li>
+            <li>Tap Leave Trip to remove yourself from the trip.</li>
+            <li>Once you&apos;ve left the trip, you&apos;re free to join another one if you&apos;d like!</li>
           </ol>
         );
       case 'review':
         return (
           <ol className='instructions-list'>
-            <li>Go to the notifications screen after you have finished a trip.</li>
+            <li>After completing a trip, go to the Notifications screen.</li>
             <li>You will see a trip participants review notification.</li>
-            <li>At the bottom there&apos;s going to be a section displaying a participant along with selectable stars.</li>
-            <li>Select the amount of stars for this participant, swipe right to see the next one and repeat.</li>
-            <li>Once you&apos;ve finished with all of them, click the submit review button.</li>
-            <li>Your reviews will be submitted and you will receive one point for each one!</li>
+            <li>At the bottom of the notification, you&apos;ll see each participant&apos;s name with a row of selectable stars below.</li>
+            <li>Select the amount of stars for this participant.</li>
+            <li>Swipe right to view the next participant and repeat the rating process.</li>
+            <li>Once you&apos;ve rated all participants, tap the Submit Review button.</li>
+            <li>After submitting, your reviews will be saved, and you&apos;ll receive one point for each review submitted.</li>
+          </ol>
+        );
+      case 'createTrip':
+        return (
+          <ol className='instructions-list'>
+            <li>On the Search Trips screen, tap the Create a New Trip button.</li>
+            <li>You&apos;ll be taken to the Trip Creation screen, where you can set up your trip details:</li>
+            <ul className='bullet-list'>
+              <li>Start and End Location</li>
+              <li>Available seats</li>
+              <li>Date and Time of the trip</li>
+            </ul>
+            <li>Note: If you choose any Start Location other than Prytaneia, the End Location will automatically be set to Prytaneia.</li>
+            <li>After selecting the Date and Time, tap Done at the bottom-right of the calendar.</li>
+            <li>Finally, tap the Submit Trip button to confirm and create your trip!</li>
+          </ol>
+        );
+      case 'delayTrip':
+        return (
+          <ol className='instructions-list'>
+            <li>On the Current Trip screen, tap the Delay Trip button.</li>
+            <li>A popup will appear, prompting you to enter the number of minutes to delay the trip.</li>
+            <li>Enter the new time and tap Done.</li>
+            <li>The trip&apos;s start time will be adjusted, and all participants will be notified of the delay.</li>
+          </ol>
+        )
+      case 'acceptRequest':
+        return (
+          <ol className='instructions-list'>
+            <li>On the Notifications screen, you will see a notification for a join request.</li>
+            <li>At the bottom of the notification, you&apos;ll see the Accept and Decline buttons.</li>
+            <li>Tap Accept to add the user to your trip, or Decline to reject the request.</li>
+            <li>Once you accept the request, the user will be added to your trip along with the stop that they have selected.</li>
           </ol>
         );
       case 'close': 
@@ -109,8 +143,8 @@ export const Main: React.FC = () => {
           <IonButton >Close Menu</IonButton>
         </IonMenuToggle>
         <div className='menu-content' >
-          <Dropdown style={{width: '100%'}}>
-            <Dropdown.Toggle >Instructions</Dropdown.Toggle>
+          <Dropdown style={{width: '100%'}} >
+            <Dropdown.Toggle >See Instructions</Dropdown.Toggle>
             <Dropdown.Menu>
               {
                 userRole === 'passenger' ? (
@@ -124,7 +158,7 @@ export const Main: React.FC = () => {
                   <>
                     <Dropdown.Item onClick={() => handleSelectedInstruction('createTrip')}>Creating a trip</Dropdown.Item>
                     <Dropdown.Item onClick={() => handleSelectedInstruction('delayTrip')}>Delaying a trip</Dropdown.Item>
-                    <Dropdown.Item onClick={() => handleSelectedInstruction('acceptRejectRequest')}>Accepting/Rejecting a request</Dropdown.Item>
+                    <Dropdown.Item onClick={() => handleSelectedInstruction('acceptRequest')}>Accepting a request</Dropdown.Item>
                     <Dropdown.Item onClick={() => handleSelectedInstruction('review')}>Reviewing users</Dropdown.Item>
                     <Dropdown.Item onClick={() => handleSelectedInstruction('close')}>Close</Dropdown.Item>     
                   </>

@@ -15,11 +15,17 @@ ion-menu{
             display: flex;
             justify-content: center;
             margin-bottom: 0.5rem;
+
+            .dropdown-item{
+                white-space: normal;
+                word-wrap: break-word;
+            }
         }
+
 
         .dropdown button{
             background-color: $ionic-background-color;
-            width: 50%;
+            width: 60%;
         }
 
         .instructions-list{
@@ -27,6 +33,14 @@ ion-menu{
             background-color: $ionic-background-color;
             color: $ionic-text-color;
             border-radius: 0.5rem;
+
+            .bullet-list{
+                list-style: none;
+                li::before{
+                    content: "• ";
+                    color: $ionic-text-color;
+                }
+            }
         }
     }
 }
