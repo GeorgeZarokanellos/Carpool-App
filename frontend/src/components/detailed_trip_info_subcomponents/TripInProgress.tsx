@@ -205,7 +205,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                             <div className="send-delay-notification">
                                 <IonText className="message">Gonna be late? Let the others know!</IonText>
                                 <IonButton shape="round" className="send-delay-notification-button" onClick={() => setOpenSelectTimeModal(true)}>
-                                    Alert Users
+                                    Delay Trip
                                 </IonButton>
                             </div>
                     }
@@ -282,7 +282,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                         >+</Button>
                     </InputGroup>
                     <IonButton onClick={() => sendNotificationsToUsers()}>
-                        Send Notification To Users
+                        Done
                     </IonButton>
                 </div>
                 <IonAlert 
