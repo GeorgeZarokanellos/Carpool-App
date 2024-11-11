@@ -6,9 +6,9 @@ ion-menu{
         width: 100%;
         @include display-flex-center('both');
         flex-direction: column;
+        justify-content: space-between;
 
         .logout-button{
-            margin-top: 5rem;
             width: 50%;
         }
 
