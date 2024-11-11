@@ -167,7 +167,7 @@ export const Main: React.FC = () => {
             </Dropdown.Menu>
           </Dropdown>
           {renderInstructions()}
-          <IonButton className='logout-button' onClick={() => setUserLogoutConfirmation(true)}>Logout</IonButton>
+          <IonButton className='logout-button' color='danger' onClick={() => setUserLogoutConfirmation(true)}>Logout</IonButton>
         </div>
       </IonContent>
     </IonMenu>
