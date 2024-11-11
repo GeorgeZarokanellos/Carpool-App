@@ -186,7 +186,7 @@ export const Main: React.FC = () => {
             <IonIcon aria-hidden="true" icon={map} />
             <IonLabel style={{fontSize: '0.6rem'}}>Current Trip</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab2" href="/main/tab2">
+          <IonTabButton tab="tab2" href="/main/tab2" disabled>
             <IonIcon aria-hidden="true" icon={chatbox} />
             <IonLabel style={{fontSize: '0.6rem'}}>Demo</IonLabel>
           </IonTabButton>
