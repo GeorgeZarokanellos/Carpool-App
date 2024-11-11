@@ -19,10 +19,12 @@
             flex-direction: column;
 
             .trip-date-time{
-                // background-color: $trip-info-background-color;
-                color: black;
+                color: $ionic-text-color;
+                font-size: large;
+                background-color: red;
                 text-align: center;
                 border-radius: 0.4rem;
+
             }
 
             ion-item {

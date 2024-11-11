@@ -252,7 +252,7 @@ export const NewTrip: React.FC = () => {
                                         ) : "Select start and end location"
                                     }
                                 </ IonButton>
-                                <IonPicker 
+                                <IonPicker
                                     isOpen={showStartLocationPicker}
                                     key={startLocationPickerKey}
                                     columns={[
@@ -289,7 +289,7 @@ export const NewTrip: React.FC = () => {
                                                 }
                                             }
                                         }
-                                    ]}  
+                                    ]} 
                                 />
                                 <IonPicker 
                                     isOpen={showEndLocationPicker}
@@ -360,13 +360,12 @@ export const NewTrip: React.FC = () => {
                                 />
                                 <IonDatetime 
                                     presentation="date-time"
-                                    showDefaultButtons={true}
+                                    showDefaultButtons={false}
                                     min={new Date(new Date().setHours(new Date().getHours())).toISOString()}
                                     hourCycle="h23"
                                     onIonChange={(e) => {
                                         if(typeof e.detail.value === 'string'){                                                                                        
                                             setSelectedDate(new Date(e.detail.value.toString()));
-                                            console.log("Selected datetime: ", selectedDate);
                                         }
                                     }}
                                 >
@@ -375,14 +374,14 @@ export const NewTrip: React.FC = () => {
                                     {
                                         selectedDate ? (
                                             <p style={{margin: 0}}>
-                                                {'Scheduled time: ' + selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
+                                                {'Trip scheduled for: '} <br /> {selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
                                             </p>
                                         ) : "Select date and time below"
                                     
                                     }
                                 </IonText>
                             </div>
-                            <IonButton type="submit" shape="round" style={{marginTop: '1rem'}}>
+                            <IonButton type="submit" shape="round" style={{marginTop: '3rem'}}>
                                 Submit Trip
                             </IonButton>
                         </form>
