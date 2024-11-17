@@ -8,17 +8,18 @@ interface UserSelectStopModalProps {
     onClose: () => void;
     endLocationId: number;
     availableStops: Stop[];
+    startingFromUniversity: boolean;
     onSelectStop: (stopId: Stop) => void;        
 }
 
-export const UserSelectStopModal:React.FC<UserSelectStopModalProps> = ({isOpen, onClose, endLocationId, availableStops, onSelectStop}) => {
+export const UserSelectStopModal:React.FC<UserSelectStopModalProps> = ({isOpen, onClose, endLocationId, availableStops, startingFromUniversity, onSelectStop}) => {
 
     return (
         <IonModal isOpen={isOpen} >
             <IonContent className="modal-content">
                 <div className="title-container">
                     <h3 style={{width: '80%'}}>
-                        Choose from which stop you want to be picked up
+                        {startingFromUniversity ? 'Choose to which stop you want to be dropped off' : 'Choose from which stop you want to be picked up'}
                     </h3>
                 </div>
                 <IonList>
