@@ -12,7 +12,7 @@ interface TripInProgressProps {
     tripDriverCurrentUser: boolean;
     userRole: string | null;
     userId: string | null;
-    setDriverWantsToEndTrip: (value: boolean) => void;
+    setDriverWantsToCompleteTrip: (value: boolean) => void;
     setDriverWantsToAbortTrip: (value: boolean) => void;
     checkForNextScheduledTrip: (userId: string | number, points? : number) => Promise<void>;  
 }
@@ -29,7 +29,7 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
     tripDriverCurrentUser,
     userRole,
     userId,
-    setDriverWantsToEndTrip, 
+    setDriverWantsToCompleteTrip, 
     setDriverWantsToAbortTrip,
     checkForNextScheduledTrip
 }) => {
@@ -193,7 +193,9 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                     </IonText>
                     {
                         tripDriverCurrentUser &&
-                        <IonButton shape="round" className="complete-trip-button" onClick={() => setDriverWantsToEndTrip(true)}>
+                        <IonButton shape="round" className="complete-trip-button" onClick={() => {
+                            setDriverWantsToCompleteTrip(true)
+                            }}>
                             Complete Trip
                         </IonButton>
                     }
