@@ -4,14 +4,25 @@ import Stop from "../model/stop"
 
 export const returnAvailableStops = async (req: Request, res: Response, next: NextFunction) => {
     const side = req.params.side;
+    const startLat = parseFloat(req.query.startLat as string);
+    const startLng = parseFloat(req.query.startLng as string);
+    const endLat = parseFloat(req.query.endLat as string);
+    const endLng = parseFloat(req.query.endLng as string);
+
     try {
-        const availableStops: Stop[] = await Stop.findAll(
+        const allStops: Stop[] = await Stop.findAll(
             {
                 where: {
                     side
                 }
             }
         );  
+        const availableStops = allStops.filter(stop => {
+            const stopLatBetween = (stop.lat >= startLat && stop.lat <= endLat) || (stop.lat <= startLat && stop.lat >= endLat);
+            const stopLngBetween = (stop.lng >= startLng && stop.lng <= endLng) || (stop.lng <= startLng && stop.lng >= endLng);
+
+            return stopLatBetween && stopLngBetween;
+        });
         res.status(200).json(availableStops);  
     } catch (error) {
         if (error instanceof Error){
