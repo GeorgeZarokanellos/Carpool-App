@@ -98,9 +98,9 @@ User.init({
 
 }, 
 {
-    sequelize, // We need to pass the connection instance
-    modelName: 'user', // We need to choose the model name
-    tableName: 'app_user', // We need to choose the table name   
+    sequelize, // connection instance
+    modelName: 'user', // model name
+    tableName: 'app_user', // table name   
     timestamps: false,
 });
 

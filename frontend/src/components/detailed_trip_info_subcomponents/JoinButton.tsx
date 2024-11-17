@@ -1,5 +1,5 @@
 import { IonAlert, IonButton } from "@ionic/react";
-import React, { useEffect } from "react";
+import React from "react";
 import { UserSelectStopModal } from "../UserSelectStopModal";
 import { Stop } from "../../interfacesAndTypes/Types";
 
@@ -11,6 +11,7 @@ interface JoinButtonProps {
     availableStops: Stop[];
     joinRequestSentAlert: boolean;
     userRequestedToJoinInTrip: boolean;
+    startingFromUniversity: boolean;
     setStopSelectModal: (value: boolean) => void;
     setSelectedStop: (value: Stop) => void;
     setJoinRequestSentAlert: (value: boolean) => void;
@@ -24,13 +25,11 @@ export const JoinButton: React.FC<JoinButtonProps> = ({
     availableStops,
     joinRequestSentAlert,
     userRequestedToJoinInTrip,
+    startingFromUniversity,
     setStopSelectModal,
     setSelectedStop,
     setJoinRequestSentAlert,
 }) => {
-    useEffect(() => {
-        console.log("Message", availabilityMessage);
-    }, [availabilityMessage]);
     
    return (
     <div className="join-button">
@@ -42,9 +41,10 @@ export const JoinButton: React.FC<JoinButtonProps> = ({
             onClose={() => setStopSelectModal(false)}
             endLocationId={endLocationId}
             availableStops={availableStops}
+            startingFromUniversity={startingFromUniversity}
             onSelectStop={(stop) => {
-            setSelectedStop(stop);
-            setStopSelectModal(false);
+                setSelectedStop(stop);
+                setStopSelectModal(false);
             }}
         />
         <IonAlert

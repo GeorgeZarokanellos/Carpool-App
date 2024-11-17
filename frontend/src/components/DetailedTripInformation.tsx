@@ -277,7 +277,14 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   const filterAvailableStops = async() => {
     if(tripData){
       if(tripData.startLocation.stopLocation !== 'Prytaneia'){
-        await instance.get(`/stops/${tripData.startLocation.side}`)
+        await instance.get(`/stops/${tripData.startLocation.side}`, {
+          params: {
+            startLat: tripData.startLocation.lat,
+            startLng: tripData.startLocation.lng,
+            endLat: tripData.endLocation.lat,
+            endLng: tripData.endLocation.lng
+          }
+        })
         .then(response => {
             setAvailableStops(response.data);
         })
@@ -285,9 +292,19 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
             console.log(error);
         });
       } else {
-        await instance.get(`/stops/${tripData.endLocation.side}`)
+        await instance.get(`/stops/${tripData.endLocation.side}`,
+          {
+            params: {
+              startLat: tripData.startLocation.lat,
+              startLng: tripData.startLocation.lng,
+              endLat: tripData.endLocation.lat,
+              endLng: tripData.endLocation.lng
+            }
+          }
+        )
         .then(response => {
             setAvailableStops(response.data);
+            
         })
         .catch(error => {
             console.log(error);
@@ -365,6 +382,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       }
   }
 
+  //#region useEffects
   useEffect(() => {
     fetchUsersInfo();
     checkIfUserIsInTrip();
@@ -383,7 +401,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
   }, [selectedStop]);
 
   useEffect(() => {
-    if (driverWantsToCompleteTrip) {
+    if (driverWantsToCompleteTrip === true) {
       setCompletionAlertConfirmation(true);
     }
   }, [driverWantsToCompleteTrip]);
@@ -407,7 +425,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       handleTripCancellation();
     }
   }, [userConfirmedCancellation]);
-
+  //#endregion
   if(tripData){
       return (
           <>
@@ -447,6 +465,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   availableStops={availableStops}
                   joinRequestSentAlert={joinRequestSentAlert}
                   userRequestedToJoinInTrip={userPendingRequestTripId !== null || userPendingRequestTripId === tripData.tripId}
+                  startingFromUniversity={tripData.startLocation.stopLocation === 'Prytaneia'}
                   setStopSelectModal={setStopSelectModal}
                   setSelectedStop={setSelectedStop}
                   setJoinRequestSentAlert={setJoinRequestSentAlert}
@@ -460,7 +479,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                     tripDriverCurrentUser={tripDriverCurrentUser}
                     userRole={userRole}
                     userId={userId}
-                    setDriverWantsToEndTrip={setDriverWantsToCompleteTrip}
+                    setDriverWantsToCompleteTrip={setDriverWantsToCompleteTrip}
                     setDriverWantsToAbortTrip={setDriverWantsToCancelTrip}
                     checkForNextScheduledTrip={checkForNextScheduledTrip}
                   /> 
@@ -481,8 +500,9 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   <IonAlert 
                     isOpen={completionAlertConfirmation}
                     onDidDismiss={() => {
+                      setUserConfirmedCompletion(false);
                       setCompletionAlertConfirmation(false);
-                      
+                      setDriverWantsToCompleteTrip(false);
                     }}
                     header="End trip"
                     message={'Are you sure you want to end the trip?'}
@@ -492,6 +512,8 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                         role: 'cancel',
                         handler: () => {
                           setUserConfirmedCompletion(false);
+                          setCompletionAlertConfirmation(false);
+                          setDriverWantsToCompleteTrip(false);
                         }
                       },
                       {

@@ -103,7 +103,6 @@ export const Main: React.FC = () => {
               <li>Date and Time of the trip</li>
             </ul>
             <li>Note: If you choose any Start Location other than Prytaneia, the End Location will automatically be set to Prytaneia.</li>
-            <li>After selecting the Date and Time, tap Done at the bottom-right of the calendar.</li>
             <li>Finally, tap the Submit Trip button to confirm and create your trip!</li>
           </ol>
         );
@@ -144,7 +143,7 @@ export const Main: React.FC = () => {
         </IonMenuToggle>
         <div className='menu-content' >
           <Dropdown style={{width: '100%'}} >
-            <Dropdown.Toggle >See Instructions</Dropdown.Toggle>
+            <Dropdown.Toggle style={{marginTop: '2rem'}}>See Instructions</Dropdown.Toggle>
             <Dropdown.Menu>
               {
                 userRole === 'passenger' ? (
@@ -167,7 +166,7 @@ export const Main: React.FC = () => {
             </Dropdown.Menu>
           </Dropdown>
           {renderInstructions()}
-          <IonButton className='logout-button' onClick={() => setUserLogoutConfirmation(true)}>Logout</IonButton>
+          <IonButton className='logout-button' color='danger' onClick={() => setUserLogoutConfirmation(true)}>Logout</IonButton>
         </div>
       </IonContent>
     </IonMenu>
@@ -187,7 +186,7 @@ export const Main: React.FC = () => {
             <IonIcon aria-hidden="true" icon={map} />
             <IonLabel style={{fontSize: '0.6rem'}}>Current Trip</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab2" href="/main/tab2">
+          <IonTabButton tab="tab2" href="/main/tab2" disabled>
             <IonIcon aria-hidden="true" icon={chatbox} />
             <IonLabel style={{fontSize: '0.6rem'}}>Demo</IonLabel>
           </IonTabButton>

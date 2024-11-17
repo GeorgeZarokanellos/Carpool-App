@@ -59,7 +59,8 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
                         attributes: ['stopLocation'],
                         
                     }
-                ]
+                ],
+                order: [['startingTime', 'ASC']]
             });
             // console.log(trips);
             res.status(200).send(trips);
