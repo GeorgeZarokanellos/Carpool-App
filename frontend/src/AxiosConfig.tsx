@@ -5,7 +5,8 @@ const instance = axios.create({
   // baseURL: 'http://localhost:3000/api/v1',
   // baseURL: 'https://zarokanellos.imslab.gr/api/v1',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'  
   },
   withCredentials: true,
 });
