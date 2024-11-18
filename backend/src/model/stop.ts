@@ -9,16 +9,6 @@ class Stop extends Model {
     declare side: number;
 }
 
-const enum StopLocation {
-    KING_GEORGE_SQUARE = 'King George Square',
-    PLATEIA_OLGAS_SQUARE = 'Plateia Olgas Square',
-    PYROSVESTEIO = 'Pyrosvesteio',
-    ARETHA = 'Aretha',
-    ERASMUS_HOSTEL_UPATRAS = 'Erasmus Hostel Upatras',
-    PRYTANEIA = 'Prytaneia',
-
-}
-
 Stop.init({
     stopId: {
         type: DataTypes.INTEGER,
@@ -27,15 +17,7 @@ Stop.init({
         field: 'stop_id'
     },
     stopLocation: {
-        type: DataTypes.ENUM,
-        values: [
-            StopLocation.KING_GEORGE_SQUARE, 
-            StopLocation.PLATEIA_OLGAS_SQUARE, 
-            StopLocation.PYROSVESTEIO, 
-            StopLocation.ARETHA, 
-            StopLocation.ERASMUS_HOSTEL_UPATRAS, 
-            StopLocation.PRYTANEIA
-        ],
+        type: DataTypes.STRING,
         allowNull: false,
         field: 'loc'
     },

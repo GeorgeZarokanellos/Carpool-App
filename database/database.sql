@@ -1,5 +1,4 @@
 CREATE TYPE user_role AS ENUM ('driver', 'passenger');
-CREATE TYPE start_stop_location AS ENUM ('King George Square', 'Plateia Olgas Square', 'Pyrosvesteio', 'Aretha', 'Erasmus Hostel UPatras', 'Prytaneia');
 CREATE TYPE notification_status AS ENUM ('accepted', 'pending', 'declined', 'reviewed');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
 CREATE TYPE notification_type AS ENUM ('request', 'review', 'cancel', 'delay');
@@ -43,7 +42,7 @@ CREATE TABLE Vehicle (
 
 CREATE TABLE Stops (
 	stop_id SERIAL,
-	loc start_stop_location NOT NULL,
+	loc VARCHAR(30) NOT NULL,
     lat DOUBLE PRECISION NOT NULL ,
     lng DOUBLE PRECISION NOT NULL ,
     side INTEGER,
