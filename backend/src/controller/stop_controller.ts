@@ -14,7 +14,8 @@ export const returnAvailableStops = async (req: Request, res: Response, next: Ne
             {
                 where: {
                     side
-                }
+                },
+                order: [['stopLocation', 'ASC']]    //sort stops alphabetically
             }
         );  
         const availableStops = allStops.filter(stop => {

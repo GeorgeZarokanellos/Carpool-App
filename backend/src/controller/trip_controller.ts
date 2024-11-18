@@ -434,7 +434,9 @@ const deleteTripStop = async (tripId: string, transaction: Transaction): Promise
 
 export const retrieveAllStartLocations = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const stops = await Stop.findAll();
+        const stops = await Stop.findAll({
+            order: [['stopLocation', 'ASC']],
+        });
         console.log(stops);
         
         res.status(200).send(stops);
