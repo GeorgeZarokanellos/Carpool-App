@@ -16,7 +16,7 @@ interface MulterFile {
 }
 
 const localPath = '/home/george/Desktop/Carpool-App/backend/static/uploads';
-const remotePath = '/home/zaro/backend/static/uploads';
+const remotePath = '/static/uploads';
 
 export const uploadProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const storage = multer.diskStorage({
@@ -87,7 +87,7 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 let message = '';
                 if(existingUser.getDataValue('username') === username)
                     message += 'Username already exists!';
-                if(existingUser.getDataValue('universityId') === universityId)
+                if(existingUser.getDataValue('universityId') === Number(universityId))
                     message += 'University ID already exists!';
                 if(existingUser.getDataValue('email') === email)
                     message += 'Email already exists!';
