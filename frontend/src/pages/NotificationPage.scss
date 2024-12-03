@@ -1,7 +1,18 @@
 @import '../global.scss';
 
-.ion-page{
+.centering-container{
+    @include centering-container;
     
+    .limiting-container{
+        @include limiting-container;
+    }
+}
+
+.ion-page{
+    ion-toolbar{
+        --background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
     ion-card {
         ion-card-content{
             .trip-display-container{

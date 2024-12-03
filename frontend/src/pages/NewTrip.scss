@@ -1,10 +1,14 @@
 @import '../global.scss';
 
-
-
+.centering-container{
+    @include centering-container;
+    
+    .limiting-container{
+        @include limiting-container;
+        overflow-y: auto;
+    }
+}
 .new-trip-input-container {
-    @include display-flex-center('justify');
-    overflow-y: auto;
     margin-top: 1rem;
     
     .trip-form{
@@ -17,6 +21,10 @@
             width: 80%;
             @include display-flex-center('both');
             flex-direction: column;
+
+            button.picker-opt{
+                color: black;
+            }
 
             .trip-date-time{
                 color: $ionic-text-color;
