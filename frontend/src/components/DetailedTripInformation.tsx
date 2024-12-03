@@ -131,7 +131,10 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
           if(tripData.tripPassengers.length > 0){
             tripData.tripPassengers.forEach((passenger) => {
               promises.push(
-                instance.patch(`/user/${passenger.passengerId}`, {currentTripId: null})
+                instance.patch(`/user/${passenger.passengerId}`, {
+                  currentTripId: null,
+                  tripCompleted: true
+                })
               );
               promises.push(
                 instance.post('/notifications', {
@@ -163,7 +166,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
           //await all promises
           await Promise.all(promises);
           setReviewNotificationsSent(true);
-          setTripStatusMessage('The trip has been completed successfully!');
+          setTripStatusMessage('The trip has been completed successfully. Please take some time to review the participants!');
           setTripStatusAlert(true);
           //TODO add alert messages for next scheduled trip
           if(userId === null){
@@ -425,10 +428,12 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       handleTripCancellation();
     }
   }, [userConfirmedCancellation]);
+    
   //#endregion
   if(tripData){
       return (
-          <>
+        <div className="centering-container">
+          <div className="limiting-container">
               <IonContent >
                   <TripMapDisplay 
                     tripStops={tripData.tripStops} 
@@ -490,7 +495,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                     isOpen={tripStatusAlert}
                     onDidDismiss={() => {
                       setTripStatusAlert(false);
-                      history.push('/main/search-trips');
+                      history.push('/main/notifications');
                       window.location.reload();
                     }}
                     message={tripStatusMessage}
@@ -545,7 +550,8 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   />
                 </>
               }
-          </>  
+          </div>  
+        </div>
       )
     } else {
       return (

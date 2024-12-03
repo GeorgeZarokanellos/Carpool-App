@@ -13,7 +13,7 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { autoMaker } from "../interfacesAndTypes/Types";
 import "./DriverVehicleRegistration.scss";
 import { Swiper,SwiperSlide } from 'swiper/react';
@@ -26,8 +26,8 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 interface DriverVehicleRegistrationRequestBody {
-  driversLicenseId: string;
-  vehicleNumberPlate: string;
+  driversLicenseId?: string;
+  vehicleNumberPlate?: string;
 }
 
 export const DriverVehicleRegistration: React.FC = () => {
@@ -77,8 +77,8 @@ export const DriverVehicleRegistration: React.FC = () => {
   ];
 
   const requestBodyValidationSchema = object().shape({
-    driversLicenseId: string().required('Driver\'s license id is required').matches(/^[0-9]{6,15}$/, 'Driver\'s license must be between 6 and 15 digits'),
-    vehicleNumberPlate: string().required('Vehicle\'s number plate is required').min(6, 'Vehicle\'s number plate must be at least 6 characters long').max(10, 'Vehicle\'s number plate cannot exceed 10 characters')
+    driversLicenseId: string().matches(/^[0-9]{1,15}$/, 'Driver\'s license must be between 1 and 15 digits'),
+    vehicleNumberPlate: string().min(1, 'Vehicle\'s number plate must be at least 1 character long').max(10, 'Vehicle\'s number plate cannot exceed 10 characters'),
   })
 
   const { control, handleSubmit, formState: {errors}} = useForm({
@@ -102,7 +102,7 @@ export const DriverVehicleRegistration: React.FC = () => {
     }
     
     Object.entries(vehicleAndDriverData).forEach(([key, value]) => {
-      if(value !== undefined && value !== null){  //check if the state is not undefined/empty1
+      if(value !==undefined && value !== null){  //check if the state is not undefined/empty1
         if(key === 'vehicleImages' && Array.isArray(value)){ 
           // console.log("vehicle images is an array",key);
           value.forEach((file) => {  //if its an array of pictures loop through it and append each picture
@@ -139,6 +139,7 @@ export const DriverVehicleRegistration: React.FC = () => {
   const createFileUploadButton = (id: string, 
                                   fileName: string, 
                                   inputName: string,
+                                  label: string,
                                   setFileMethod: React.Dispatch<React.SetStateAction<Blob | undefined>>, 
                                   setNameMethod: React.Dispatch<React.SetStateAction<string>>,
                                   ) => {
@@ -151,21 +152,63 @@ export const DriverVehicleRegistration: React.FC = () => {
     //regular expression to split the id string in the first capital letter and then join the array with a space
     const displayedName = fileName ? fileName : id.split(/(?=[A-Z])/).join(' ') + '(PDF)';
     return (
-      <IonButton onClick={() => document.getElementById(id)?.click()}>
-        {displayedName}
-        <input type="file" id={id} name={inputName} hidden required accept=".pdf" onChange={handleFileUpload} />
-      </IonButton>
+      <>
+        <label>{label}</label>
+          <IonButton onClick={() => document.getElementById(id)?.click()}>
+            {displayedName}
+            <input type="file" id={id} name={inputName} hidden accept=".pdf" onChange={handleFileUpload} />
+          </IonButton>
+      </>
     )
   }
 
   const handleImagesUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if(e.target.files) {
+      console.log("Files", e.target.files);
       const files = Array.from(e.target.files);
+      console.log("Files array", files);
       const newUrls = files.map((file) => URL.createObjectURL(file));
       setVehicleImages(prevPictures => [...prevPictures, ...files]);
       setImageUrls(prevUrls => [...prevUrls, ...newUrls]);
     }
   }, []);
+
+  useEffect(() => {
+    const retrieveDefaultFiles = async () => {
+      try {
+        //default pdfs
+        const defaultPdf = await fetch('/test1.pdf');
+        const pdfBlob = await defaultPdf.blob();
+        const  defaultPdfFile = new File([pdfBlob], 'default_pdf.pdf',{
+          type: 'application/pdf',
+          lastModified: Date.now()
+        }); 
+        setDriversLicense(defaultPdfFile);
+        setDriversLicenseFileName('test_drivers_license.pdf');
+        setVehicleInsurance(defaultPdfFile);
+        setVehicleInsuranceFileName('test_vehicle_insurance.pdf');
+        setVehicleRegistration(defaultPdfFile);
+        setVehicleRegistrationFileName('test_vehicle_registration.pdf');
+        //default images
+        const defaultImageResponse = await fetch('/test_car_image.png');
+        const defaultImageBlob = await defaultImageResponse.blob();
+        const  defaultImageFile = new File([defaultImageBlob], 'default_car_image.png',{
+          type: 'image/png',
+          lastModified: Date.now()
+        }); 
+        setVehicleImages([defaultImageFile]);
+        setImageUrls([URL.createObjectURL(defaultImageFile)]);
+      } catch (error) {
+        console.log('Error fetching default files', error);
+      }
+    }
+    retrieveDefaultFiles();
+  }, []);
+
+  useEffect(() => {
+    console.log("VEhicle images", vehicleImages);
+  }, [vehicleImages]);
+    
 
   return (
     <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
@@ -193,16 +236,19 @@ export const DriverVehicleRegistration: React.FC = () => {
                     name='driversLicenseId'
                     control={control}
                     render={({field}) => (
-                      <input 
-                        name="driversLicenseId" 
-                        type="number" 
-                        placeholder="DRIVERS LICENSE ID" 
-                        required 
-                        value={field.value !== null ? field.value : ''} 
-                        onChange={(e) => {
-                          const value = e.target.value ? parseInt(e.target.value) : null;
-                          field.onChange(value);
-                        }}/>  
+                      <>
+                        <label>Driver&apos;s License ID</label>
+                        <input 
+                          name="driversLicenseId" 
+                          type="number" 
+                          placeholder="Insert here (up to 15 digits)" 
+                          // required 
+                          value={field.value !== null ? field.value : ''} 
+                          onChange={(e) => {
+                            const value = e.target.value ? parseInt(e.target.value) : null;
+                            field.onChange(value);
+                          }}/>  
+                      </>
                     )}
                   />
                   {errors['driversLicenseId'] !== undefined && <p className="error-message">{errors['driversLicenseId']?.message}</p>}
@@ -212,22 +258,26 @@ export const DriverVehicleRegistration: React.FC = () => {
                     name="vehicleNumberPlate"
                     control={control}
                     render={({field}) => (
-                      <input 
-                        name="vehicleNumberPlate"
-                        type="text" 
-                        placeholder="VEHICLE NUMBER PLATE" 
-                        required 
-                        value={field.value !== null ? field.value : ''} 
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          field.onChange(value);
-                        }}
-                      />
+                      <>
+                        <label>Vehicle Number Plate</label>
+                        <input 
+                          name="vehicleNumberPlate"
+                          type="text" 
+                          placeholder="Insert here (up to 10 characters)" 
+                          // required 
+                          value={field.value !== null ? field.value : ''} 
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value);
+                          }}
+                        />
+                      </>
                     )}
                     />
                   {errors['vehicleNumberPlate'] !== undefined && <p className="error-message">{errors['vehicleNumberPlate']?.message}</p>}
                 </div>
                 <div className="pickers">
+                  <label >Maker & Model</label>
                     <IonButton onClick={() => setShowMakerPicker(true)}>
                     {
                       selectedVehicleMaker.maker && selectedVehicleModel 
@@ -246,6 +296,7 @@ export const DriverVehicleRegistration: React.FC = () => {
                     {showMakerPicker && (
                       <IonPicker
                         isOpen={showMakerPicker}
+                        onDidDismiss={() => setShowMakerPicker(false)}
                         columns={[
                           {
                             name: "Car Maker",
@@ -309,51 +360,53 @@ export const DriverVehicleRegistration: React.FC = () => {
                     )}
                 </div>
                 <div className="no-of-seats-container"> 
+                  <label>Number of seats</label>
                   <IonButton onClick={() => setShowNoOfSeatsPicker(true)}>
                     {noOfSeats ? 'Available seats: ' + noOfSeats : "Select number of seats"}
                   </IonButton>
-                  <IonPicker 
-                    isOpen={showNoOfSeatsPicker}
-                    columns={[
-                      {
-                        name: 'Seats',
-                        options: [
-                          { text: '2', value: 2 },
-                          { text: '3', value: 3 },
-                          { text: '4', value: 4 },
-                          { text: '5', value: 5 }
-                        ]
-                      }
-                    ]}
-                    buttons={[
-                      {
-                        text: 'Cancel',
-                        role: 'Cancel',
-                        handler: () => setShowNoOfSeatsPicker(false)
-                      },
-                      {
-                        text: 'Confirm',
-                        handler: (value) => {
-                          setNoOfSeats(value.Seats.value);
-                          setShowNoOfSeatsPicker(false);
+                    <IonPicker 
+                      isOpen={showNoOfSeatsPicker}
+                      onDidDismiss={() => setShowNoOfSeatsPicker(false)}
+                      columns={[
+                        {
+                          name: 'Seats',
+                          options: [
+                            { text: '2', value: 2 },
+                            { text: '3', value: 3 },
+                            { text: '4', value: 4 },
+                            { text: '5', value: 5 }
+                          ]
                         }
-                      }
-                    ]}
-                  />
+                      ]}
+                      buttons={[
+                        {
+                          text: 'Cancel',
+                          role: 'Cancel',
+                          handler: () => setShowNoOfSeatsPicker(false)
+                        },
+                        {
+                          text: 'Confirm',
+                          handler: (value) => {
+                            setNoOfSeats(value.Seats.value);
+                            setShowNoOfSeatsPicker(false);
+                          }
+                        }
+                      ]}
+                    />
                 </div>
                 <div className="drivers-license-container">
-                  {createFileUploadButton( "DriversLicense", driversLicenseFileName, "driversLicense" , setDriversLicense , setDriversLicenseFileName)}
+                  {createFileUploadButton( "DriversLicense", driversLicenseFileName, "driversLicense" , 'Drivers License File' , setDriversLicense , setDriversLicenseFileName)}
                 </div>
                 <div className="vehicle-insurance-container">
-                  {createFileUploadButton( "VehicleInsurance", vehicleInsuranceFileName, "vehicleInsurance" , setVehicleInsurance, setVehicleInsuranceFileName)}
+                  {createFileUploadButton( "VehicleInsurance", vehicleInsuranceFileName, "vehicleInsurance" , 'Vehicle Insurance File' , setVehicleInsurance, setVehicleInsuranceFileName)}
                 </div>
                 <div className="vehicle-registration-container">
-                  {createFileUploadButton( "VehicleRegistration", vehicleRegistrationFileName, "vehicleRegistration" , setVehicleRegistration, setVehicleRegistrationFileName)}
+                  {createFileUploadButton( "VehicleRegistration", vehicleRegistrationFileName, "vehicleRegistration", 'Vehicle Registration File' , setVehicleRegistration, setVehicleRegistrationFileName)}
                 </div>
                 <div className="car-images-container">
                   <IonButton onClick={() => document.getElementById('vehicleImages')?.click()}>
                     {vehicleImages.length ? 'Selected images' : 'Upload car images(JPEG/PNG)'}
-                    <input type="file" id="vehicleImages" name="vehicleImages" hidden required multiple accept="image/jpeg, image/png" onChange={handleImagesUpload} />
+                    <input type="file" id="vehicleImages" name="vehicleImages" hidden  multiple accept="image/jpeg, image/png" onChange={handleImagesUpload} />
                   </IonButton>
                   <Swiper
                     spaceBetween={50}

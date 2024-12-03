@@ -222,192 +222,196 @@ export const NewTrip: React.FC = () => {
     },[userIdInt]);
 
     return (
-        <div>
             <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
-                <IonHeader>
-                    <IonToolbar>
-                        <IonTitle style={{ textAlign: "center" }}>
-                            Trip Creation
-                        </IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-                <IonContent>
-                    <div className="new-trip-input-container">
-                        <form className="trip-form" onSubmit={handleSubmit}>
-                            <div className="form-contents">
-                                <IonButton onClick={() => {
-                                    setShowStartLocationPicker(true);
-                                    setStartLocationPickerKey(prevKey => prevKey + 1);
-                                    }} > 
-                                    {
-                                        selectedStartLocation && selectedEndLocation ? (
-                                            <p style={{margin: 0, wordWrap: 'break-word', whiteSpace: 'normal'}}>
-                                                Starting at
-                                                {' ' + selectedStartLocation.loc}
-                                                <br />
-                                                <br />
-                                                Ending at
-                                                {' ' + selectedEndLocation.loc}
-                                            </p>
-                                        ) : "Select start and end location"
-                                    }
-                                </ IonButton>
-                                <IonPicker
-                                    isOpen={showStartLocationPicker}
-                                    key={startLocationPickerKey}
-                                    columns={[
-                                        {
-                                            name: 'Start Locations',
-                                            options: startLocations.map((stop) => ({
-                                                text: stop.stopLocation,
-                                                value: stop.stopId
-                                            }))
-                                        }
-                                    ]}  
-                                    buttons={[
-                                        {
-                                            text: "Cancel",
-                                            role: "Cancel",
-                                            handler: () => setShowStartLocationPicker(false),
-                                        },
-                                        {
-                                            text: "Confirm",
-                                            role: "Confirm",
-                                            handler: (value) => {
-                                                setSelectedStartLocation({loc: value['Start Locations'].text, stopId: value['Start Locations'].value});
-                                                if(value['Start Locations'].text !== 'Prytaneia'){
-                                                    const prytaneia = startLocations.find(stop => stop.stopLocation === 'Prytaneia');
-                                                    if(prytaneia){
-                                                        setSelectedEndLocation({loc: prytaneia.stopLocation, stopId: prytaneia.stopId});
-                                                    } else {
-                                                        console.log("Prytaneia not found");
-                                                    }
-                                                    setShowStartLocationPicker(false);
-                                                } else {
-                                                    setShowStartLocationPicker(false);
-                                                    setShowEndLocationPicker(true);
+                <div className="centering-container">
+                    <div className="limiting-container">
+                        <IonHeader>
+                            <IonToolbar>
+                                <IonTitle style={{ textAlign: "center" }}>
+                                    Trip Creation
+                                </IonTitle>
+                            </IonToolbar>
+                        </IonHeader>
+                        <IonContent>
+                            <div className="new-trip-input-container">
+                                <form className="trip-form" onSubmit={handleSubmit}>
+                                    <div className="form-contents">
+                                        <IonButton onClick={() => {
+                                            setShowStartLocationPicker(true);
+                                            setStartLocationPickerKey(prevKey => prevKey + 1);
+                                            }} > 
+                                            {
+                                                selectedStartLocation && selectedEndLocation ? (
+                                                    <p style={{margin: 0, wordWrap: 'break-word', whiteSpace: 'normal'}}>
+                                                        Starting at
+                                                        {' ' + selectedStartLocation.loc}
+                                                        <br />
+                                                        <br />
+                                                        Ending at
+                                                        {' ' + selectedEndLocation.loc}
+                                                    </p>
+                                                ) : "Select start and end location"
+                                            }
+                                        </ IonButton>
+                                        <IonPicker
+                                            isOpen={showStartLocationPicker}
+                                            key={startLocationPickerKey}
+                                            style={{color: 'black!important'}}
+                                            className="start-location-picker"
+                                            columns={[
+                                                {
+                                                    name: 'Start Locations',
+                                                    options: startLocations.map((stop) => ({
+                                                        text: stop.stopLocation,
+                                                        value: stop.stopId
+                                                    }))
                                                 }
+                                            ]}  
+                                            buttons={[
+                                                {
+                                                    text: "Cancel",
+                                                    role: "Cancel",
+                                                    handler: () => setShowStartLocationPicker(false),
+                                                },
+                                                {
+                                                    text: "Confirm",
+                                                    role: "Confirm",
+                                                    handler: (value) => {
+                                                        setSelectedStartLocation({loc: value['Start Locations'].text, stopId: value['Start Locations'].value});
+                                                        if(value['Start Locations'].text !== 'Prytaneia'){
+                                                            const prytaneia = startLocations.find(stop => stop.stopLocation === 'Prytaneia');
+                                                            if(prytaneia){
+                                                                setSelectedEndLocation({loc: prytaneia.stopLocation, stopId: prytaneia.stopId});
+                                                            } else {
+                                                                console.log("Prytaneia not found");
+                                                            }
+                                                            setShowStartLocationPicker(false);
+                                                        } else {
+                                                            setShowStartLocationPicker(false);
+                                                            setShowEndLocationPicker(true);
+                                                        }
+                                                    }
+                                                }
+                                            ]} 
+                                        />
+                                        <IonPicker 
+                                            isOpen={showEndLocationPicker}
+                                            columns={[
+                                                {
+                                                    name: 'End Locations',
+                                                    options: startLocations
+                                                        .filter(stop => stop.stopLocation !== 'Prytaneia')
+                                                        .map((stop) => ({
+                                                            text: stop.stopLocation,
+                                                            value: stop.stopId
+                                                        }))
+                                                }
+                                            ]}
+                                            buttons={[
+                                                {
+                                                    text: "Cancel", 
+                                                    role: "Cancel", 
+                                                    handler: () => {
+                                                        setShowEndLocationPicker(false)
+                                                        setShowStartLocationPicker(true);
+                                                    }
+                                                },
+                                                {
+                                                    text: "Confirm",
+                                                    role: "Confirm",
+                                                    handler: (value) => {
+                                                        setSelectedEndLocation({loc: value['End Locations'].text, stopId: value['End Locations'].value});
+                                                        setShowEndLocationPicker(false);
+                                                    }
+                                                }
+                                            ]}
+                                        />
+                                        <IonButton onClick={() => {
+                                            setShowFreeSeatsNumberPicker(true);
+                                            setFreeSeatsNumberPickerKey(prevKey => prevKey + 1);
+                                        }}>
+                                            {
+                                                <p style={{margin: 0}}>Free seats in the car: 
+                                                    {' ' + freeSeatsNumberSelectedOption.text }
+                                                </p>
                                             }
-                                        }
-                                    ]} 
-                                />
-                                <IonPicker 
-                                    isOpen={showEndLocationPicker}
-                                    columns={[
-                                        {
-                                            name: 'End Locations',
-                                            options: startLocations
-                                                .filter(stop => stop.stopLocation !== 'Prytaneia')
-                                                .map((stop) => ({
-                                                    text: stop.stopLocation,
-                                                    value: stop.stopId
-                                                }))
-                                        }
-                                    ]}
-                                    buttons={[
-                                        {
-                                            text: "Cancel", 
-                                            role: "Cancel", 
-                                            handler: () => {
-                                                setShowEndLocationPicker(false)
-                                                setShowStartLocationPicker(true);
+                                        </IonButton>
+                                        <IonPicker 
+                                            isOpen={showFreeSeatsNumberPicker}
+                                            key={freeSeatsNumberPickerKey}
+                                            columns={[
+                                                {
+                                                    name: 'Free Seats Number',
+                                                    options: freeSeatsNumberOptions
+                                                }
+                                            ]}
+                                            buttons={[
+                                                {
+                                                    text: "Cancel",
+                                                    role: "Cancel",
+                                                    handler: () => setShowFreeSeatsNumberPicker(false),
+                                                },
+                                                {
+                                                    text: "Confirm",
+                                                    role: "Confirm",
+                                                    handler: (value) => {
+                                                        const selectedOption = value['Free Seats Number'];
+                                                        setFreeSeatsNumberSelectedOption({text:  selectedOption.text, value: selectedOption.value});
+                                                    }
+                                                }
+                                            ]}
+                                        />
+                                        <IonDatetime 
+                                            presentation="date-time"
+                                            showDefaultButtons={false}
+                                            min={new Date(new Date().setHours(new Date().getHours())).toISOString()}
+                                            hourCycle="h23"
+                                            onIonChange={(e) => {
+                                                if(typeof e.detail.value === 'string'){                                                                                        
+                                                    setSelectedDate(new Date(e.detail.value.toString()));
+                                                }
+                                            }}
+                                        >
+                                        </IonDatetime>
+                                        <IonText className="trip-date-time">
+                                            {
+                                                selectedDate ? (
+                                                    <p style={{margin: 0}}>
+                                                        {'Trip scheduled for: '} <br /> {selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
+                                                    </p>
+                                                ) : "Select date and time below"
+                                            
                                             }
-                                        },
-                                        {
-                                            text: "Confirm",
-                                            role: "Confirm",
-                                            handler: (value) => {
-                                                setSelectedEndLocation({loc: value['End Locations'].text, stopId: value['End Locations'].value});
-                                                setShowEndLocationPicker(false);
-                                            }
-                                        }
-                                    ]}
-                                />
-                                <IonButton onClick={() => {
-                                    setShowFreeSeatsNumberPicker(true);
-                                    setFreeSeatsNumberPickerKey(prevKey => prevKey + 1);
-                                }}>
-                                    {
-                                        <p style={{margin: 0}}>Free seats in the car: 
-                                            {' ' + freeSeatsNumberSelectedOption.text }
-                                        </p>
-                                    }
-                                </IonButton>
-                                <IonPicker 
-                                    isOpen={showFreeSeatsNumberPicker}
-                                    key={freeSeatsNumberPickerKey}
-                                    columns={[
-                                        {
-                                            name: 'Free Seats Number',
-                                            options: freeSeatsNumberOptions
-                                        }
-                                    ]}
-                                    buttons={[
-                                        {
-                                            text: "Cancel",
-                                            role: "Cancel",
-                                            handler: () => setShowFreeSeatsNumberPicker(false),
-                                        },
-                                        {
-                                            text: "Confirm",
-                                            role: "Confirm",
-                                            handler: (value) => {
-                                                const selectedOption = value['Free Seats Number'];
-                                                setFreeSeatsNumberSelectedOption({text:  selectedOption.text, value: selectedOption.value});
-                                            }
-                                        }
-                                    ]}
-                                />
-                                <IonDatetime 
-                                    presentation="date-time"
-                                    showDefaultButtons={false}
-                                    min={new Date(new Date().setHours(new Date().getHours())).toISOString()}
-                                    hourCycle="h23"
-                                    onIonChange={(e) => {
-                                        if(typeof e.detail.value === 'string'){                                                                                        
-                                            setSelectedDate(new Date(e.detail.value.toString()));
-                                        }
-                                    }}
-                                >
-                                </IonDatetime>
-                                <IonText className="trip-date-time">
-                                    {
-                                        selectedDate ? (
-                                            <p style={{margin: 0}}>
-                                                {'Trip scheduled for: '} <br /> {selectedDate.toString().split(' ').slice(0, 4).join(' ') + ' on ' + selectedDate.toString().split(' ')[4].split(':').slice(0, 2).join(':')}
-                                            </p>
-                                        ) : "Select date and time below"
-                                    
-                                    }
-                                </IonText>
+                                        </IonText>
+                                    </div>
+                                    <IonButton type="submit" shape="round" style={{marginTop: '3rem'}}>
+                                        Submit Trip
+                                    </IonButton>
+                                </form>
                             </div>
-                            <IonButton type="submit" shape="round" style={{marginTop: '3rem'}}>
-                                Submit Trip
-                            </IonButton>
-                        </form>
+                        </IonContent>
+                        <IonAlert 
+                            isOpen={showTripCompletedAlert}
+                            onDidDismiss={() => {
+                                setShowTripCompletedAlert(false);
+                                history.push('/main/search-trips');
+                                window.location.reload();
+                            }}
+                            header={'Trip Creation'}
+                            message={tripCompletionMessage}
+                            buttons={['OK']}
+                        />
+                        <IonAlert 
+                            isOpen={showErrorAlert}
+                            onDidDismiss={() => {
+                                setShowErrorAlert(false);
+                            }}
+                            header={'Error'}
+                            message={errorMessage}
+                            buttons={['OK']}
+                        />
                     </div>
-                </IonContent>
-                <IonAlert 
-                    isOpen={showTripCompletedAlert}
-                    onDidDismiss={() => {
-                        setShowTripCompletedAlert(false);
-                        history.push('/main/search-trips');
-                        window.location.reload();
-                    }}
-                    header={'Trip Creation'}
-                    message={tripCompletionMessage}
-                    buttons={['OK']}
-                />
-                <IonAlert 
-                    isOpen={showErrorAlert}
-                    onDidDismiss={() => {
-                        setShowErrorAlert(false);
-                    }}
-                    header={'Error'}
-                    message={errorMessage}
-                    buttons={['OK']}
-                />
+                </div>
             </IonPage>
-        </div>
     );
 }

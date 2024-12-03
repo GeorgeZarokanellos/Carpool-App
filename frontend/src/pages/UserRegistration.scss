@@ -1,7 +1,10 @@
 @import '../global.scss';
 
 ion-content {
-
+    .user-registration-container{
+        width: 100%;
+        @include display-flex-center('both');
+    }
     .custom-form {
         @include display-flex-center('justify');
         width: 100%;
@@ -18,7 +21,8 @@ ion-content {
                 ion-avatar {
                     height: 10rem;
                     width: 10rem;
-                    
+                    display: flex;
+                    align-items: center;
                 }
                 
                 .error-message{
