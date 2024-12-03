@@ -18,6 +18,7 @@ class User extends Model {
     declare profilePicture: Blob;
     declare currentTripId: number;
     declare pendingRequestTripId: number;
+    declare tripCompleted: boolean;
 }
 
 User.init({ 
@@ -94,6 +95,11 @@ User.init({
         type: DataTypes.INTEGER,
         defaultValue: null,
         field: 'pending_request_trip_id'
+    },
+    tripCompleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        field: 'trip_completed'
     }
 
 }, 

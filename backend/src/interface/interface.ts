@@ -38,6 +38,7 @@ interface updatedUserInterface {
     currentTripId?: number;
     overallPoints?: number;
     pendingRequestTripId?: number;
+    tripCompleted?: boolean;
 }
 
 
@@ -47,9 +48,9 @@ interface addUserRequestBodyInterface {
     lastName: string;
     username: string;
     password: string;
-    email: string;
+    email?: string;
     role: role;
-    phone: string;
+    phone?: string;
 }
 
 interface carRegisterRequestBodyInterface {
