@@ -100,7 +100,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                         newStop = false;
                     }
                 })
-
+                
                 if(notificationDetails.stopId === trip.startLocationId){
                     newStop = false;
                 }
@@ -364,7 +364,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
     }, [trip]);
 
     return (
-        <>
+        <div >
             <IonCard color="primary">
                 <IonCardHeader className="notification-header">
                     <IonCardTitle class="ion-text-center" className="notification-title">
@@ -372,13 +372,19 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                             displayAppropriateTitle()
                         }
                     </IonCardTitle>
-                    <IonButton 
-                        className="delete-button" 
-                        title="Delete Notification"
-                        onClick={deleteNotification}
-                        >
-                        <CloseIcon />
-                    </IonButton>
+                    {
+                        !displayAcceptReject &&
+                            <IonButton 
+                                className="delete-button" 
+                                title="Delete Notification"
+                                onClick={() => {
+                                    deleteNotification();
+                                }}
+                                    
+                                >
+                                <CloseIcon />
+                            </IonButton>
+                    }
                 </IonCardHeader>
                 <IonCardContent className="card-content">
                     <div className="notification-message">
@@ -502,6 +508,6 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 message={ratingAlertMessage}
                 buttons={['OK']}
             />
-        </>
+        </div>
     );
 }
