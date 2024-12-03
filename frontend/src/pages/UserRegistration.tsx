@@ -13,15 +13,15 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 type inputLabelNames = "universityId" | "firstName" | "lastName" | "username" | "password" | "email" | "phone";
 interface UserRegistrationBody {
-  universityId: string;
+  universityId?: string;
   firstName: string;
   lastName: string;
   username: string;
   password: string;
-  email: string;
-  phone: string;
+  email?: string;
+  phone?: string;
   role?: string;
-  profilePicture: Blob;
+  profilePicture?: Blob | null;
 }
 
 export const UserRegistration: React.FC = () => {
@@ -41,21 +41,32 @@ export const UserRegistration: React.FC = () => {
   const viewportHeight = window.innerHeight;
 
   const requestBodyValidationSchema = object().shape({
-    universityId: string().required('University ID is required').matches(/^[0-9]{7}$/, 'University Id needs to be exactly 7 characters long'),
+    universityId: string().matches(/^[0-9]{1,10}$/, 'University Id can be up to 10 digits long'),
     firstName: string().required('First name is required').max(50, 'First name cannot exceed 50 characters'),
     lastName: string().required('Last name is required').max(50, 'Last name cannot exceed 50 characters'),
     username: string().required('Username is required').max(50, 'Username cannot exceed 50 characters'),
-    password: string().required('Password is required').min(3, 'Password cant be less than 3 characters').max(20, 'Password cannot exceed 20 characters').matches(/^[0-9A-Za-z!@#$%^&*_+]{3,20}$/, 'Password must be between 8 and 20 characters long'),
-    email: string().required('Email is required').matches(/^[0-9A-Za-z._+]+@[0-9A-Za-z]+\.[a-zA-Z]{2,}$/, 'Email is invalid'),
-    phone: string().required('Phone number is required').matches(/^\d{10}$/, 'Phone number must be 10 digits long'),
+    password: string().required('Password is required').min(1, 'Password cant be less than 1 character').max(20, 'Password cannot exceed 20 characters').matches(/^[0-9A-Za-z!@#$%^&*_+]{1,20}$/, 'Password must be between 1 and 20 characters long'),
+    email: string(),
+    // .required('Email is required').matches(/^[0-9A-Za-z._+]+@[0-9A-Za-z]+\.[a-zA-Z]{2,}$/, 'Email is invalid'),
+    phone: string(),
+    // .required('Phone number is required').matches(/^\d{10}$/, 'Phone number must be 10 digits long'),
     profilePicture: 
-    mixed<Blob>().
-    required('Profile picture is required')
+    mixed<Blob>()
+    .notRequired()
+    // .required('Profile picture is required')
     .test('Is valid type', 'Image type is not valid', (value) => {
-      return value && ['image/jpeg', 'image/jpg', 'image/png'].includes((value as Blob).type);
+      console.log("value", value);
+      
+      if(value === null || value === undefined)
+        return true;
+      else
+        return value && ['image/jpeg', 'image/jpg', 'image/png'].includes((value as Blob).type);
     })
     .test('Filesize', 'The file is too large', (value) => {
-      return value && (value as Blob).size <= 6000000;  //in bytes
+      if(value === null || value === undefined)
+        return true;
+      else
+        return value && (value as Blob).size <= 6000000;  //in bytes
     })
   });
   const { control, handleSubmit, formState: {errors} } = useForm({
@@ -116,13 +127,13 @@ export const UserRegistration: React.FC = () => {
   };
 
   const inputFieldProperties: { label: string, type: TextFieldTypes, placeholder?: string, name: inputLabelNames}[] = [
-    { label: 'University ID', type: 'number' as TextFieldTypes, placeholder: '7 digit registration number', name: 'universityId' },
-    { label: 'First Name',  type: 'text' as TextFieldTypes, name: "firstName"},
-    { label: 'Last Name', type: 'text' as TextFieldTypes, name: 'lastName'},
-    { label: 'Username', type: 'text' as TextFieldTypes, name: 'username'},
-    { label: 'Password', type: 'password' as TextFieldTypes, name: 'password'},
-    { label: 'Email', type: 'email' as TextFieldTypes, placeholder: 'example@gmail.com' , name: 'email'},
-    { label: 'Phone',  type: 'tel' as TextFieldTypes, placeholder: '10 digit personal number' , name: 'phone'},
+    { label: 'University ID', type: 'number' as TextFieldTypes, placeholder: 'Insert University id up to 10 digits', name: 'universityId' },
+    { label: 'First Name',  type: 'text' as TextFieldTypes, placeholder: 'Insert first name' ,name: "firstName"},
+    { label: 'Last Name', type: 'text' as TextFieldTypes, placeholder: 'Insert last name' , name: 'lastName'},
+    { label: 'Username', type: 'text' as TextFieldTypes, placeholder: 'Insert username' ,name: 'username'},
+    { label: 'Password', type: 'password' as TextFieldTypes, placeholder: 'Insert password up to 20 characters' , name: 'password'},
+    { label: 'Email', type: 'text' as TextFieldTypes, placeholder: 'Insert email' , name: 'email'},
+    { label: 'Phone',  type: 'tel' as TextFieldTypes, placeholder: 'Insert phone number' , name: 'phone'},
   ];
 
   useEffect(() => {
@@ -140,7 +151,7 @@ export const UserRegistration: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent >
-        {/* <div className='user-registration-container'> */}
+        <div className='user-registration-container'>
             <form onSubmit={handleSubmit(handleRegistration)} id='userCredentials' className='custom-form' encType='multipart/form-data'>
               <div className='form-contents'>
                   <div className='profile-picture-container'>
@@ -151,7 +162,15 @@ export const UserRegistration: React.FC = () => {
                       render={({field}) => (
                         <IonButton fill='clear' onClick={() => document.getElementById('profilePicture')?.click()}>
                             <IonAvatar >
-                              <img alt="Silhouette of a person's head" src={profilePicture? URL.createObjectURL(profilePicture) : "https://ionicframework.com/docs/img/demos/avatar.svg" }/>
+                              {
+                                profilePicture ? (
+                                  <img alt="Profile" src={URL.createObjectURL(profilePicture)} />
+                                ) : (
+                                  <div style={{whiteSpace: 'normal'}}>
+                                    Press here to select profile picture
+                                  </div>
+                                )
+                              }
                             </IonAvatar>
                           <input 
                             type='file' 
@@ -195,7 +214,7 @@ export const UserRegistration: React.FC = () => {
                   </IonCheckbox>
               </div>
             </form>
-        {/* </div> */}
+        </div>
       </IonContent>
       <IonFooter>
         <IonToolbar>

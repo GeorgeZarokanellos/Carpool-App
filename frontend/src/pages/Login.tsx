@@ -14,15 +14,15 @@ interface LoginFormInterface {
 
 const Login: React.FC = () => {
 
-  const loginRequestValidationSchema = object().shape({
-    username: string().required('Username is required'),
-    password: string().required('Password is required')
-  })
+  // const loginRequestValidationSchema = object().shape({
+  //   username: string().required('Username is required'),
+  //   password: string().required('Password is required')
+  // })
 
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { control, handleSubmit, formState: {errors}} = useForm<LoginFormInterface>({
-    resolver: yupResolver(loginRequestValidationSchema),
+    // resolver: yupResolver(loginRequestValidationSchema),
   });
   const history = useHistory();
   const viewportWidth = window.innerWidth;
@@ -66,7 +66,7 @@ const Login: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding" >
-        <div className='login-container'>
+        <div className='login-container' >
           <form onSubmit={handleSubmit(handleLogin)} className='custom-form'>
             <div className='credentials-container'>
               <IonLabel className='custom'> Username </IonLabel>

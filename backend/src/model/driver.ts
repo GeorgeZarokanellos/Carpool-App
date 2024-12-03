@@ -1,7 +1,8 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database/connect_to_db';
 
-class Driver extends Model {}
+class Driver extends Model {
+}
 
 Driver.init({
     // fields
@@ -9,12 +10,11 @@ Driver.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-        autoIncrement: true,
         field: 'driver_id'
     },
     licenseId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         field: 'license_id'
     },
     nextScheduledTripId: {

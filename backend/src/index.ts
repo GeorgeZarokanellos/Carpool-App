@@ -82,7 +82,9 @@ app.post(`${basePath}/login`, async (req,res) => {
             console.log('Incorrect username!');
             return res.status(401).send('Incorrect username');
         } else {
-            const passwordsMatch = await bcrypt.compare(password, user.getDataValue('password'));
+            //* commented for testing purposes
+            // const passwordsMatch = await bcrypt.compare(password, user.getDataValue('password'));
+            const passwordsMatch = password === user.getDataValue('password');
             if(!passwordsMatch){
                 console.log('Incorrect password!');
                 return res.status(401).send('Incorrect password');
