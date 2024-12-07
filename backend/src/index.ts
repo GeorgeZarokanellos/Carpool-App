@@ -19,6 +19,7 @@ import review_router from './router/review_router';
 import notification_router from './router/notification_router';
 import user_router from './router/user_router';
 import driver_router  from './router/driver_router';
+import admin_router from './router/admin_router';
 // #endregion
 
 const app = express();
@@ -131,6 +132,7 @@ app.use(`${basePath}/stops`, stop_router);
 app.use(`${basePath}/notifications`, notification_router);
 app.use(`${basePath}/user`, user_router);
 app.use(`${basePath}/driver`, driver_router);
+app.use(`${basePath}/admin`, admin_router);
 
 const httpServer = http.createServer(app);
 httpServer.listen(3000, () => {
