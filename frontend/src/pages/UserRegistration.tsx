@@ -144,7 +144,7 @@ export const UserRegistration: React.FC = () => {
   }, [userId]);
 
   return (
-    <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`}}>
+    <IonPage style={{width: `${viewportWidth}`, height: `${viewportHeight}`, color: 'black'}}>
       <IonHeader>
         <IonToolbar>
           <IonTitle style={{textAlign: 'center'}}>Registration</IonTitle>
