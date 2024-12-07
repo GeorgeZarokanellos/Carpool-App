@@ -8,6 +8,11 @@ enum NotificationType {
     REVIEW = 'review'
 }
 
+export enum CouponStatus {
+    ACTIVE = 'active',
+    REDEEMED = 'redeemed',
+}
+
 export enum tripStatus {
     INPROGRESS = 'in_progress',
     COMPLETED = 'completed',
