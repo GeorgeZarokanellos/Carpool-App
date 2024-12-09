@@ -11,6 +11,7 @@ class Coupon extends Model {
     declare pointsCost: number;
     declare status: CouponStatus;
     declare ownerId: number;
+    declare createdAt: Date;
 }
 
 Coupon.init({
@@ -57,6 +58,12 @@ Coupon.init({
         type: DataTypes.INTEGER,
         allowNull: true,
         field: 'owner_id'
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+        field: 'created_at'
     }
 },{
     sequelize,

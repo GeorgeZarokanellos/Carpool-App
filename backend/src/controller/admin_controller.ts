@@ -67,7 +67,11 @@ export const retrieveAllTrips = async (req: Request, res: Response, next: Functi
 
 export const retrieveAllCoupons = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const coupons = await Coupon.findAll();
+        const coupons = await Coupon.findAll(
+            {
+                order: [['createdAt', 'DESC']]
+            }
+        );
         res.status(200).json(coupons);
     } catch (error) {
         res.status(500).json({message: 'Error retrieving coupons', error: error});

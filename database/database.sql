@@ -120,11 +120,12 @@ CREATE TABLE Coupons (
     coupon_id SERIAL,
     title VARCHAR(30) NOT NULL,
     description TEXT,
-    code VARCHAR(10) DEFAULT 'code',
+    code VARCHAR(20) DEFAULT 'code',
     discount_value INT NOT NULL ,
     points_cost INT NOT NULL ,
     status coupon_status NOT NULL DEFAULT 'active',
     owner_id INT,
+    created_at TIMESTAMP DEFAULT NOW(),
     PRIMARY KEY (coupon_id),
     FOREIGN KEY (owner_id) REFERENCES App_user (user_id)
 );
