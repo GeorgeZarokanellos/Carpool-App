@@ -3,6 +3,7 @@ import './Users.scss';
 import instance from '../../AxiosConfig';
 import { UserDisplay } from './components/UserDisplay';
 import { IonLoading } from '@ionic/react';
+import { Pagination } from "@mui/material";
 
 type User = {
     universityId: string;
@@ -19,8 +20,11 @@ type User = {
 
 export const Users: React.FC = () => {
 
-    const [usersList, setUsersList] = useState<User[]>();
+    const [usersList, setUsersList] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [page, setPage] = useState<number>(1);
+    const [itemsPerPage] = useState<number>(10);
+    const paginatedUsers = usersList.slice((page-1)*itemsPerPage, itemsPerPage*page);
 
     const retrieveUsers = async () => {
         try {
@@ -33,6 +37,10 @@ export const Users: React.FC = () => {
             console.log(error);
             setIsLoading(false);
         }
+    }
+
+    const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
     }
 
     useEffect(() => {
@@ -57,7 +65,7 @@ export const Users: React.FC = () => {
                         <label>Trips Completed</label>
                     </div>
                      {
-                        usersList != null && usersList.map((user) => {
+                        usersList != null && paginatedUsers.map((user) => {
                             return (
                                 <UserDisplay 
                                     universityId={user.universityId}
@@ -75,6 +83,12 @@ export const Users: React.FC = () => {
                             )
                         })
                     }
+                    <Pagination 
+                        count={Math.ceil(usersList?.length / itemsPerPage)}
+                        page={page}
+                        shape="rounded"
+                        onChange={handlePageChange}
+                    />
                 </div>
             </div>
             <IonLoading 

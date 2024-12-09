@@ -5,7 +5,7 @@
     .list-header{
         width: 95%;
         display: grid;
-        grid-template-columns: repeat(11,1fr);
+        grid-template-columns: repeat(4,1fr) 2fr repeat(6,1fr);
 
         label{
             text-align: center;
