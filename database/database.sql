@@ -21,7 +21,7 @@ CREATE TABLE App_user (
     current_trip_id INT,
     pending_request_trip_id INT DEFAULT NULL,
     trip_completed BOOLEAN DEFAULT FALSE,
-    joined_at TIMESTAMP NOT NULL,
+    joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	PRIMARY KEY (user_id)
 );
 
