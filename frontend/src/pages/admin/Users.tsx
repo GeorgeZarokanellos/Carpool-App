@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Users.scss';
 import instance from '../../AxiosConfig';
-import { UserDisplay } from './UserDisplay';
+import { UserDisplay } from './components/UserDisplay';
 import { IonLoading } from '@ionic/react';
 
 type User = {
@@ -31,6 +31,7 @@ export const Users: React.FC = () => {
             setIsLoading(false);
         } catch (error) {
             console.log(error);
+            setIsLoading(false);
         }
     }
 
@@ -43,42 +44,37 @@ export const Users: React.FC = () => {
             <h1>Users</h1>
             <div className='list-display'>
                 <div className='users-list'>
-                    <table>
-                        <thead>
-                            <tr >
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Role</th>
-                                <th>Id</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Overall Rating</th>
-                                <th>Overall Points</th>
-                                <th>No of Reviews</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                usersList != null && usersList.map((user) => {
-                                    return (
-                                        <UserDisplay 
-                                            universityId={user.universityId}
-                                            firstName={user.firstName}
-                                            lastName={user.lastName}
-                                            email={user.email}
-                                            role={user.role}
-                                            phone={user.phone}
-                                            overallRating={user.overallRating}
-                                            overallPoints={user.overallPoints}
-                                            noOfReviews={user.noOfReviews}
-                                            tripsCompleted={user.tripsCompleted}
-                                            key={user.universityId}
-                                        />
-                                    )
-                                })
-                            }
-                        </tbody>
-                    </table>
+                    <div className='list-header'>
+                        <label>First Name</label>
+                        <label>Last Name</label>
+                        <label>Role</label>
+                        <label>University ID</label>
+                        <label>Email</label>
+                        <label>Phone</label>
+                        <label>Overall Rating</label>
+                        <label>Overall Points</label>
+                        <label>No of Reviews</label>
+                        <label>Trips Completed</label>
+                    </div>
+                     {
+                        usersList != null && usersList.map((user) => {
+                            return (
+                                <UserDisplay 
+                                    universityId={user.universityId}
+                                    firstName={user.firstName}
+                                    lastName={user.lastName}
+                                    email={user.email}
+                                    role={user.role}
+                                    phone={user.phone}
+                                    overallRating={user.overallRating}
+                                    overallPoints={user.overallPoints}
+                                    noOfReviews={user.noOfReviews}
+                                    tripsCompleted={user.tripsCompleted}
+                                    key={user.universityId}
+                                />
+                            )
+                        })
+                    }
                 </div>
             </div>
             <IonLoading 

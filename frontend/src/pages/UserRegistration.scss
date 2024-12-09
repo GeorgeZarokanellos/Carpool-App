@@ -1,11 +1,13 @@
 @import '../global.scss';
 
 ion-content {
+    color: black;
     .user-registration-container{
         width: 100%;
         @include display-flex-center('both');
     }
     .custom-form {
+        color: black;
         @include display-flex-center('justify');
         width: 100%;
         max-width: 25rem;
