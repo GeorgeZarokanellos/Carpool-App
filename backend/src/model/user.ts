@@ -20,6 +20,7 @@ class User extends Model {
     declare pendingRequestTripId: number;
     declare tripCompleted: boolean;
     declare joinedAt: Date
+    declare noOfTripsCompleted: number;
 }
 
 User.init({ 
@@ -107,6 +108,11 @@ User.init({
         defaultValue: new Date(),
         allowNull: false,
         field: 'joined_at'
+    },
+    noOfTripsCompleted: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        field: 'no_of_trips_completed'
     }
 
 }, 

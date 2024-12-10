@@ -7,7 +7,7 @@ export const retrieveAllUsers = async (req: Request, res: Response, next: NextFu
     try {
         const users = await User.findAll(
             {
-                attributes: ['universityId', 'firstName', 'lastName', 'email', 'role', 'phone', 'overallRating', 'overallPoints', 'noOfReviews'],
+                attributes: ['userId', 'universityId', 'firstName', 'lastName', 'email', 'role', 'phone', 'overallRating', 'overallPoints', 'noOfReviews', 'noOfTripsCompleted', 'joinedAt'],
                 where: {
                     role: {
                         [Op.ne]: 'admin'
