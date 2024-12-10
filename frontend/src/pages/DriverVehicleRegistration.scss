@@ -12,6 +12,7 @@ input[type="number"] {
 
 ion-content{
     ion-grid{
+        color: black;
         height: 100%;
         padding: 0;
         width: 100%;
@@ -28,6 +29,7 @@ ion-content{
         }
     }
     .custom-form {
+        color: black;
         width: 100%;
         @include display-flex-center('justify');
 

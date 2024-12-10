@@ -2,10 +2,12 @@
 
 ion-content {
     .user-registration-container{
+        color: black;
         width: 100%;
         @include display-flex-center('both');
     }
     .custom-form {
+        color: black;
         @include display-flex-center('justify');
         width: 100%;
         max-width: 25rem;
