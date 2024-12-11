@@ -68,7 +68,8 @@ export const Users: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        setUserDeletionConfirmation(true);
+        if(userToBeDeleted !== 0)
+            setUserDeletionConfirmation(true);
     }, [userToBeDeleted]);
 
     return(
@@ -83,14 +84,10 @@ export const Users: React.FC = () => {
                         <label>University <br/> ID</label>
                         <label>Email <br/> Address</label>
                         <label>Phone <br/> Number</label>
-                        <label>Overall <br/> Rating</label>
-                        <label>Overall <br/> Points</label>
-                        <label>No of <br/> Reviews</label>
-                        <label>Trips <br/> Completed</label>
                         <label>Joined <br/> At</label>
                     </div>
                      {
-                        usersList != null && paginatedUsers.map((user) => {
+                        usersList != null && paginatedUsers.map((user, index) => {
                             return (
                                 <UserDisplay 
                                     userId={user.userId}
@@ -106,7 +103,7 @@ export const Users: React.FC = () => {
                                     tripsCompleted={user.noOfTripsCompleted}
                                     joinedAt={user.joinedAt}
                                     setUserToBeDeleted={setUserToBeDeleted}
-                                    key={user.universityId}
+                                    key={index}
                                 />
                             )
                         })

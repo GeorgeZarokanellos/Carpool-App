@@ -3,9 +3,9 @@
     border: 1px solid black;
     margin: 0.5rem;
     width: 95%;
-    height: 3rem;
+    height: 10%;
     display: grid;
-    grid-template-columns: repeat(4,1fr) 2fr repeat(7,1fr);
+    grid-template-columns: repeat(4,1fr) 2fr repeat(4,1fr);
     background-color: lightblue;
 
     label{
@@ -15,5 +15,22 @@
 
     ion-button{
         --border-radius: 0.7rem;
+    }
+
+    .extend-user-info-container{
+        grid-column: span 10;
+        .user-detailed-info{
+            width: 100%;
+            .card{
+                background-color: lightblue;
+                width: 100%;
+                border: none;
+                margin: 0.5rem;
+
+                span{
+                    margin-right: 2rem;
+                }
+            }
+        }
     }
 }
