@@ -20,6 +20,7 @@ CREATE TABLE App_user (
     profile_picture bytea,
     current_trip_id INT,
     pending_request_trip_id INT DEFAULT NULL,
+    no_of_trips_completed INT DEFAULT 0,
     trip_completed BOOLEAN DEFAULT FALSE,
     joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	PRIMARY KEY (user_id)

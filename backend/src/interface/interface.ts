@@ -44,6 +44,7 @@ interface updatedUserInterface {
     overallPoints?: number;
     pendingRequestTripId?: number;
     tripCompleted?: boolean;
+    noOfTripsCompleted?: number; 
 }
 
 
