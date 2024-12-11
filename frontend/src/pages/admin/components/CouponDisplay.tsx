@@ -31,8 +31,8 @@ export const CouponDisplay: React.FC<CouponDisplayInterface> = (
             <label>{status}</label>
             <IonButton color='primary' onClick={() => setIsExpanded(!isExpanded)}>See Details</IonButton>
             <IonButton color='danger' onClick={() => setCouponToBeDeleted(couponId)}>Delete Coupon</IonButton>
-            <div className="extend">
-                <CCollapse visible={isExpanded} className="detailed-info" >
+            <div className="extend-coupon-info-container">
+                <CCollapse visible={isExpanded} className="coupon-detailed-info" >
                     <CCard >
                         <CCardBody>
                             <p>Description: {description}</p>

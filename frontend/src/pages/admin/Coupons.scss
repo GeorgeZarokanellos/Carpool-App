@@ -3,10 +3,14 @@
 .coupon-list-container{
     color: black;
     height: 100%;
-    width: 95%;
+    width: 100%;
     @include display-flex-center('align');
     flex-direction: column;
+    h1{
+        text-decoration: underline;
+    }
     .coupon-list-display{
+        color: black;
         width: 100%;
         max-height: 95%;
         overflow-y: scroll;

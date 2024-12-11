@@ -35,11 +35,12 @@ export const Coupons: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [couponActionAlert, setCouponActionAlert] = useState<boolean>(false);
     const [couponActionMessage, setCouponActionMessage] = useState<string>('');
+    const [couponDeletionConfirmation, setCouponDeletionConfirmation] = useState<boolean>(false);
     const [page, setPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(10);
-    const paginatedCoupons = couponsList.slice((page-1)*itemsPerPage, itemsPerPage*page);
     const {register, handleSubmit} = useForm<CouponFormInputs>();
     const [couponToBeDeleted, setCouponToBeDeleted] = useState<number>(0);
+    const paginatedCoupons = couponsList.slice((page-1)*itemsPerPage, itemsPerPage*page);
 
     const retrieveAllCoupons = async () => {
         try {
@@ -101,12 +102,13 @@ export const Coupons: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        handleCouponDeletion(couponToBeDeleted);
+        if(couponToBeDeleted !== 0)
+            setCouponDeletionConfirmation(true);
     }, [couponToBeDeleted])
 
     return(
         <div className="coupon-list-container">
-            <h1>Coupons</h1>
+            <h1>Coupons List</h1>
             <div className="coupon-list-display">
                 <div className="coupons-list">
                     <div className="list-header">
@@ -172,6 +174,30 @@ export const Coupons: React.FC = () => {
                 onDidDismiss={() => setCouponActionAlert(false)}
                 message={couponActionMessage}
                 buttons={['OK']}
+            />
+            <IonAlert 
+                isOpen={couponDeletionConfirmation}
+                onDidDismiss={() => setCouponDeletionConfirmation(false)}
+                header='Delete Coupon'
+                message='Are you sure you want to delete this coupon?'
+                buttons={
+                    [
+                        {
+                            text: 'Cancel',
+                            role: 'cancel',
+                            handler: () => {
+                                setCouponDeletionConfirmation(false);
+                            }
+                        },
+                        {
+                            text: 'Delete',
+                            handler: () => {
+                                setCouponDeletionConfirmation(false);
+                                handleCouponDeletion(couponToBeDeleted);
+                            }
+                        }
+                    ]
+                }
             />
         </div>
     )
