@@ -46,21 +46,31 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
 export const retrieveAllTrips = async (req: Request, res: Response, next: Function) => {
     try {
-        const startDate = new Date(req.query.startDate as string);
-        const endDate = new Date(req.query.endDate as string);
+        
+        const startDate = new Date(req.query.startDate as string).toISOString().split('T')[0];
+        const endDate = req.query.endDate !== "null" ? new Date(req.query.endDate as string).toISOString().split('T')[0] : "null";
         const tripStatus = req.query.status;
-
+        
         const tripsBetweenDates = await Trip.findAll({
+            attributes:[
+                [sequelize.fn('DATE', sequelize.col('starting_time')), 'Date'],
+                [sequelize.fn('COUNT', sequelize.col('trip_id')), 'TripCount']
+            ],
             where: {
-                startingTime: {
+                startingTime: req.query.endDate !== "null" ? {
                     [Op.between]: [startDate, endDate]
+                }:{
+                    [Op.gte]: startDate
                 },
                 status: tripStatus
-            }
+            },
+            group: [sequelize.fn('DATE', sequelize.col('starting_time'))],
+            order: [[sequelize.fn('DATE', sequelize.col('starting_time')), 'ASC']] 
         });
 
         res.status(200).json(tripsBetweenDates);
     } catch (error) {
+        console.log(error);
         res.status(500).json({message: 'Error retrieving trips between dates', error: error});
     }
 }
