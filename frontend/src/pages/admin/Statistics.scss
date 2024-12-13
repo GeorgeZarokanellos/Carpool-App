@@ -1,13 +1,56 @@
-.statistics-container{
+@import '../../global.scss';
 
+.statistics-container{
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr 20fr;
+    
     .trips-graph-container{
+        width: 45%;
+        height: 50%;
+        border: 1px solid black;
+        border-radius: 1.1rem;
+        @include display-flex-center('justify');
+        flex-direction: column;
+
         .picker-container{
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            padding: 0.5rem;
+            border-radius:1.1rem 1.1rem 0 0;
+            background-color: lightblue;
+
+            .date-label-picker,
+            .status-label-picker{
+                @include display-flex-center('align');
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                
+                #trip-status-picker{
+                    width: 70%;
+                    background-color: white;
+                    text-align: center;
+                }
+            }
+
             .react-datepicker-wrapper{
                 .react-datepicker__input-container{
                     input{
                         background-color: white;
+                        text-align: center;
                     }
                 }
+            }
+
+        }
+
+        .graph-container{
+            width: 100%;
+            height: 100%;
+            .responsive-container{
+                padding: 1rem;
             }
         }
     }
