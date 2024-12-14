@@ -1,8 +1,9 @@
 import { ProfilePictureBuffer } from "./Interfaces";
 
-enum Role {
-    DRIVER = "Driver",
-    PASSENGER = "Passenger",
+export enum Role {
+    DRIVER = "driver",
+    PASSENGER = "passenger",
+    ALL_ROLES = "all_roles"
 }
 
 export enum tripStatus {

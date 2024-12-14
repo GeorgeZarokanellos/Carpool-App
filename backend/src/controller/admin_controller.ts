@@ -2,18 +2,33 @@ import {Request, Response ,NextFunction } from "express";
 import sequelize from "../database/connect_to_db";
 import { Op } from "sequelize";
 import { Coupon, User, Trip } from "../model/association";
+import { role } from "../interface/interface";
 
 export const retrieveAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const startDate = new Date(req.query.startDate as string);
+        const endDate= req.query.endDate !== "null" ? new Date(req.query.endDate as string) : null;
+        const selectedRole = req.query.selectedRole; 
+
         const users = await User.findAll(
             {
-                attributes: ['userId', 'universityId', 'firstName', 'lastName', 'email', 'role', 'phone', 'overallRating', 'overallPoints', 'noOfReviews', 'noOfTripsCompleted', 'joinedAt'],
-                where: {
-                    role: {
-                        [Op.ne]: 'admin'
-                    } 
-                        
-                }
+                attributes: [
+                    [sequelize.fn('COUNT', sequelize.col('user_id')), 'noOfEntries'],
+                    [sequelize.fn('TO_CHAR', sequelize.col('joined_at'), 'DD/MM/YY'), 'date']
+                ],
+                where:{
+                    role: req.query.selectedRole === role.ALL_ROLES ? {
+                        [Op.in]: ['driver', 'passenger']
+                    } : selectedRole,
+                    
+                    joinedAt: req.query.endDate !== "null" ? {
+                        [Op.between] : [startDate, endDate] 
+                    } : {
+                        [Op.gte]: startDate
+                    }
+                },
+                group: [sequelize.fn('TO_CHAR', sequelize.col('joined_at'), 'DD/MM/YY')],
+                order: [[sequelize.fn('TO_CHAR', sequelize.col('joined_at'), 'DD/MM/YY'), 'ASC']]
             }
         );
         res.status(200).json(users);
@@ -53,8 +68,8 @@ export const retrieveAllTrips = async (req: Request, res: Response, next: Functi
         
         const tripsBetweenDates = await Trip.findAll({
             attributes:[
-                [sequelize.fn('DATE', sequelize.col('starting_time')), 'Date'],
-                [sequelize.fn('COUNT', sequelize.col('trip_id')), 'TripCount']
+                [sequelize.fn('TO_CHAR', sequelize.col('starting_time'), 'DD/MM/YY'), 'date'],
+                [sequelize.fn('COUNT', sequelize.col('trip_id')), 'noOfEntries']
             ],
             where: {
                 startingTime: req.query.endDate !== "null" ? {
@@ -64,8 +79,8 @@ export const retrieveAllTrips = async (req: Request, res: Response, next: Functi
                 },
                 status: tripStatus
             },
-            group: [sequelize.fn('DATE', sequelize.col('starting_time'))],
-            order: [[sequelize.fn('DATE', sequelize.col('starting_time')), 'ASC']] 
+            group: [sequelize.fn('TO_CHAR', sequelize.col('starting_time'), 'DD/MM/YY')],
+            order: [[sequelize.fn('TO_CHAR', sequelize.col('starting_time'), 'DD/MM/YY'), 'ASC']] 
         });
 
         res.status(200).json(tripsBetweenDates);

@@ -1,6 +1,7 @@
 enum role {
-    driver = 'driver',
-    passenger = 'passenger'
+    DRIVER = 'driver',
+    PASSENGER = 'passenger',
+    ALL_ROLES = 'all_roles'
 }
 
 enum NotificationType {

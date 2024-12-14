@@ -61,7 +61,7 @@ User.init({
         field: 'email'
     },
     role: {
-        type: DataTypes.ENUM(role.driver, role.passenger),
+        type: DataTypes.ENUM(role.DRIVER, role.PASSENGER, role.ALL_ROLES),
         allowNull: false,
         field: 'role'
     },
