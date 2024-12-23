@@ -1,0 +1,14 @@
+@import './../global.scss';
+
+ion-content{
+    .content-header{
+        .sub-tabs-container{
+            @include display-flex-center('justify');
+            width: 100%;
+            ion-button{
+                flex: 1;
+                max-width: 15rem;
+            }
+        }
+    }
+}
