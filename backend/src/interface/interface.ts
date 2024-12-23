@@ -1,11 +1,17 @@
 enum role {
-    driver = 'driver',
-    passenger = 'passenger'
+    DRIVER = 'driver',
+    PASSENGER = 'passenger',
+    ALL_ROLES = 'all_roles'
 }
 
 enum NotificationType {
     REQUEST = 'request',
     REVIEW = 'review'
+}
+
+export enum CouponStatus {
+    ACTIVE = 'active',
+    REDEEMED = 'redeemed',
 }
 
 export enum tripStatus {
@@ -39,6 +45,7 @@ interface updatedUserInterface {
     overallPoints?: number;
     pendingRequestTripId?: number;
     tripCompleted?: boolean;
+    noOfTripsCompleted?: number; 
 }
 
 

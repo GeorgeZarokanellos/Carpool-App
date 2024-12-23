@@ -43,7 +43,6 @@ export const Main: React.FC = () => {
       setIsLoading(true);
         await instance.get(`/notifications/${userId}?${queryParams.toString()}`)
         .then(response => {
-            // console.log(response.data);
             setUserNotifications(response.data);
             setNotificationsNumber(response.data.length);
             setIsLoading(false);

@@ -19,6 +19,8 @@ class User extends Model {
     declare currentTripId: number;
     declare pendingRequestTripId: number;
     declare tripCompleted: boolean;
+    declare joinedAt: Date
+    declare noOfTripsCompleted: number;
 }
 
 User.init({ 
@@ -59,7 +61,7 @@ User.init({
         field: 'email'
     },
     role: {
-        type: DataTypes.ENUM(role.driver, role.passenger),
+        type: DataTypes.ENUM(role.DRIVER, role.PASSENGER, role.ALL_ROLES),
         allowNull: false,
         field: 'role'
     },
@@ -100,6 +102,17 @@ User.init({
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         field: 'trip_completed'
+    },
+    joinedAt: {
+        type: DataTypes.DATE,
+        defaultValue: new Date(),
+        allowNull: false,
+        field: 'joined_at'
+    },
+    noOfTripsCompleted: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        field: 'no_of_trips_completed'
     }
 
 }, 

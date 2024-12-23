@@ -36,18 +36,28 @@ const Login: React.FC = () => {
     }).then((response) => {
       console.log(response);
       if(response.status === 200 && response.data.message === 'Login successful'){
+        const userRole = response.data.role;
+
         localStorage.setItem('userId', response.data.userId);
-        localStorage.setItem('role', response.data.role);
+        localStorage.setItem('role', userRole);
         localStorage.setItem('token', response.data.token);
-        if(response.data.role === 'driver'){
-          localStorage.setItem('nextScheduledTripId', response.data.nextScheduledTripId);
+        
+        if(userRole === 'passenger' || userRole === 'driver'){
+          if(response.data.role === 'driver'){
+            localStorage.setItem('nextScheduledTripId', response.data.nextScheduledTripId);
+          }
+          setIsLoading(false);
+          history.push('/main/search-trips');
+        } else if(userRole === 'admin'){
+          setIsLoading(false);
+          history.push('/admin/dashboard');
         }
-        setIsLoading(false);
-        history.push('/main/search-trips');
       } else if(response.status === 401 || response.status === 402) {
         setIsLoading(false);
         setShowAlert(true);
-      } 
+      } else {
+        setIsLoading(false);
+      }
     })
     .catch((error) => {
       if(error.status === 401 || error.status === 402){
