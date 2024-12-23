@@ -9,8 +9,6 @@ class Coupon extends Model {
     declare code: string;
     declare discountValue: number;
     declare pointsCost: number;
-    declare status: CouponStatus;
-    declare ownerId: number;
     declare createdAt: Date;
 }
 
@@ -47,17 +45,6 @@ Coupon.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'points_cost'
-    },
-    status: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: CouponStatus.ACTIVE,
-        field: 'status'
-    },
-    ownerId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        field: 'owner_id'
     },
     createdAt: {
         type: DataTypes.DATE,
