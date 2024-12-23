@@ -1,8 +1,9 @@
 import { ProfilePictureBuffer } from "./Interfaces";
 
-enum Role {
-    DRIVER = "Driver",
-    PASSENGER = "Passenger",
+export enum Role {
+    DRIVER = "driver",
+    PASSENGER = "passenger",
+    ALL_ROLES = "all_roles"
 }
 
 export enum tripStatus {
@@ -31,6 +32,7 @@ export type Driver =
             lastName: string;
             overallRating: string;
             profilePicture?: ProfilePictureBuffer;
+            noOfTripsCompleted: number;
         };
         vehicle: {
             noOfSeats: number;
@@ -73,12 +75,12 @@ export type ExtendedTrip = Trip & {
 
 export type tripPassenger = {
     passengerId: number;
-    //TODO change passenger to details
     passenger: {
         firstName: string;
         lastName: string;
         overallRating: string;
         profilePicture?: ProfilePictureBuffer;
+        noOfTripsCompleted: number;
     }
 }
 

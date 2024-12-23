@@ -11,6 +11,7 @@
             @include display-flex-center('both');
             flex-direction: column;
             width: 100%;
+            max-width: 8rem;
             
             }
     }

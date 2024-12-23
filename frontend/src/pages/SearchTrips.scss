@@ -1,5 +1,12 @@
 @import '../global.scss';
 
+.centering-container{
+    @include centering-container;
+    
+    .limiting-container{
+        @include limiting-container;
+    }
+}
 
 ion-searchbar.custom{
     --border-radius: 2rem;

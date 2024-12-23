@@ -51,14 +51,14 @@ const uploadFiles = async (
 const initializeUpload = async (req:Request, res:Response, next: NextFunction , userId: number): Promise<void> => {
     // store the uploaded files in the uploads folder
     const localPath = `/home/george/Desktop/Carpool-App/backend/static/uploads/${userId}`;
-    const remotePath = `/home/zaro/backend/static/uploads/${userId}`;
+    const remotePath = `/static/uploads/${userId}`;
     
     const Storage = multer.diskStorage({   
         destination: function(req,file,cb){    // cb is callback function that takes an error and a destination folder as parameters
             if(!userId){
                 throw new Error('Username is missing');
             }
-            const dir = path.resolve(localPath);   // create a folder for each driver using the username
+            const dir = path.resolve(remotePath);   // create a folder for each driver using the username
             fs.access(dir, fs.constants.F_OK, (err) => {   // check if the folder already exists
                 if(err !== null){    // err here means that the folder doesn't exist
                     fs.mkdir(dir, {recursive:true}, (err)=>{  // create the folder
@@ -132,25 +132,29 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
     async function addDriverAndVehicleAsync(): Promise<void> {
         try {
             const driverId = Number(req.params.id);
-            const {licenseId, plateNumber, maker, model, noOfSeats}: carRegisterRequestBodyInterface = req.body;            
-            let message = '';
-            const existingVehicle = await Vehicle.findOne({where: {plateNumber}});
-            const existingDriver = await Driver.findOne({where: {licenseId}});
-            if(existingDriver !== null){
-                message += 'Driver with the license ID you provided already exists';
-                res.status(400).send(message);
-                return;
-            }
-            if(existingVehicle !==null){
-                message +=  'Vehicle with the plate number you provided already exists';
-                res.status(400).send(message);
-                return;
-            }
+            const userId = driverId;
+            const {licenseId, plateNumber, maker, model, noOfSeats}: carRegisterRequestBodyInterface = req.body; 
+            const licenseIdNumber = Number(licenseId);           
+            
+            //* commented for testing purposes
+            // let message = '';
+            // const existingVehicle = await Vehicle.findOne({where: {plateNumber}});
+            // const existingDriver = await Driver.findOne({where: {licenseId}});
+            // if(existingDriver !== null){
+            //     message += 'Driver with the license ID you provided already exists';
+            //     res.status(400).send(message);
+            //     return;
+            // }
+            // if(existingVehicle !==null){
+            //     message +=  'Vehicle with the plate number you provided already exists';
+            //     res.status(400).send(message);
+            //     return;
+            // }
             // create a new driver and vehicle in a transaction
             await sequelize.transaction(async (transaction) => {
                 const newDriver = await Driver.create({ 
                     driverId,
-                    licenseId,
+                    licenseId: licenseIdNumber,
                 }, {transaction});
 
                 const newVehicle = await Vehicle.create({
@@ -161,7 +165,7 @@ export const addDriverAndVehicle = (req: Request, res: Response, next: NextFunct
                     noOfSeats
                 }, {transaction});
 
-                const user = await User.findByPk(driverId, {transaction});
+                const user = await User.findByPk(userId, {transaction});
                 if(user !== null)
                     await user.update({role: 'driver'}, {transaction}); // update the role of the user to driver
                 else {

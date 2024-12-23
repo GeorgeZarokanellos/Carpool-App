@@ -19,6 +19,7 @@ import review_router from './router/review_router';
 import notification_router from './router/notification_router';
 import user_router from './router/user_router';
 import driver_router  from './router/driver_router';
+import admin_router from './router/admin_router';
 // #endregion
 
 const app = express();
@@ -82,7 +83,9 @@ app.post(`${basePath}/login`, async (req,res) => {
             console.log('Incorrect username!');
             return res.status(401).send('Incorrect username');
         } else {
-            const passwordsMatch = await bcrypt.compare(password, user.getDataValue('password'));
+            //* commented for testing purposes
+            // const passwordsMatch = await bcrypt.compare(password, user.getDataValue('password'));
+            const passwordsMatch = password === user.getDataValue('password');
             if(!passwordsMatch){
                 console.log('Incorrect password!');
                 return res.status(401).send('Incorrect password');
@@ -129,6 +132,7 @@ app.use(`${basePath}/stops`, stop_router);
 app.use(`${basePath}/notifications`, notification_router);
 app.use(`${basePath}/user`, user_router);
 app.use(`${basePath}/driver`, driver_router);
+app.use(`${basePath}/admin`, admin_router);
 
 const httpServer = http.createServer(app);
 httpServer.listen(3000, () => {

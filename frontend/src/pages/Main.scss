@@ -1,6 +1,17 @@
 @import '../global.scss';
 
+ion-tab-bar{
+    --background: white;
+    --color: #6a6a6a;
+    border: none;
+    box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.3);
+    // --color-selected: black;
+}
+
 ion-menu{
+    ion-menu-button{
+        color: black;
+    }
     .menu-content{
         height: 90%;
         width: 100%;

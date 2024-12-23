@@ -26,6 +26,7 @@ export const Main: React.FC = () => {
   const [notificationsNumber, setNotificationsNumber] = useState<number>(0);
   const [userLogoutConfirmation, setUserLogoutConfirmation] = useState<boolean>(false);
   const [selectedInstruction, setSelectedInstruction] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const userId = localStorage.getItem('userId');
   const userRole = localStorage.getItem('role');
@@ -39,11 +40,12 @@ export const Main: React.FC = () => {
 
   const retrieveNotifications = async () => {
     try {
+      setIsLoading(true);
         await instance.get(`/notifications/${userId}?${queryParams.toString()}`)
         .then(response => {
-            // console.log(response.data);
             setUserNotifications(response.data);
             setNotificationsNumber(response.data.length);
+            setIsLoading(false);
         })
         .catch(error => {
             console.log("Error retrieving notifications", error);
@@ -138,7 +140,7 @@ export const Main: React.FC = () => {
   <>
     <IonMenu contentId='main-content'>
       <IonContent>
-        <IonMenuToggle autoHide={false}>
+        <IonMenuToggle autoHide={false} >
           <IonButton >Close Menu</IonButton>
         </IonMenuToggle>
         <div className='menu-content' >
@@ -164,7 +166,7 @@ export const Main: React.FC = () => {
                 )
               }
             </Dropdown.Menu>
-          </Dropdown>
+        </Dropdown>
           {renderInstructions()}
           <IonButton className='logout-button' color='danger' onClick={() => setUserLogoutConfirmation(true)}>Logout</IonButton>
         </div>
@@ -176,7 +178,7 @@ export const Main: React.FC = () => {
           <Route path="/main/current-trip" render={() => <CurrentTripPage refreshKey={currentTripRefreshKey} />} />
           <Route path="/main/tab2" component={Tab2} />
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={searchTripsRefreshKey}/>}/>
-          <Route path="/main/notifications" render={() => <NotificationPage notifications={userNotifications}/> }/>
+          <Route path="/main/notifications" render={() => <NotificationPage notifications={userNotifications} isLoading={isLoading}/> }/>
           <Route path="/main/profile" render={() => <Profile refreshKey={profileRefreshKey} /> }/>
           <Route path="/main/create-trip" component={NewTrip} />
           <Route path="/main/trip-info/:tripId" component={DetailedTripInformationPage}/>

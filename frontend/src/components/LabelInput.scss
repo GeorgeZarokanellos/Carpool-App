@@ -2,9 +2,14 @@
 
 .label-input{
     width: 100%;
+    margin-top: 0.5rem;
+    ion-label{
+        margin-bottom:0;
+    }
     ion-input{
         font-size: 1.35rem;
         width: 90%;
+        margin-top: -0.5rem;
         ::placeholder{
             font-size: 1.1rem;
         }

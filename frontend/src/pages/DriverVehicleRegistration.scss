@@ -9,36 +9,45 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
     -moz-appearance: textfield; /* Firefox */
 }
-ion-grid{
-    height: 100%;
-    padding: 0;
-    @include display-flex-center('both');
-    flex-direction: column;
-    ion-row {
-        height: 90%;
-        width: 100%;
-    }
-
-    .filler{
-        height: 5%;
-    }
-}
 
 ion-content{
-
+    ion-grid{
+        height: 100%;
+        padding: 0;
+        width: 100%;
+        @include display-flex-center('both');
+        flex-direction: column;
+        ion-row {
+            @include display-flex-center('justify');
+            height: 90%;
+            width: 100%;
+        }
+    
+        .filler{
+            height: 5%;
+        }
+    }
     .custom-form {
+        color: black;
         width: 100%;
         @include display-flex-center('justify');
 
         .form-contents {
+            label{
+                margin-top: 0.5rem;
+            }
             // height: 100%;
             width: 85%;
             @include display-flex-center('both');
             flex-direction: column;
+            ion-button{
+                margin-top: 0;
+                margin-bottom: 0.5rem;
+            }
             *{
                 width: 100%;
                 max-width: 25rem;
-                margin-bottom: 0.5rem;
+                // margin-bottom: 0.3rem;
                 ion-button,
                 input{
                     max-width: 95%;
@@ -71,10 +80,10 @@ ion-content{
                         border: 2.5px solid black;
                     }
                 }
-                .error-message {
-                    @include error-message-style();
-                    height: fit-content;
-                }
+            }
+            .error-message {
+                @include error-message-style();
+                height: fit-content;
             }
         }
     }

@@ -1,8 +1,14 @@
 @import '../global.scss';
 
 ion-content {
-
+    color: black;
+    .user-registration-container{
+        color: black;
+        width: 100%;
+        @include display-flex-center('both');
+    }
     .custom-form {
+        color: black;
         @include display-flex-center('justify');
         width: 100%;
         max-width: 25rem;
@@ -18,7 +24,8 @@ ion-content {
                 ion-avatar {
                     height: 10rem;
                     width: 10rem;
-                    
+                    display: flex;
+                    align-items: center;
                 }
                 
                 .error-message{

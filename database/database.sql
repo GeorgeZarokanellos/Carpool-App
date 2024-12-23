@@ -1,8 +1,8 @@
-CREATE TYPE user_role AS ENUM ('driver', 'passenger');
-CREATE TYPE start_stop_location AS ENUM ('King George Square', 'Plateia Olgas Square', 'Pyrosvesteio', 'Aretha', 'Erasmus Hostel UPatras', 'Prytaneia');
+CREATE TYPE user_role AS ENUM ('driver', 'passenger', 'admin');
 CREATE TYPE notification_status AS ENUM ('accepted', 'pending', 'declined', 'reviewed');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
 CREATE TYPE notification_type AS ENUM ('request', 'review', 'cancel', 'delay');
+CREATE TYPE coupon_status AS ENUM ('active', 'redeemed');
 
 CREATE TABLE App_user (
 	user_id SERIAL,
@@ -20,11 +20,14 @@ CREATE TABLE App_user (
     profile_picture bytea,
     current_trip_id INT,
     pending_request_trip_id INT DEFAULT NULL,
+    no_of_trips_completed INT DEFAULT 0,
+    trip_completed BOOLEAN DEFAULT FALSE,
+    joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	PRIMARY KEY (user_id)
 );
 
 CREATE TABLE Driver (
-	driver_id SERIAL,
+	driver_id INT UNIQUE,
 	license_id INT UNIQUE NOT NULL,
     next_scheduled_trip_id INT DEFAULT NULL,
 	PRIMARY KEY (driver_id),
@@ -32,18 +35,19 @@ CREATE TABLE Driver (
 );
 
 CREATE TABLE Vehicle (
-	plate_number VARCHAR(50) UNIQUE NOT NULL,
+    vehicle_id SERIAL,
+	plate_number VARCHAR(50) ,
     owner_id INT UNIQUE NOT NULL,
 	no_of_seats SMALLINT NOT NULL,
     maker VARCHAR(50),
 	model VARCHAR(50),
-	PRIMARY KEY (plate_number),
+	PRIMARY KEY (vehicle_id),
 	FOREIGN KEY (owner_id) REFERENCES Driver (driver_id)
 );
 
 CREATE TABLE Stops (
 	stop_id SERIAL,
-	loc start_stop_location NOT NULL,
+	loc VARCHAR(30) NOT NULL,
     lat DOUBLE PRECISION NOT NULL ,
     lng DOUBLE PRECISION NOT NULL ,
     side INTEGER,
@@ -111,6 +115,20 @@ CREATE TABLE Notifications (
 	FOREIGN KEY (driver_id) REFERENCES Driver (driver_id),
     FOREIGN KEY (passenger_id) REFERENCES App_user (user_id),
     FOREIGN KEY (trip_id) REFERENCES Trip (trip_id)
+);
+
+CREATE TABLE Coupons (
+    coupon_id SERIAL,
+    title VARCHAR(30) NOT NULL,
+    description TEXT,
+    code VARCHAR(20) DEFAULT 'code',
+    discount_value INT NOT NULL ,
+    points_cost INT NOT NULL ,
+    status coupon_status NOT NULL DEFAULT 'active',
+    owner_id INT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (coupon_id),
+    FOREIGN KEY (owner_id) REFERENCES App_user (user_id)
 );
 
 

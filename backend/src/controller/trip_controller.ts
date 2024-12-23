@@ -11,8 +11,6 @@ export const returnTrips = (req: Request,res: Response, next: NextFunction): voi
     async function returnTripsAsync(): Promise<void> {
         const userDateTime = req.query.userDate as string;
         const parsedDate = new Date(userDateTime);
-        console.log(parsedDate);
-        
         
         try {
             const trips = await Trip.findAll({
@@ -98,7 +96,7 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                             {
                                 model: User,
                                 as: 'user',
-                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
+                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture', 'noOfTripsCompleted']
                             },
                             {
                                 model: Vehicle,
@@ -116,7 +114,7 @@ export const returnSingleTrip = (req: Request,res: Response, next: NextFunction)
                             {
                                 model: User,
                                 as: 'passenger',
-                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture']
+                                attributes: ['firstName', 'lastName', 'overallRating', 'profilePicture', 'noOfTripsCompleted']
                             },
                         ]
                     },
@@ -434,7 +432,9 @@ const deleteTripStop = async (tripId: string, transaction: Transaction): Promise
 
 export const retrieveAllStartLocations = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const stops = await Stop.findAll();
+        const stops = await Stop.findAll({
+            order: [['stopLocation', 'ASC']],
+        });
         console.log(stops);
         
         res.status(200).send(stops);

@@ -2,6 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import sequelize from '../database/connect_to_db';
 
 class Vehicle extends Model {
+    declare vehicleId: number;
     declare plateNumber: string;
     declare ownerId: number;
     declare noOfSeats: number;
@@ -11,11 +12,16 @@ class Vehicle extends Model {
 
 Vehicle.init({
     // fields
-    plateNumber: {
-        type: DataTypes.STRING,
+    vehicleId:{
+        type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
+        field: 'vehicle_id'
+    },
+    plateNumber: {
+        type: DataTypes.STRING,
+        allowNull: true,
         field: 'plate_number'
     },
     ownerId:{

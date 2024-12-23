@@ -16,12 +16,12 @@ interface MulterFile {
 }
 
 const localPath = '/home/george/Desktop/Carpool-App/backend/static/uploads';
-const remotePath = '/home/zaro/backend/static/uploads';
+const remotePath = '/static/uploads';
 
 export const uploadProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, localPath);
+            cb(null, remotePath);
         },
         filename: (req, file, cb) => {
             cb(null, Date.now() + '-' + file.originalname);
@@ -46,7 +46,8 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
                         resolve(req);
                     } else {
                         console.warn("No file uploaded");
-                        reject(new Error("No file uploaded"));
+                        // reject(new Error("No file uploaded"));
+                        resolve(req);
                     }
                 }
             });
@@ -64,22 +65,22 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
             const readFileASync = promisify(fs.readFile);
             let fileBuffer;
             const {universityId, firstName, lastName, username, password, email, role, phone}: addUserRequestBodyInterface = req.body;
-            const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role'];
+            //* Commented for testing
+            // const requiredFields = ['universityId', 'firstName', 'username', 'password', 'email', 'role'];
             let profilePicture: Buffer;
-            for (const field of requiredFields){
-                if(req.body[field] === undefined || req.body[field] === null || req.body[field] === ''){
-                    console.log(`${field}`);
-                    res.status(400).json({ error: `${field} is missing` });
-                    return;
-                }
-            }
+            //* Commented for testing
+            // for (const field of requiredFields){
+            //     if(req.body[field] === undefined || req.body[field] === null || req.body[field] === ''){
+            //         console.log(`${field}`);
+            //         res.status(400).json({ error: `${field} is missing` });
+            //         return;
+            //     }
+            // }
             // check if the username|uniId|email already exists
             const existingUser = await User.findOne(
                 {where: {
                         [Op.or]: [    // check if the username or universityId already exists
-                            {username}, 
-                            {universityId},
-                            {email}
+                            {username}
                         ]
                     }
                 });
@@ -87,15 +88,32 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                 let message = '';
                 if(existingUser.getDataValue('username') === username)
                     message += 'Username already exists!';
-                if(existingUser.getDataValue('universityId') === universityId)
-                    message += 'University ID already exists!';
-                if(existingUser.getDataValue('email') === email)
-                    message += 'Email already exists!';
+                // if(existingUser.getDataValue('universityId') === Number(universityId))
+                //     message += 'University ID already exists!';
+                // if(existingUser.getDataValue('email') === email)
+                //     message += 'Email already exists!';
                 res.status(400).send(message);
                 return;
             }
             //check if req.file is populated
-            if (req.file !== undefined) {
+            if (req.file === undefined) {
+                await sequelize.transaction(async (transaction) => {
+                    //* Commented for testing
+                    // const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
+                    const newUser = await User.create({
+                        universityId,
+                        firstName,
+                        lastName,
+                        username,
+                        password,
+                        email,
+                        role,
+                        phone,
+                        profilePicture
+                    }, {transaction});
+                    res.status(200).json(newUser);
+                });
+            } else {
                 try {
                     fileBuffer = await readFileASync(req.file.path);
                     profilePicture = fileBuffer;
@@ -103,24 +121,25 @@ export const addUser = (req: Request, res: Response, next: NextFunction): void =
                     res.status(500).json({ error: 'Error reading the file' });
                     return;
                 }
+                await sequelize.transaction(async (transaction) => {
+                    //* Commented for testing
+                    // const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
+                    const newUser = await User.create({
+                        universityId,
+                        firstName,
+                        lastName,
+                        username,
+                        password,
+                        email,
+                        role,
+                        phone,
+                        profilePicture
+                    }, {transaction});
+                    res.status(200).json(newUser);
+    
+                });
             }
 
-            await sequelize.transaction(async (transaction) => {
-                const hash = await bcrypt.hash(password, saltRounds); // hash the password before storing it in the database
-                const newUser = await User.create({
-                    universityId,
-                    firstName,
-                    lastName,
-                    username,
-                    password: hash,     // store the hashed password
-                    email,
-                    role,
-                    phone,
-                    profilePicture
-                }, {transaction});
-                res.status(200).json(newUser);
-
-            });
         } catch (err) {
             if (err instanceof Error)
                 console.log('Error: ' + err.message);

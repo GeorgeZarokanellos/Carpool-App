@@ -6,6 +6,7 @@ import User from './user';
 import Driver from './driver';
 import Review from './review';
 import Vehicle from './vehicle';
+import Coupon from './coupon';
 
 
 
@@ -34,6 +35,9 @@ User.hasMany(Review, {foreignKey: 'reviewerId', as: 'reviewer'});
 Review.belongsTo(User, {foreignKey: 'reviewedUserId', targetKey: 'userId', as: 'reviewedUser'});
 User.hasMany(Review, {foreignKey: 'reviewedUserId', as: 'reviewedUser'});
 
+Coupon.belongsTo(User, {foreignKey: 'ownerId', as: 'owner'});
+User.hasMany(Coupon, {foreignKey: 'ownerId', as: 'coupons'});
+
 export {
     User,
     Trip,
@@ -41,6 +45,7 @@ export {
     TripPassenger,
     Stop,
     Driver,
-    Review
+    Review,
+    Coupon
 }
 

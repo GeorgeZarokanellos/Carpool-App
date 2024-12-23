@@ -87,9 +87,15 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
         let updateDetails;
         const promises = [];
         if(points === undefined)  //trip cancellation case
-          updateDetails = {currentTripId: nextScheduledTripId};
+          updateDetails = {
+            currentTripId: nextScheduledTripId
+          };
         else  //trip completion case
-          updateDetails = {currentTripId: nextScheduledTripId, overallPoints: points};
+          updateDetails = {
+            currentTripId: nextScheduledTripId, 
+            overallPoints: points,
+            noOfTripsCompleted: userResponse.data.noOfTripsCompleted + 1
+          };
         //update the current trip of the user to the next scheduled trip
         promises.push(instance.patch(`/user/${userId}`, updateDetails));
   
@@ -107,7 +113,10 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
         
       } else {
         //if no next scheduled trip, set the current trip of the user to null
-        const updateUser = await instance.patch(`/user/${userId}`, {currentTripId: null});
+        const updateUser = await instance.patch(`/user/${userId}`, {
+          currentTripId: null,
+          noOfTripsCompleted: userResponse.data.noOfTripsCompleted + 1
+        });
         console.log('User\'s current trip updated to null. No next scheduled trip', updateUser);
       }
     } catch (error) {
@@ -131,7 +140,11 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
           if(tripData.tripPassengers.length > 0){
             tripData.tripPassengers.forEach((passenger) => {
               promises.push(
-                instance.patch(`/user/${passenger.passengerId}`, {currentTripId: null})
+                instance.patch(`/user/${passenger.passengerId}`, {
+                  currentTripId: null,
+                  tripCompleted: true,
+                  noOfTripsCompleted: passenger.passenger.noOfTripsCompleted + 1
+                })
               );
               promises.push(
                 instance.post('/notifications', {
@@ -163,9 +176,8 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
           //await all promises
           await Promise.all(promises);
           setReviewNotificationsSent(true);
-          setTripStatusMessage('The trip has been completed successfully!');
+          setTripStatusMessage('The trip has been completed successfully. Please take some time to review the participants!');
           setTripStatusAlert(true);
-          //TODO add alert messages for next scheduled trip
           if(userId === null){
             console.log("User id is null in local storage");
           } else {
@@ -425,10 +437,12 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
       handleTripCancellation();
     }
   }, [userConfirmedCancellation]);
+    
   //#endregion
   if(tripData){
       return (
-          <>
+        <div className="centering-container">
+          <div className="limiting-container">
               <IonContent >
                   <TripMapDisplay 
                     tripStops={tripData.tripStops} 
@@ -490,7 +504,7 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                     isOpen={tripStatusAlert}
                     onDidDismiss={() => {
                       setTripStatusAlert(false);
-                      history.push('/main/search-trips');
+                      history.push('/main/notifications');
                       window.location.reload();
                     }}
                     message={tripStatusMessage}
@@ -545,7 +559,8 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                   />
                 </>
               }
-          </>  
+          </div>  
+        </div>
       )
     } else {
       return (
