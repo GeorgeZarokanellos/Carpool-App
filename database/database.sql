@@ -124,12 +124,18 @@ CREATE TABLE Coupons (
     code VARCHAR(20) DEFAULT 'code',
     discount_value INT NOT NULL ,
     points_cost INT NOT NULL ,
-    status coupon_status NOT NULL DEFAULT 'active',
-    owner_id INT,
     created_at TIMESTAMP DEFAULT NOW(),
-    PRIMARY KEY (coupon_id),
-    FOREIGN KEY (owner_id) REFERENCES App_user (user_id)
+    PRIMARY KEY (coupon_id)
 );
 
+CREATE TABLE User_Coupons (
+    user_id INT,
+    coupon_id INT,
+    purchased_at TIMESTAMP DEFAULT NOW(),
+    coupon_status coupon_status NOT NULL DEFAULT 'active',
+    PRIMARY KEY (user_id,coupon_id),
+    FOREIGN KEY (user_id) REFERENCES app_user (user_id),
+    FOREIGN KEY (coupon_id) REFERENCES coupons (coupon_id)
+);
 
 

@@ -11,7 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Pagination} from 'swiper/modules';
-import { tripStatus } from "../interfacesAndTypes/Types";
+import { TripStatus } from "../interfacesAndTypes/Types";
 import CloseIcon from '@mui/icons-material/Close';
 
 interface NotificationProps {
@@ -288,7 +288,7 @@ export const NotificationDisplay: React.FC<NotificationProps> = ({notificationDe
                 //check if trip is full after accepting a request
                 if(tripData.noOfPassengers + 1 === tripData.driver.vehicle.noOfSeats){
                     await instance.patch(`/trips/${notificationDetails.tripId}`, {
-                        status: tripStatus.LOCKED
+                        status: TripStatus.LOCKED
                     });
                     tripIsFull = true;
                     //check if trip is not full after rejecting a request

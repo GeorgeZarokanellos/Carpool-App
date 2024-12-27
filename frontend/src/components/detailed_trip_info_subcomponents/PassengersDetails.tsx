@@ -1,11 +1,11 @@
 import React from "react";
-import { tripPassenger } from "../../interfacesAndTypes/Types";
+import { TripPassenger } from "../../interfacesAndTypes/Types";
 import { IonAvatar, IonItem, IonLabel } from "@ionic/react";
 import './PassengersDetails.scss';
 import { arrayBufferTo64String, StarRating } from "../../util/common_functions";
 
 interface PassengersDetailsProps{
-    passengers: tripPassenger[];
+    passengers: TripPassenger[];
 }
 
 export const PassengersDetails: React.FC<PassengersDetailsProps> = ({passengers}) => {

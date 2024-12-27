@@ -1,10 +1,10 @@
 import { Op } from "sequelize";
-import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver } from "../model/association";
+import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver, Coupon, UserCoupon } from "../model/association";
 import Notification from '../model/notification';
 import { Request, Response, NextFunction, response } from "express";
 import { Transaction } from "sequelize";
 import sequelize from '../database/connect_to_db';
-import { updatedUserInterface } from "../interface/interface";
+import { CouponStatus, updatedUserInterface } from "../interface/interface";
 import path from "path";
 import fs from "fs";
 import Vehicle from "../model/vehicle";
@@ -38,6 +38,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         }
     });
 };
+
+//User Information
 
 export const retrieveUserReviews = async (userId: string) : Promise<Review[]> => {
     try {
@@ -237,7 +239,7 @@ export const retrieveUserInfo = async (req: Request, res: Response, next: NextFu
 
     try {
         const userData = await User.findByPk(userId, {
-            attributes: ['firstName', 'lastName', 'overallRating', 'role', 'currentTripId', 'pendingRequestTripId', 'tripCompleted', 'noOfTripsCompleted']
+            attributes: ['firstName', 'lastName', 'overallRating', 'overallPoints', 'role', 'currentTripId', 'pendingRequestTripId', 'tripCompleted', 'noOfTripsCompleted']
         });
         if(userData){
             let responseData = userData.toJSON();
@@ -319,6 +321,8 @@ export const retrieveVehicleImages = async (req: Request, res: Response, next: N
     }
 }
 
+//User Notifications
+
 export const deleteUserNotifications = async (req: Request, res: Response, next: NextFunction) => {
     await sequelize.transaction(async (transaction: Transaction) => {
         const userId: string = req.params.userId;
@@ -390,5 +394,117 @@ export const getUserRequestNotification = async (req: Request, res: Response, ne
             res.status(404).send('Notification not found!');
     } catch (error) {
         res.status(500).send('Internal Server Error' + error);
+    }
+}
+
+//User Coupons
+
+export const retrieveCoupons = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const couponStatus = req.query.couponStatus as CouponStatus;
+        const userId = req.query.userId;
+
+        if (!Object.values(CouponStatus).includes(couponStatus)) {
+            return res.status(400).json({ message: 'Invalid coupon status requested!' });
+        }
+
+        switch (couponStatus) {
+            case CouponStatus.ACTIVE:
+                const availableCouponsList = await Coupon.findAll({
+                    attributes: ['couponId', 'title', 'description', 'discountValue', 'pointsCost']
+                });
+                if(availableCouponsList.length === 0){
+                    return res.status(404).json({message: 'No available coupons found. Return later!'});
+                }
+                return res.status(200).json({data: availableCouponsList, message: 'Available coupons list retrieved!'})
+
+            case CouponStatus.REDEEMED:
+                const userCouponsList = await UserCoupon.findAll({
+                    where: {
+                        userId: userId
+                    },
+                    include: {
+                        model: Coupon,
+                        as: 'coupon',
+                        attributes: ['title', 'description', 'code', 'discountValue', 'pointsCost']
+                    },
+                    order: [['purchasedAt', 'ASC']]
+                });
+                if(userCouponsList.length === 0){
+                    return res.status(404).json({message: 'No User Coupons found! '})
+                }
+                return res.status(200).json({data: userCouponsList, message: 'User Coupons List retrieved!'});
+
+            default:
+                return res.status(400).json({message: 'Wrong type of coupon requested!'});
+        }
+    } catch (error) {
+        return res.status(500).json({message: 'Error retrieving coupons!', error: error});
+    }
+}
+
+export const addPurchasedCoupon = async (req: Request, res: Response, next: NextFunction) => {
+    await sequelize.transaction(async (transaction: Transaction) => {
+        try {
+            const couponId = parseInt(req.params.couponId, 10);
+            const {userId, couponPointsCost} = req.body;
+            const userToUpdate = await User.findByPk(userId);
+
+            if (!userToUpdate) {
+                throw new Error('User not found');
+            }
+
+            if (userToUpdate.overallPoints < couponPointsCost) {
+                throw new Error('Not enough points');
+            }
+            
+            const removePointsFromUser = await userToUpdate.update(
+                { overallPoints: userToUpdate.overallPoints - couponPointsCost },
+                {transaction}
+            );
+            
+            if(!removePointsFromUser){
+                return res.status(400).json({message: 'Error subtracting user\'s points'})
+            }
+
+            const addCouponToUser = await UserCoupon.create(
+                { userId: parseInt(userId, 10), couponId, couponStatus: CouponStatus.REDEEMED }, 
+                {transaction}
+            ); 
+
+            if(!addCouponToUser){
+                return res.status(400).json({message: 'Purchase of coupon failed'})
+            }
+            
+            res.status(201).json({message: 'Coupon purchased successfully!'});
+            
+        } catch (error) {
+            if(error instanceof Error)
+                res.status(500).json({ message: 'An error occurred', error: error.message });
+            else 
+                res.status(500).json({ message: 'An error occurred', error: error });
+        }
+    })
+}
+
+export const removePurchasedCoupon = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const couponId = parseInt(req.params.couponId, 10);
+        const userId = req.query.userId;
+        
+        const couponToBeDeleted = await UserCoupon.findOne({
+            where: {
+                userId,
+                couponId
+            }
+        });
+        
+        if(!couponToBeDeleted){
+            return res.status(404).json({message: 'Coupon to be deleted not found!'});
+        }
+        await couponToBeDeleted.destroy();
+        return res.status(200).json({message: 'Coupon deleted successfully!'});
+    } catch (error) {
+        return res.status(500).json({message: 'Error! Failed to delete coupon.'});
     }
 }

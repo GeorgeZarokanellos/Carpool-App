@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Route} from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { IonRouterOutlet, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonBadge, IonPage, IonMenu, IonContent, IonButton, IonMenuToggle, IonAlert} from '@ionic/react';
-import { map, chatbox, notifications, person, search } from 'ionicons/icons';
-import Tab2 from './Tab2';
+import { map, pricetags, notifications, person, search } from 'ionicons/icons';
 import SearchTrips from './SearchTrips';
 import Profile from './Profile';
+import { CouponsPage } from './CouponsPage';
 import { NewTrip } from './NewTrip';
 import { CurrentTripPage } from './CurrentTripPage';
 import { NotificationPage } from './NotificationPage';
@@ -18,10 +18,13 @@ import { Dropdown } from 'react-bootstrap';
 //TODO make the tab turn blue when user clicks on a trip from search trips tab
 
 export const Main: React.FC = () => {
-  const [searchTripsRefreshKey, setSearchTripsRefreshKey] = useState(0);
+  //refresh keys
   const [currentTripRefreshKey, setCurrentTripRefreshKey] = useState(0);
+  const [couponsRefreshKey, setCouponsRefreshKey] = useState(0);
+  const [searchTripsRefreshKey, setSearchTripsRefreshKey] = useState(0);
   const [notificationRefreshKey, setNotificationRefreshKey] = useState(0);
   const [profileRefreshKey, setProfileRefreshKey] = useState(0);
+  //misc
   const [userNotifications, setUserNotifications] = useState<NotificationInterface[]>([]);
   const [notificationsNumber, setNotificationsNumber] = useState<number>(0);
   const [userLogoutConfirmation, setUserLogoutConfirmation] = useState<boolean>(false);
@@ -176,7 +179,7 @@ export const Main: React.FC = () => {
       <IonTabs>
         <IonRouterOutlet>
           <Route path="/main/current-trip" render={() => <CurrentTripPage refreshKey={currentTripRefreshKey} />} />
-          <Route path="/main/tab2" component={Tab2} />
+          <Route path="/main/coupons" render={() => <CouponsPage refreshKey={couponsRefreshKey}/> }/>
           <Route path="/main/search-trips" render={() => <SearchTrips refreshKey={searchTripsRefreshKey}/>}/>
           <Route path="/main/notifications" render={() => <NotificationPage notifications={userNotifications} isLoading={isLoading}/> }/>
           <Route path="/main/profile" render={() => <Profile refreshKey={profileRefreshKey} /> }/>
@@ -188,9 +191,9 @@ export const Main: React.FC = () => {
             <IonIcon aria-hidden="true" icon={map} />
             <IonLabel style={{fontSize: '0.6rem'}}>Current Trip</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="tab2" href="/main/tab2" disabled>
-            <IonIcon aria-hidden="true" icon={chatbox} />
-            <IonLabel style={{fontSize: '0.6rem'}}>Demo</IonLabel>
+          <IonTabButton tab="coupons" href="/main/coupons" onClick={() => setCouponsRefreshKey(couponsRefreshKey => couponsRefreshKey + 1)}>
+            <IonIcon aria-hidden="true" icon={pricetags} />
+            <IonLabel style={{fontSize: '0.6rem'}}>Coupons</IonLabel>
           </IonTabButton>
           <IonTabButton tab="searchTrips" href="/main/search-trips" onClick={() => setSearchTripsRefreshKey(searchTripsRefreshKey => searchTripsRefreshKey + 1)}>
             <IonIcon aria-hidden="true" icon={search} />

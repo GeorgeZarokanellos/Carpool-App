@@ -1,3 +1,4 @@
+import { CouponStatus } from "../pages/admin/Coupons";
 import { ProfilePictureBuffer } from "./Interfaces";
 
 export enum Role {
@@ -6,7 +7,7 @@ export enum Role {
     ALL_ROLES = "all_roles"
 }
 
-export enum tripStatus {
+export enum TripStatus {
     INPROGRESS = 'in_progress',
     COMPLETED = 'completed',
     PLANNING = 'planning',
@@ -67,13 +68,13 @@ export type Trip = {
 }
 
 export type ExtendedTrip = Trip & {
-    tripPassengers: tripPassenger[];
+    tripPassengers: TripPassenger[];
     tripStops: TripStops
     startLocation: Stop;
     endLocation: Stop;
 }
 
-export type tripPassenger = {
+export type TripPassenger = {
     passengerId: number;
     passenger: {
         firstName: string;
@@ -127,12 +128,12 @@ export type ProfileData = {
     tripsCompleted: Trip[];
 }
 
-export type descIndex = {
+export type DescIndex = {
     text: string,
     index: number
 }
 
-export type autoMaker = {
+export type AutoMaker = {
     maker: string,
     models: string[]
 }
@@ -143,4 +144,22 @@ export type Stop = {
     lat: number;
     lng: number;
     side: number;
+}
+
+export type Coupon = {
+    couponId: number;
+    title: string;
+    description: string;
+    discountValue: number;
+    pointsCost: number;
+}
+
+export type UserCoupon = {
+    userId: number;
+    couponId: number;
+    couponStatus: CouponStatus;
+    purchasedAt: Date;
+    coupon: Coupon & {
+        code: string
+    };
 }

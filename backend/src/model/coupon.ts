@@ -1,5 +1,4 @@
 import { Model, DataTypes } from 'sequelize';
-import { CouponStatus } from "../interface/interface";
 import sequelize from '../database/connect_to_db';
 
 class Coupon extends Model {
@@ -9,8 +8,6 @@ class Coupon extends Model {
     declare code: string;
     declare discountValue: number;
     declare pointsCost: number;
-    declare status: CouponStatus;
-    declare ownerId: number;
     declare createdAt: Date;
 }
 
@@ -48,17 +45,6 @@ Coupon.init({
         allowNull: false,
         field: 'points_cost'
     },
-    status: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: CouponStatus.ACTIVE,
-        field: 'status'
-    },
-    ownerId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        field: 'owner_id'
-    },
     createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -67,7 +53,7 @@ Coupon.init({
     }
 },{
     sequelize,
-    modelName: 'coupon',
+    modelName: 'Coupon',
     tableName: 'coupons',
     timestamps: false
 });
