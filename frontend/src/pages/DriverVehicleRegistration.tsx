@@ -14,7 +14,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import React, { useCallback, useEffect, useState } from "react";
-import type { autoMaker } from "../interfacesAndTypes/Types";
+import type { AutoMaker } from "../interfacesAndTypes/Types";
 import "./DriverVehicleRegistration.scss";
 import { Swiper,SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -35,7 +35,7 @@ export const DriverVehicleRegistration: React.FC = () => {
   const [showMakerPicker, setShowMakerPicker] = useState(false);
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [showNoOfSeatsPicker, setShowNoOfSeatsPicker] = useState(false);
-  const [selectedVehicleMaker, setSelectedVehicleMaker] = useState<autoMaker>({
+  const [selectedVehicleMaker, setSelectedVehicleMaker] = useState<AutoMaker>({
     maker: "",
     models: [],
   });

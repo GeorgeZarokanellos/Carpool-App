@@ -4,7 +4,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './Statistics.scss'
 import instance from "../../AxiosConfig";
-import { Role, tripStatus } from "../../interfacesAndTypes/Types";
+import { Role, TripStatus } from "../../interfacesAndTypes/Types";
 import { LineChart, Line, Tooltip, XAxis, YAxis, ResponsiveContainer, Legend } from 'recharts';
 
 interface GraphDataFormat {
@@ -19,7 +19,7 @@ export const Statistics: React.FC = () => {
     const [tripStartDate, setTripStartDate] = useState<Date>(new Date(`${currentMonth + 1} 1,${currentYear} 00:00:00`));
     const [tripEndDate, setTripEndDate] = useState<Date | null>(null);
     const [tripGraphData, setTripGraphData] = useState<GraphDataFormat[]>();
-    const [selectedTripStatus, setSelectedTripStatus] = useState<tripStatus>(tripStatus.COMPLETED);
+    const [selectedTripStatus, setSelectedTripStatus] = useState<TripStatus>(TripStatus.COMPLETED);
     //user graph related states
     const [usersGraphData, setUsersGraphData] = useState<GraphDataFormat[]>();
     const [userStartDate, setUserStartDate] = useState<Date>(new Date(`${currentMonth + 1} 1,${currentYear} 00:00:00`));
@@ -29,7 +29,7 @@ export const Statistics: React.FC = () => {
     const [errorAlert, setErrorAlert] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
-    const retrieveTrips = async (startDate: Date , endDate: Date | null, tripStatus: tripStatus) => {
+    const retrieveTrips = async (startDate: Date , endDate: Date | null, tripStatus: TripStatus) => {
         try {   
             const graphDataResponse = await instance.get(`/admin/trips?startDate=${startDate}&endDate=${endDate}&status=${tripStatus}`);
             if(graphDataResponse.status === 200){
@@ -60,16 +60,16 @@ export const Statistics: React.FC = () => {
         event.preventDefault();
         switch(event.target.value){
             case 'completed': 
-                setSelectedTripStatus(tripStatus.COMPLETED);
+                setSelectedTripStatus(TripStatus.COMPLETED);
                 break;
             case 'planning':
-                setSelectedTripStatus(tripStatus.PLANNING);
+                setSelectedTripStatus(TripStatus.PLANNING);
                 break;
             case 'cancelled':
-                setSelectedTripStatus(tripStatus.CANCELLED);
+                setSelectedTripStatus(TripStatus.CANCELLED);
                 break;
             case 'in_progress':
-                setSelectedTripStatus(tripStatus.INPROGRESS);
+                setSelectedTripStatus(TripStatus.INPROGRESS);
                 break;
             default:
                 setErrorMessage('Error selecting trip status');
@@ -115,7 +115,7 @@ export const Statistics: React.FC = () => {
     }
 
     useEffect(() => {
-        retrieveTrips(tripStartDate, null, tripStatus.COMPLETED);
+        retrieveTrips(tripStartDate, null, TripStatus.COMPLETED);
         retrieveRegisteredUsers(userStartDate, null, Role.ALL_ROLES);
     }, []);
 
@@ -142,10 +142,10 @@ export const Statistics: React.FC = () => {
                         <div className="second-option-label-picker">
                             <label htmlFor="second-option-picker">Selected Trip Status</label>
                             <select id="second-option-picker" required value={selectedTripStatus} onChange={handleChangeInTripStatus}>
-                                <option value={tripStatus.COMPLETED}>Completed</option>
-                                <option value={tripStatus.PLANNING}>Planning</option>
-                                <option value={tripStatus.CANCELLED}>Cancelled</option>
-                                <option value={tripStatus.INPROGRESS}>In Progress</option>
+                                <option value={TripStatus.COMPLETED}>Completed</option>
+                                <option value={TripStatus.PLANNING}>Planning</option>
+                                <option value={TripStatus.CANCELLED}>Cancelled</option>
+                                <option value={TripStatus.INPROGRESS}>In Progress</option>
                             </select>
                         </div>
                         <div className="search-button">

@@ -1,5 +1,4 @@
 import { Model, DataTypes } from 'sequelize';
-import { CouponStatus } from "../interface/interface";
 import sequelize from '../database/connect_to_db';
 
 class Coupon extends Model {
@@ -54,7 +53,7 @@ Coupon.init({
     }
 },{
     sequelize,
-    modelName: 'coupon',
+    modelName: 'Coupon',
     tableName: 'coupons',
     timestamps: false
 });
