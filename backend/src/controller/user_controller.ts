@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver, Coupon } from "../model/association";
+import { User, Review, Trip, Stop, TripPassenger, TripStop, Driver, Coupon, UserCoupon } from "../model/association";
 import Notification from '../model/notification';
 import { Request, Response, NextFunction, response } from "express";
 import { Transaction } from "sequelize";
@@ -8,7 +8,6 @@ import { CouponStatus, updatedUserInterface } from "../interface/interface";
 import path from "path";
 import fs from "fs";
 import Vehicle from "../model/vehicle";
-import UserCoupon from "../model/user_coupons";
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     await sequelize.transaction(async (transaction: Transaction) => {
@@ -412,7 +411,7 @@ export const retrieveCoupons = async (req: Request, res: Response, next: NextFun
         switch (couponStatus) {
             case CouponStatus.ACTIVE:
                 const availableCouponsList = await Coupon.findAll({
-                    attributes: ['title', 'description', 'discountValue', 'pointsCost']
+                    attributes: ['couponId', 'title', 'description', 'discountValue', 'pointsCost']
                 });
                 if(availableCouponsList.length === 0){
                     return res.status(404).json({message: 'No available coupons found. Return later!'});
@@ -451,13 +450,14 @@ export const addPurchasedCoupon = async (req: Request, res: Response, next: Next
             const {userId, couponPointsCost} = req.body;
             const userToUpdate = await User.findByPk(userId);
 
-            if(!userToUpdate){
-                return res.status(404).json({message: 'Error! User not found'})
+            if (!userToUpdate) {
+                throw new Error('User not found');
             }
 
-            if(userToUpdate.overallPoints < couponPointsCost)
-                return res.status(400).json({message: 'Error! Not enough points'});
-
+            if (userToUpdate.overallPoints < couponPointsCost) {
+                throw new Error('Not enough points');
+            }
+            
             const removePointsFromUser = await userToUpdate.update(
                 { overallPoints: userToUpdate.overallPoints - couponPointsCost },
                 {transaction}
@@ -468,19 +468,17 @@ export const addPurchasedCoupon = async (req: Request, res: Response, next: Next
             }
 
             const addCouponToUser = await UserCoupon.create(
-                { userId, couponId, couponStatus: CouponStatus.REDEEMED }, 
+                { userId: parseInt(userId, 10), couponId, couponStatus: CouponStatus.REDEEMED }, 
                 {transaction}
             ); 
 
             if(!addCouponToUser){
                 return res.status(400).json({message: 'Purchase of coupon failed'})
             }
-
-            await transaction.commit();
+            
             res.status(201).json({message: 'Coupon purchased successfully!'});
             
         } catch (error) {
-            await transaction.rollback();
             if(error instanceof Error)
                 res.status(500).json({ message: 'An error occurred', error: error.message });
             else 
@@ -492,7 +490,15 @@ export const addPurchasedCoupon = async (req: Request, res: Response, next: Next
 export const removePurchasedCoupon = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const couponId = parseInt(req.params.couponId, 10);
-        const couponToBeDeleted = await UserCoupon.findByPk(couponId);
+        const userId = req.query.userId;
+        
+        const couponToBeDeleted = await UserCoupon.findOne({
+            where: {
+                userId,
+                couponId
+            }
+        });
+        
         if(!couponToBeDeleted){
             return res.status(404).json({message: 'Coupon to be deleted not found!'});
         }
