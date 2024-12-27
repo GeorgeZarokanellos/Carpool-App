@@ -1,3 +1,4 @@
+import { CouponStatus } from "../pages/admin/Coupons";
 import { ProfilePictureBuffer } from "./Interfaces";
 
 export enum Role {
@@ -146,13 +147,19 @@ export type Stop = {
 }
 
 export type Coupon = {
+    couponId: number;
     title: string;
     description: string;
     discountValue: number;
     pointsCost: number;
 }
 
-export type UserCoupon = Coupon & {
-    code: string;
-    coupon: Coupon[];
+export type UserCoupon = {
+    userId: number;
+    couponId: number;
+    couponStatus: CouponStatus;
+    purchasedAt: Date;
+    coupon: Coupon & {
+        code: string
+    };
 }

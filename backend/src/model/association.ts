@@ -47,6 +47,7 @@ export {
     Stop,
     Driver,
     Review,
-    Coupon
+    Coupon,
+    UserCoupon
 }
 
