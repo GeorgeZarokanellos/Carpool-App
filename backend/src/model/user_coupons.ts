@@ -6,33 +6,31 @@ enum CouponStatus {
     REDEEMED = 'redeemed'
 }
 
-class User_Coupon extends Model{
+class UserCoupon extends Model{
     declare userId: number;
     declare couponId: number;
     declare purchasedAt: Date;
     declare couponStatus: CouponStatus
 }
 
-User_Coupon.init({
+UserCoupon.init({
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-        autoIncrement: true,
         field: 'user_id'
     },
     couponId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-        autoIncrement: true,
         field: 'coupon_id'
     },
     purchasedAt: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
-        field: 'coupon_id'
+        field: 'purchased_at'
     },
     couponStatus: {
         type: DataTypes.ENUM(...Object.values(CouponStatus)),
@@ -42,9 +40,9 @@ User_Coupon.init({
     },
 },{
     sequelize,
-    modelName: 'userCoupons',
-    tableName: 'User_Coupons',
+    modelName: 'UserCoupon',
+    tableName: 'user_coupons',
     timestamps: false
 });
 
-export default User_Coupon;
+export default UserCoupon;
