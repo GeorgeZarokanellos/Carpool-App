@@ -6,11 +6,6 @@ import './Coupons.scss';
 import { Pagination } from "@mui/material";
 import { useForm } from "react-hook-form";
 
-export enum CouponStatus {
-    ACTIVE = 'active',
-    REDEEMED = 'redeemed',
-}
-
 type Coupon = {
     couponId: number;
     title: string;
@@ -18,7 +13,6 @@ type Coupon = {
     code: string;
     discountValue: number;
     pointsCost: number;
-    status: CouponStatus;
     createdAt: string;
 }
 
@@ -66,7 +60,7 @@ export const Coupons: React.FC = () => {
     const handleCouponCreation = async (data: CouponFormInputs) => {
         try {
             const coupon = await instance.post('/admin/coupon' , data);
-            if (coupon.status === 200) {
+            if (coupon.status === 201) {
                 setCouponActionMessage('Coupon created successfully');
                 setCouponActionAlert(true);
                 retrieveAllCoupons();
@@ -116,7 +110,6 @@ export const Coupons: React.FC = () => {
                         <label>Code</label>
                         <label>Discount Value</label>
                         <label>Cost</label>
-                        <label>Status</label>
                     </div>
                     {
                         couponsList != null && paginatedCoupons.map((coupon, index) => {
@@ -128,7 +121,6 @@ export const Coupons: React.FC = () => {
                                 code={coupon.code}
                                 value={coupon.discountValue}
                                 cost={coupon.pointsCost}
-                                status={coupon.status}
                                 setCouponToBeDeleted={setCouponToBeDeleted}
                                 key={index}
                               />  

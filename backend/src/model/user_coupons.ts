@@ -10,7 +10,6 @@ class UserCoupon extends Model{
     declare userId: number;
     declare couponId: number;
     declare purchasedAt: Date;
-    declare couponStatus: CouponStatus
 }
 
 UserCoupon.init({
@@ -31,13 +30,7 @@ UserCoupon.init({
         allowNull: false,
         defaultValue: DataTypes.NOW,
         field: 'purchased_at'
-    },
-    couponStatus: {
-        type: DataTypes.ENUM(...Object.values(CouponStatus)),
-        allowNull: false,
-        defaultValue: CouponStatus.ACTIVE,
-        field: 'coupon_status',
-    },
+    }
 },{
     sequelize,
     modelName: 'UserCoupon',

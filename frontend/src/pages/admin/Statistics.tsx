@@ -80,7 +80,7 @@ export const Statistics: React.FC = () => {
 
     const retrieveRegisteredUsers = async(startDate: Date, endDate: Date | null, selectedRole: Role) => {
         try {
-            const usersResponse = await instance.get(`/admin/users?startDate=${startDate}&endDate=${endDate}&selectedRole=${selectedRole}`)
+            const usersResponse = await instance.get(`/admin/users/filter?startDate=${startDate}&endDate=${endDate}&selectedRole=${selectedRole}`)
             if(usersResponse.status === 200){
                 console.log(usersResponse.data);
                 setUsersGraphData(usersResponse.data);

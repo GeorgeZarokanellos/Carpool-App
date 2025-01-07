@@ -2,7 +2,6 @@ CREATE TYPE user_role AS ENUM ('driver', 'passenger', 'admin');
 CREATE TYPE notification_status AS ENUM ('accepted', 'pending', 'declined', 'reviewed');
 CREATE TYPE trip_status AS ENUM ('planning', 'locked', 'in_progress', 'completed', 'cancelled');
 CREATE TYPE notification_type AS ENUM ('request', 'review', 'cancel', 'delay');
-CREATE TYPE coupon_status AS ENUM ('active', 'redeemed');
 
 CREATE TABLE App_user (
 	user_id SERIAL,
@@ -132,7 +131,6 @@ CREATE TABLE User_Coupons (
     user_id INT,
     coupon_id INT,
     purchased_at TIMESTAMP DEFAULT NOW(),
-    coupon_status coupon_status NOT NULL DEFAULT 'active',
     PRIMARY KEY (user_id,coupon_id),
     FOREIGN KEY (user_id) REFERENCES app_user (user_id),
     FOREIGN KEY (coupon_id) REFERENCES coupons (coupon_id)

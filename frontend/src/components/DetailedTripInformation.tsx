@@ -546,7 +546,8 @@ export const DetailedTripInformation: React.FC<DetailedTripInfoProps> = ({ click
                         text: 'No',
                         role: 'cancel',
                         handler: () => {
-                          setUserConfirmedCancellation(false);
+                          setCancellationConfirmationAlert(false);
+                          setDriverWantsToCancelTrip(false);
                         }
                       },
                       {

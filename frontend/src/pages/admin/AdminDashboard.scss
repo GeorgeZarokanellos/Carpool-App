@@ -13,6 +13,8 @@
         color: black;
         flex: 15%;
         @include display-flex-center('both');
+        flex-direction: column;
+
         .options{
             width: 100%;
             .list{
@@ -35,6 +37,10 @@
                     --border-radius: 1.1rem;
                 }
             }
+        }
+
+        .logout-button{
+            margin-top: 5rem;
         }
     }
 

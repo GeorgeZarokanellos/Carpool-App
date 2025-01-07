@@ -217,7 +217,9 @@ export const TripInProgress: React.FC<TripInProgressProps> = ({
                         </IonText>
                         {
                             tripDriverCurrentUser &&
-                            <IonButton shape="round" className="abort-trip-button" onClick={() => setDriverWantsToAbortTrip(true)}>
+                            <IonButton shape="round" className="abort-trip-button" onClick={() => {
+                                    setDriverWantsToAbortTrip(true)
+                                }}>
                                 Cancel Trip
                             </IonButton>
                         }

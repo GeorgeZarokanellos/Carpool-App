@@ -35,7 +35,7 @@ export const Users: React.FC = () => {
     const retrieveUsers = async () => {
         try {
             setIsLoading(true);
-            const response = await instance.get('/admin/users');
+            const response = await instance.get(`/admin/users`);
             console.log(response.data);
             setUsersList(response.data);
             setIsLoading(false);
