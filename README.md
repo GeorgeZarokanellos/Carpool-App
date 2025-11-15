@@ -1,9 +1,11 @@
 📘 Overview
+
 This repository contains a mobile web–based carpooling platform developed for my thesis at the University of Patras.
 The platform enables students to create and join shared rides, helping reduce transportation costs, traffic congestion, and environmental impact. 
 It is designed with a strong focus on usability, intuitiveness, and responsive mobile-first design.
 
 🎯 Objectives
+
 Provides a simple interface for creating and discovering available rides.
 
 Promote an alternative third way of commuting to the campus that is both sustainable for the students and the environment.
